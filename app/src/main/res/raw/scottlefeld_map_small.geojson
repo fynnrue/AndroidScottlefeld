@@ -1,0 +1,706 @@
+{
+	"type": "FeatureCollection",
+	"facilmap": {
+		"name": "G-SE 2022 Scotland Yard in Bielefeld - kleine Map",
+		"searchEngines": false,
+		"description": "",
+		"clusterMarkers": "%clusterMarkers",
+		"views": [
+
+		],
+		"types": {
+			"15143": {
+				"fields": [],
+				"name": "Knotenpunkt",
+				"type": "marker",
+				"defaultColour": "000000",
+				"colourFixed": true,
+				"defaultSize": 30,
+				"sizeFixed": false,
+				"defaultSymbol": null,
+				"symbolFixed": null,
+				"defaultShape": "rectangle-marker",
+				"shapeFixed": true,
+				"defaultWidth": null,
+				"widthFixed": null,
+				"defaultMode": null,
+				"modeFixed": null,
+				"showInLegend": true
+			},
+			"15144": {
+				"fields": [
+					{
+						"name": "Ticketanzahl Detectives",
+						"type": "input",
+						"default": "4"
+					},
+					{
+						"name": "Ticketanzahl M. X",
+						"type": "input",
+						"default": "3"
+					}
+				],
+				"name": "Stadtbahn-Verbindung",
+				"type": "line",
+				"defaultColour": "fe0000",
+				"colourFixed": true,
+				"defaultSize": null,
+				"sizeFixed": null,
+				"defaultSymbol": null,
+				"symbolFixed": null,
+				"defaultShape": null,
+				"shapeFixed": null,
+				"defaultWidth": 3,
+				"widthFixed": true,
+				"defaultMode": null,
+				"modeFixed": null,
+				"showInLegend": true
+			},
+			"15145": {
+				"fields": [
+					{
+						"name": "Ticketanzahl Detectives",
+						"type": "input",
+						"default": "8"
+					},
+					{
+						"name": "Ticketanzahl M. X",
+						"type": "input",
+						"default": "3"
+					}
+				],
+				"name": "Bus-Verbindung",
+				"type": "line",
+				"defaultColour": "3166ff",
+				"colourFixed": true,
+				"defaultSize": null,
+				"sizeFixed": null,
+				"defaultSymbol": null,
+				"symbolFixed": null,
+				"defaultShape": null,
+				"shapeFixed": null,
+				"defaultWidth": 6,
+				"widthFixed": true,
+				"defaultMode": null,
+				"modeFixed": false,
+				"showInLegend": true
+			},
+			"15146": {
+				"fields": [
+					{
+						"name": "Ticketanzahl Detectives",
+						"type": "input",
+						"default": "10"
+					},
+					{
+						"name": "Ticketanzahl M. X",
+						"type": "input",
+						"default": "4"
+					}
+				],
+				"name": "Siggi-Bike-Verbindung",
+				"type": "line",
+				"defaultColour": "f8a102",
+				"colourFixed": true,
+				"defaultSize": null,
+				"sizeFixed": null,
+				"defaultSymbol": null,
+				"symbolFixed": null,
+				"defaultShape": null,
+				"shapeFixed": null,
+				"defaultWidth": 9,
+				"widthFixed": true,
+				"defaultMode": null,
+				"modeFixed": null,
+				"showInLegend": true
+			},
+			"15147": {
+				"fields": [
+					{
+						"name": "Ticketanzahl M. X",
+						"type": "input",
+						"default": "3-5 (Anzahl Detectives)"
+					}
+				],
+				"name": "Black-Tickets",
+				"type": "line",
+				"defaultColour": "000000",
+				"colourFixed": true,
+				"defaultSize": null,
+				"sizeFixed": null,
+				"defaultSymbol": null,
+				"symbolFixed": null,
+				"defaultShape": null,
+				"shapeFixed": null,
+				"defaultWidth": 1,
+				"widthFixed": true,
+				"defaultMode": null,
+				"modeFixed": null,
+				"showInLegend": true
+			}
+		}
+	},
+	"features": [
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					8.533313870429994,
+					52.02910912478645
+				]
+			},
+			"properties": {
+				"name": "Hauptbahnhof Bielefeld",
+				"colour": "000000",
+				"size": 30,
+				"symbol": null,
+				"shape": "rectangle-marker",
+				"data": {
+					
+				},
+				"typeId": 15143
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					8.53493928909302,
+					52.02859094054396
+				]
+			},
+			"properties": {
+				"name": "Stadthalle Bielefeld",
+				"colour": "000000",
+				"size": 30,
+				"symbol": null,
+				"shape": "rectangle-marker",
+				"data": {
+					
+				},
+				"typeId": 15143
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					8.53315830230713,
+					52.031053087310866
+				]
+			},
+			"properties": {
+				"name": "Ishara",
+				"colour": "000000",
+				"size": 30,
+				"symbol": null,
+				"shape": "rectangle-marker",
+				"data": {
+					
+				},
+				"typeId": 15143
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					8.531323671340944,
+					52.02979892761377
+				]
+			},
+			"properties": {
+				"name": "Cinemaxx",
+				"colour": "000000",
+				"size": 30,
+				"symbol": null,
+				"shape": "rectangle-marker",
+				"data": {
+					
+				},
+				"typeId": 15143
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					8.532085418701174,
+					52.02743573112821
+				]
+			},
+			"properties": {
+				"name": "Bahnhofstraße",
+				"colour": "000000",
+				"size": 30,
+				"symbol": null,
+				"shape": "rectangle-marker",
+				"data": {
+					
+				},
+				"typeId": 15143
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.531323671340944,
+						52.02979892761377
+					],
+					[
+						8.53315830230713,
+						52.031053087310866
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "f8a102",
+				"width": 9,
+				"distance": 0.19,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029799,
+						"lon": 8.531324
+					},
+					{
+						"lat": 52.031053,
+						"lon": 8.533158
+					}
+				],
+				"typeId": 15146
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.53315830230713,
+						52.031053087310866
+					],
+					[
+						8.53493928909302,
+						52.02859094054396
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "3166ff",
+				"width": 6,
+				"distance": 0.3,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.031053,
+						"lon": 8.533158
+					},
+					{
+						"lat": 52.028591,
+						"lon": 8.534939
+					}
+				],
+				"typeId": 15145
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.531323671340944,
+						52.02979892761377
+					],
+					[
+						8.532085418701174,
+						52.02743573112821
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "fe0000",
+				"width": 3,
+				"distance": 0.27,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029799,
+						"lon": 8.531324
+					},
+					{
+						"lat": 52.027436,
+						"lon": 8.532085
+					}
+				],
+				"typeId": 15144
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.532085418701174,
+						52.02743573112821
+					],
+					[
+						8.53493928909302,
+						52.02859094054396
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "f8a102",
+				"width": 9,
+				"distance": 0.23,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.027436,
+						"lon": 8.532085
+					},
+					{
+						"lat": 52.028591,
+						"lon": 8.534939
+					}
+				],
+				"typeId": 15146
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.532085418701174,
+						52.02743573112821
+					],
+					[
+						8.53493928909302,
+						52.02859094054396
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "fe0000",
+				"width": 3,
+				"distance": 0.23,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.027436,
+						"lon": 8.532085
+					},
+					{
+						"lat": 52.028591,
+						"lon": 8.534939
+					}
+				],
+				"typeId": 15144
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.531323671340944,
+						52.02979892761377
+					],
+					[
+						8.533313870429994,
+						52.02910912478645
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "3166ff",
+				"width": 6,
+				"distance": 0.16,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029799,
+						"lon": 8.531324
+					},
+					{
+						"lat": 52.029109,
+						"lon": 8.533314
+					}
+				],
+				"typeId": 15145
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.531323671340944,
+						52.02979892761377
+					],
+					[
+						8.533313870429994,
+						52.02910912478645
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "fe0000",
+				"width": 3,
+				"distance": 0.16,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029799,
+						"lon": 8.531324
+					},
+					{
+						"lat": 52.029109,
+						"lon": 8.533314
+					}
+				],
+				"typeId": 15144
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.533313870429994,
+						52.02910912478645
+					],
+					[
+						8.53493928909302,
+						52.02859094054396
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "f8a102",
+				"width": 9,
+				"distance": 0.13,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029109,
+						"lon": 8.533314
+					},
+					{
+						"lat": 52.028591,
+						"lon": 8.534939
+					}
+				],
+				"typeId": 15146
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.533313870429994,
+						52.02910912478645
+					],
+					[
+						8.53493928909302,
+						52.02859094054396
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "3166ff",
+				"width": 6,
+				"distance": 0.13,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029109,
+						"lon": 8.533314
+					},
+					{
+						"lat": 52.028591,
+						"lon": 8.534939
+					}
+				],
+				"typeId": 15145
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.53315830230713,
+						52.031053087310866
+					],
+					[
+						8.533313870429994,
+						52.02910912478645
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "f8a102",
+				"width": 9,
+				"distance": 0.22,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.031053,
+						"lon": 8.533158
+					},
+					{
+						"lat": 52.029109,
+						"lon": 8.533314
+					}
+				],
+				"typeId": 15146
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.533313870429994,
+						52.02910912478645
+					],
+					[
+						8.53315830230713,
+						52.031053087310866
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "3166ff",
+				"width": 6,
+				"distance": 0.22,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029109,
+						"lon": 8.533314
+					},
+					{
+						"lat": 52.031053,
+						"lon": 8.533158
+					}
+				],
+				"typeId": 15145
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[
+						8.533313870429994,
+						52.02910912478645
+					],
+					[
+						8.53315830230713,
+						52.031053087310866
+					]
+				]
+			},
+			"properties": {
+				"name": "Untitled line",
+				"mode": "",
+				"colour": "fe0000",
+				"width": 3,
+				"distance": 0.22,
+				"time": null,
+				"data": {
+					
+				},
+				"routePoints": [
+					{
+						"lat": 52.029109,
+						"lon": 8.533314
+					},
+					{
+						"lat": 52.031053,
+						"lon": 8.533158
+					}
+				],
+				"typeId": 15144
+			}
+		}
+	]
+}

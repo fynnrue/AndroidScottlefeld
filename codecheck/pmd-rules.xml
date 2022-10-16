@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+
+<ruleset name="GSE-PMD-Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+    <description>
+        PMD-rules for GSE
+    </description>
+
+    <exclude-pattern>.*/module-info.java</exclude-pattern>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement"/>
+
+        <!--Usable with JUnit4, Project uses JUnit5 + AssertJ-->
+        <exclude name="JUnit4SuitesShouldUseSuiteAnnotation"/>
+        <exclude name="JUnit4TestShouldUseAfterAnnotation"/>
+        <exclude name="JUnit4TestShouldUseBeforeAnnotation"/>
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
+        <exclude name="JUnitUseExpected"/>
+        <exclude name="UseAssertEqualsInsteadOfAssertTrue"/>
+        <exclude name="UseAssertSameInsteadOfAssertTrue"/>
+        <exclude name="UseAssertTrueInsteadOfAssertEquals"/>
+
+        <!--Avoid Yoda-Style and NPE-Shadowing-->
+        <exclude name="PositionLiteralsFirstInCaseInsensitiveComparisons"/>
+        <exclude name="PositionLiteralsFirstInComparisons"/>
+        <exclude name="LiteralsFirstInComparisons"/>
+
+
+        <!--Don't avoid star-imports-->
+        <exclude name="UnusedImports"/>
+
+
+        <!-- Verstehen die meisten nicht... -->
+        <exclude name="AccessorMethodGeneration"/>
+    </rule>
+
+    <rule ref="category/java/bestpractices.xml/SystemPrintln">
+        <priority>5</priority>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/ArrayIsStoredDirectly">
+        <priority>5</priority>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/MethodReturnsInternalArray">
+        <priority>5</priority>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/UseVarargs">
+        <priority>5</priority>
+    </rule>
+
+    <rule ref="category/java/bestpractices.xml/MissingOverride">
+        <priority>1</priority>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/PreserveStackTrace">
+        <priority>1</priority>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/UseCollectionIsEmpty">
+        <priority>5</priority>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AvoidFinalLocalVariable"/>
+
+        <!--Could clash with Star-Import-->
+        <exclude name="DuplicateImports"/>
+
+        <!--Doesn't allow something like <SELF>-->
+        <exclude name="GenericsNaming"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="FieldNamingConventions"/>
+
+        <exclude name="LongVariable"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="AtLeastOneConstructor"/>
+
+        <exclude name="UnnecessaryLocalBeforeReturn"/>
+
+        <exclude name="ControlStatementBraces"/>
+
+        <!-- CommentDefaultAccessModifier is used -->
+        <exclude name="DefaultPackage"/>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/CommentDefaultAccessModifier">
+        <priority>5</priority>
+        <properties>
+            <property name="ignoredAnnotations"
+                      value="com.google.common.annotations.VisibleForTesting|android.support.annotation.VisibleForTesting|org.jetbrains.annotations.TestOnly"/>
+            <property name="regex" value="\/\*\s*(default|package)\s*\*\/"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <priority>5</priority>
+        <properties>
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z]+(s|Utils?|Helper|Singleton)"/>
+        </properties>
+    </rule>
+
+    <!--Allow more static imports - especially for tests-->
+    <rule ref="category/java/codestyle.xml/TooManyStaticImports">
+        <properties>
+            <property name="maximumStaticImports">
+                <value>15</value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/UselessParentheses">
+        <priority>5</priority>
+    </rule>
+
+    <rule ref="category/java/codestyle.xml/LocalVariableCouldBeFinal">
+        <priority>5</priority>
+    </rule>
+    <rule ref="category/java/codestyle.xml/UseUnderscoresInNumericLiterals">
+        <priority>5</priority>
+    </rule>
+
+    <rule ref="category/java/design.xml">
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="ImmutableField"/>
+        <exclude name="LawOfDemeter"/>
+        <exclude name="UseUtilityClass"/>
+        <exclude name="DataClass"/>
+    </rule>
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods">
+                <value>25</value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="JUnitSpelling"/>
+        <exclude name="JUnitStaticSuite"/>
+        <exclude name="TestClassWithoutTestCases"/>
+        <exclude name="BeanMembersShouldSerialize"/>
+        <!-- can't handle for-loops, https://sourceforge.net/p/pmd/bugs/1383/ -->
+        <exclude name="DataflowAnomalyAnalysis"/>
+
+        <exclude name="LoggerIsNotStaticFinal"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+        <properties>
+            <property name="ignoreMagicNumbers">
+                <value>-1,0,1,2,10</value>
+            </property>
+        </properties>
+    </rule>
+    <rule ref="category/java/errorprone.xml/DoNotTerminateVM" message="System.exit() should only be called inside main">
+        <priority>1</priority>
+    </rule>
+    <rule ref="category/java/errorprone.xml/CloseResource">
+        <priority>1</priority>
+    </rule>
+    <rule ref="category/java/errorprone.xml/SingleMethodSingleton">
+        <priority>1</priority>
+    </rule>
+
+
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="UseConcurrentHashMap"/>
+        <exclude name="AvoidUsingVolatile"/>
+        <exclude name="DoNotUseThreads"/>
+    </rule>
+    <rule ref="category/java/multithreading.xml/NonThreadSafeSingleton">
+        <priority>1</priority>
+    </rule>
+
+    <rule ref="category/java/performance.xml">
+        <exclude name="RedundantFieldInitializer"/>
+        <exclude name="SimplifyStartsWith"/>
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+        <exclude name="ConsecutiveAppendsShouldReuse"/>
+    </rule>
+
+</ruleset>
