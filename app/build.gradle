@@ -3,11 +3,12 @@ plugins {
 }
 
 android {
-    namespace 'de.techfak.gse.template'
+    namespace 'de.techfak.gse.fruehlemann'
     compileSdk 32
 
     defaultConfig {
-        applicationId "de.techfak.gse.template"
+        setArchivesBaseName("fruehlemann")
+        applicationId "de.techfak.gse.fruehlemann"
         minSdk 26
         targetSdk 32
         versionCode 1

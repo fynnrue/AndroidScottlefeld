@@ -1,4 +1,4 @@
-package de.techfak.gse.template;
+package de.techfak.gse.fruehlemann;
 
 import org.junit.Test;
 
