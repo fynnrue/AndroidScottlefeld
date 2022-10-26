@@ -7,12 +7,12 @@ android {
     compileSdk 32
 
     defaultConfig {
-        setArchivesBaseName("fruehlemann")
         applicationId "de.techfak.gse.fruehlemann"
         minSdk 26
         targetSdk 32
         versionCode 1
         versionName "1.0"
+        setArchivesBaseName("fruehlemann")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

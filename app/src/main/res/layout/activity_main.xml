@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hallo! Willkommen in dieser App! \n Dies wird einmal Scotland Yard!"
+        android:text="Hello Player. Welcome to Scottlefeld!"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
