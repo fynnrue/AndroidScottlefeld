@@ -20,9 +20,10 @@
         app:layout_constraintVertical_bias="0.05" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="onStartClick"
         android:text="Start"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,14 +32,15 @@
         app:layout_constraintVertical_bias="0.9" />
 
     <Spinner
-        android:id="@+id/spinner"
+        android:id="@+id/dropdown"
         android:layout_width="409dp"
         android:layout_height="wrap_content"
         android:contextClickable="true"
         android:spinnerMode="dropdown"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintBottom_toTopOf="@+id/start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header" />
+        app:layout_constraintTop_toBottomOf="@+id/header"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
