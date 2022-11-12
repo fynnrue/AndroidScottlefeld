@@ -1,3 +1,5 @@
+// Setzen der Spinner Auswahlmöglichkeiten von: https://stackoverflow.com/a/5241720
+
 package de.techfak.gse.fruehlemann;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +15,10 @@ import android.widget.Spinner;
 import java.lang.reflect.Field;
 
 public class MainActivity extends AppCompatActivity {
-    Spinner dropdown;   // Dropdown Menü zur Karten auswahl
-    String keineAuswahl;    // Variable um wiederkehrende Strings besser zu behandeln
+    // Dropdown Menü zur Karten auswahl
+    Spinner dropdown;
+    // Variable um wiederkehrende Strings besser zu behandeln
+    String keineAuswahl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
