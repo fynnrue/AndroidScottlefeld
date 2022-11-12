@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     // Dropdown Menü zur Karten auswahl
     Spinner dropdown;
     // Variable um wiederkehrende Strings besser zu behandeln
-    String keineAuswahl;
+    String noSelection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,11 +26,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         dropdown = findViewById(R.id.dropdown);
-        keineAuswahl = "Karte auswählen";
+        noSelection = "Karte auswählen";
 
         Field[] maps = R.raw.class.getFields();
         String[] mapNames = new String[maps.length + 1];
-        mapNames[0] = keineAuswahl;
+        mapNames[0] = noSelection;
         for (int i = 0; i < maps.length; i++) {
             mapNames[i + 1] = maps[i].getName();
         }
@@ -42,8 +42,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onStartClick(View view) {
-        if (dropdown.getSelectedItem().equals(keineAuswahl)) {
+        try {
+            checkSelected();
+            Snackbar.make(view, "Spiel startet", Snackbar.LENGTH_SHORT).show();
+        } catch (NoMapSelectedException noMap) {
             Snackbar.make(view, "Keine Karte ausgewählt!", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    private void checkSelected() throws NoMapSelectedException {
+        if (dropdown.getSelectedItem().equals(noSelection)) {
+            throw new NoMapSelectedException();
+        }
+    }
+
+    private class NoMapSelectedException extends Exception {
+        public NoMapSelectedException() {
         }
     }
 }
