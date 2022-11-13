@@ -4,7 +4,9 @@ package de.techfak.gse.fruehlemann;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -44,7 +46,16 @@ public class MainActivity extends AppCompatActivity {
     public void onStartClick(View view) {
         try {
             checkSelected();
+
+            String selectedMap = dropdown.getSelectedItem().toString();
+
             Snackbar.make(view, "Spiel startet", Snackbar.LENGTH_SHORT).show();
+
+            Intent gameI = new Intent(MainActivity.this, GameActivity.class);
+            gameI.putExtra("map", selectedMap);
+            startActivity(gameI);
+
+            Log.i("Ausgewählte Karte", selectedMap);
         } catch (NoMapSelectedException noMap) {
             Snackbar.make(view, "Keine Karte ausgewählt!", Snackbar.LENGTH_SHORT).show();
         }
