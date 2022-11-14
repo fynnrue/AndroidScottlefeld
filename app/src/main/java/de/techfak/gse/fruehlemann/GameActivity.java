@@ -89,13 +89,13 @@ public class GameActivity extends AppCompatActivity {
                 setPositiveButton("Ja", (dialog, id) -> {
                     Intent mainI = new Intent(GameActivity.this, MainActivity.class);
                     startActivity(mainI);
+
+                    finish();
                 }).
                 setNegativeButton("Nein", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
         alert.show();
-
-        finish();
     }
 
     private String searchPoint(JsonNode root, BigDecimal lon, BigDecimal lat) {
