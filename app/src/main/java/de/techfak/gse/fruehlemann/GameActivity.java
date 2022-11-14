@@ -30,8 +30,51 @@ public class GameActivity extends AppCompatActivity {
         String jsonContent = br.lines().collect(Collectors.joining());
 
         ObjectMapper om = new ObjectMapper();
+
+        JsonNode root = null;
+
         try {
-            JsonNode root = om.readTree((jsonContent));
+            root = om.readTree((jsonContent));
+
+            for (JsonNode jn : root.get("features")) {
+
+                String featureType = jn.get("geometry").get("type").asText();
+                if (featureType.equals("Point")) {
+                    BigDecimal lonP = jn.get("geometry").get("coordinates").get(0).decimalValue();
+                    BigDecimal latP = jn.get("geometry").get("coordinates").get(1).decimalValue();
+
+                    for (JsonNode link : root.get("features")) {
+                        String featType = link.get("geometry").get("type").asText();
+                        if (featType.equals("LineString")) {
+                            BigDecimal lonL = link.get("geometry").get("coordinates").get(0).get(0).decimalValue();
+                            BigDecimal latL = link.get("geometry").get("coordinates").get(0).get(1).decimalValue();
+
+                            if (lonP.equals(lonL) && latP.equals(latL)) {
+                                BigDecimal lonPoint = link.get("geometry").get("coordinates").get(1).get(0).decimalValue();
+                                BigDecimal latPoint = link.get("geometry").get("coordinates").get(1).get(1).decimalValue();
+
+                                Log.i("POIs mit Verbindung", jn.get("properties").get("name").asText() + " ("
+                                        + lonP + ", " + latP + ") -> " + searchPoint(root, lonPoint, latPoint) + " ("
+                                        + lonPoint + ", " + latPoint + "), " + "Verkehrsmittel?"
+                                );
+                            }
+
+                            lonL = link.get("geometry").get("coordinates").get(1).get(0).decimalValue();
+                            latL = link.get("geometry").get("coordinates").get(1).get(1).decimalValue();
+
+                            if (lonP.equals(lonL) && latP.equals(latL)) {
+                                BigDecimal lonPoint = link.get("geometry").get("coordinates").get(0).get(0).decimalValue();
+                                BigDecimal latPoint = link.get("geometry").get("coordinates").get(0).get(1).decimalValue();
+
+                                Log.i("POIs mit Verbindung", jn.get("properties").get("name").asText() + " ("
+                                        + lonP + ", " + latP + ") -> " + searchPoint(root, lonPoint, latPoint) + " ("
+                                        + latPoint + ", " + lonPoint + "), " + "Verkehrsmittel?"
+                                );
+                            }
+                        }
+                    }
+                }
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -53,5 +96,17 @@ public class GameActivity extends AppCompatActivity {
         alert.show();
 
         finish();
+    }
+
+    private String searchPoint(JsonNode root, BigDecimal lon, BigDecimal lat) {
+        for (JsonNode jn : root.get("features")) {
+            if (jn.get("geometry").get("type").asText().equals("Point")) {
+                if (jn.get("geometry").get("coordinates").get(0).decimalValue().equals(lon)
+                        && jn.get("geometry").get("coordinates").get(1).decimalValue().equals(lat)) {
+                    return jn.get("properties").get("name").asText();
+                }
+            }
+        }
+        return null;
     }
 }
