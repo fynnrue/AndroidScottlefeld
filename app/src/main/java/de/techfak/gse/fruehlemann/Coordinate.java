@@ -4,12 +4,11 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Coordinate {
-    private BigDecimal lon;
-    private BigDecimal lat;
+    private BigDecimal lat, lon;
 
-    public Coordinate(BigDecimal lon, BigDecimal lat) {
-        this.lon = lon;
+    public Coordinate(BigDecimal lat, BigDecimal lon) {
         this.lat = lat;
+        this.lon = lon;
     }
 
     @Override
@@ -17,12 +16,12 @@ public class Coordinate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Coordinate that = (Coordinate) o;
-        return lon.equals(that.lon) && lat.equals(that.lat);
+        return lat.equals(that.lat) && lon.equals(that.lon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lon, lat);
+        return Objects.hash(lat, lon);
     }
 
     public BigDecimal getLat() {
@@ -42,7 +41,7 @@ public class Coordinate {
     }
 
     public String getCoords() {
-        return lon + ", " + lat;
+        return lat + ", " + lon;
 
     }
 }

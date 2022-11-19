@@ -2,7 +2,6 @@ package de.techfak.gse.fruehlemann;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -92,12 +92,12 @@ public class GameActivity extends AppCompatActivity {
             String featureType = jn.get("geometry").get("type").asText();
 
             if (featureType.equals("Point")) {
-                BigDecimal lonP = jn.get("geometry").get("coordinates").get(0).decimalValue();
-                BigDecimal latP = jn.get("geometry").get("coordinates").get(1).decimalValue();
+                BigDecimal latP = jn.get("geometry").get("coordinates").get(0).decimalValue();
+                BigDecimal lonP = jn.get("geometry").get("coordinates").get(1).decimalValue();
 
                 pOIsUnduped.add(new PointOfInterest(
                         jn.get("properties").get("name").asText(),
-                        (new Coordinate(lonP, latP))
+                        (new Coordinate(latP, lonP))
                 ));
             }
         }
@@ -139,17 +139,17 @@ public class GameActivity extends AppCompatActivity {
             String featType = link.get("geometry").get("type").asText();
 
             if (featType.equals("LineString")) {
-                BigDecimal lonS = link.get("geometry").get("coordinates").get(0).get(0).decimalValue();
-                BigDecimal latS = link.get("geometry").get("coordinates").get(0).get(1).decimalValue();
+                BigDecimal latS = link.get("geometry").get("coordinates").get(0).get(0).decimalValue();
+                BigDecimal lonS = link.get("geometry").get("coordinates").get(0).get(1).decimalValue();
 
 
                 for (PointOfInterest start : pOIs) {
-                    if (start.getCoords().getLon().equals(lonS) && start.getCoords().getLat().equals(latS)) {
-                        BigDecimal lonE = link.get("geometry").get("coordinates").get(1).get(0).decimalValue();
-                        BigDecimal latE = link.get("geometry").get("coordinates").get(1).get(1).decimalValue();
+                    if (start.getCoords().getLat().equals(latS) && start.getCoords().getLon().equals(lonS)) {
+                        BigDecimal latE = link.get("geometry").get("coordinates").get(1).get(0).decimalValue();
+                        BigDecimal lonE = link.get("geometry").get("coordinates").get(1).get(1).decimalValue();
 
                         for (PointOfInterest end : pOIs) {
-                            if (end.getCoords().getLon().equals(lonE) && end.getCoords().getLat().equals(latE)) {
+                            if (end.getCoords().getLat().equals(latE) && end.getCoords().getLon().equals(lonE)) {
 
                                 if (link.get("properties").get("typeId").asText().equals(transports.get(0).getId())) {
                                     links.add(new Link(start, end, transports.get(0)));
@@ -167,5 +167,7 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }
+
+        links.sort(Comparator.comparing(a -> a.getPoint1().getName()));
     }
 }
