@@ -2,6 +2,7 @@ package de.techfak.gse.fruehlemann;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
@@ -37,7 +38,8 @@ public class GameActivity extends AppCompatActivity {
 
 
         BufferedReader br = new BufferedReader(
-                new InputStreamReader(getResources().openRawResource(getResources().getIdentifier(map, "raw", getPackageName()))));
+                new InputStreamReader(getResources().openRawResource(getResources().getIdentifier(
+                        map, "raw", getPackageName()))));
         String jsonContent = br.lines().collect(Collectors.joining());
 
         ObjectMapper om = new ObjectMapper();
@@ -64,6 +66,8 @@ public class GameActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        outLinks();
     }
 
     @Override
@@ -151,8 +155,10 @@ public class GameActivity extends AppCompatActivity {
                         for (PointOfInterest end : pOIs) {
                             if (end.getCoords().getLat().equals(latE) && end.getCoords().getLon().equals(lonE)) {
 
-                                if (link.get("properties").get("typeId").asText().equals(transports.get(0).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                if (link.get("properties").get("typeId").asText().equals(
+                                        transports.get(0).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
+                                            && x.getPoint2().equals(end))) {
                                         for (Link linkDup : links) {
                                             if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
                                                 linkDup.addType(transports.get(0));
@@ -163,13 +169,13 @@ public class GameActivity extends AppCompatActivity {
                                         type.add(transports.get(0));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get("properties").get("typeId").asText().equals(transports.get(1).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
-                                        if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
-                                            for (Link linkDup : links) {
-                                                if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
-                                                    linkDup.addType(transports.get(1));
-                                                }
+                                } else if (link.get("properties").get("typeId").asText().equals(
+                                        transports.get(1).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
+                                            && x.getPoint2().equals(end))) {
+                                        for (Link linkDup : links) {
+                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                                linkDup.addType(transports.get(1));
                                             }
                                         }
                                     } else {
@@ -177,13 +183,13 @@ public class GameActivity extends AppCompatActivity {
                                         type.add(transports.get(1));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get("properties").get("typeId").asText().equals(transports.get(2).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
-                                        if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
-                                            for (Link linkDup : links) {
-                                                if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
-                                                    linkDup.addType(transports.get(2));
-                                                }
+                                } else if (link.get("properties").get("typeId").asText().equals(
+                                        transports.get(2).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
+                                            && x.getPoint2().equals(end))) {
+                                        for (Link linkDup : links) {
+                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                                linkDup.addType(transports.get(2));
                                             }
                                         }
                                     } else {
@@ -191,13 +197,13 @@ public class GameActivity extends AppCompatActivity {
                                         type.add(transports.get(2));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get("properties").get("typeId").asText().equals(transports.get(3).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
-                                        if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
-                                            for (Link linkDup : links) {
-                                                if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
-                                                    linkDup.addType(transports.get(3));
-                                                }
+                                } else if (link.get("properties").get("typeId").asText().equals(
+                                        transports.get(3).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
+                                            && x.getPoint2().equals(end))) {
+                                        for (Link linkDup : links) {
+                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                                linkDup.addType(transports.get(3));
                                             }
                                         }
                                     } else {
@@ -216,4 +222,25 @@ public class GameActivity extends AppCompatActivity {
         links.sort(Comparator.comparing(a -> a.getPoint1().getName()));
     }
 
+    public void outLinks() {
+        for (Link link : links) {
+            String transport = "";
+            for (Transport trans : link.getType()) {
+                transport += (trans.getType() + ", ");
+            }
+
+            Log.i("POI -> Verbindung", link.getPoint1().getName() + " (" + link.getPoint1().getCoords().getLat()
+                    + ", " + link.getPoint1().getCoords().getLon() + ") -> "
+                    + link.getPoint2().getName() + " (" + link.getPoint2().getCoords().getLat()
+                    + " " + link.getPoint2().getCoords().getLon() + "), "
+                    + transport);
+
+            Log.i("POI -> Verbindung", link.getPoint2().getName() + " (" + link.getPoint2().getCoords().getLat()
+                    + ", " + link.getPoint2().getCoords().getLon() + ") -> "
+                    + link.getPoint1().getName() + " (" + link.getPoint1().getCoords().getLat()
+                    + " " + link.getPoint1().getCoords().getLon() + "), "
+                    + transport);
+
+        }
+    }
 }
