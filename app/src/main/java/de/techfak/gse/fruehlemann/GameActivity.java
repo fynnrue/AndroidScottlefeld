@@ -152,14 +152,59 @@ public class GameActivity extends AppCompatActivity {
                             if (end.getCoords().getLat().equals(latE) && end.getCoords().getLon().equals(lonE)) {
 
                                 if (link.get("properties").get("typeId").asText().equals(transports.get(0).getId())) {
-                                    links.add(new Link(start, end, transports.get(0)));
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                        for (Link linkDup : links) {
+                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                                linkDup.addType(transports.get(0));
+                                            }
+                                        }
+                                    } else {
+                                        ArrayList<Transport> type = new ArrayList<>();
+                                        type.add(transports.get(0));
+                                        links.add(new Link(start, end, type));
+                                    }
                                 } else if (link.get("properties").get("typeId").asText().equals(transports.get(1).getId())) {
-                                    links.add(new Link(start, end, transports.get(1)));
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                        if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                            for (Link linkDup : links) {
+                                                if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                                    linkDup.addType(transports.get(1));
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        ArrayList<Transport> type = new ArrayList<>();
+                                        type.add(transports.get(1));
+                                        links.add(new Link(start, end, type));
+                                    }
                                 } else if (link.get("properties").get("typeId").asText().equals(transports.get(2).getId())) {
-                                    links.add(new Link(start, end, transports.get(2)));
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                        if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                            for (Link linkDup : links) {
+                                                if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                                    linkDup.addType(transports.get(2));
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        ArrayList<Transport> type = new ArrayList<>();
+                                        type.add(transports.get(2));
+                                        links.add(new Link(start, end, type));
+                                    }
                                 } else if (link.get("properties").get("typeId").asText().equals(transports.get(3).getId())) {
-                                    links.add(new Link(start, end, transports.get(3)));
-
+                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                        if (links.stream().anyMatch(x -> x.getPoint1().equals(start) && x.getPoint2().equals(end))) {
+                                            for (Link linkDup : links) {
+                                                if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                                    linkDup.addType(transports.get(3));
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        ArrayList<Transport> type = new ArrayList<>();
+                                        type.add(transports.get(3));
+                                        links.add(new Link(start, end, type));
+                                    }
                                 }
                             }
                         }
@@ -170,4 +215,5 @@ public class GameActivity extends AppCompatActivity {
 
         links.sort(Comparator.comparing(a -> a.getPoint1().getName()));
     }
+
 }

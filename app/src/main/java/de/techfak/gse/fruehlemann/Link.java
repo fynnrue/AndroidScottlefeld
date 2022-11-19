@@ -1,11 +1,13 @@
 package de.techfak.gse.fruehlemann;
 
 
+import java.util.ArrayList;
+
 public class Link {
     private PointOfInterest point1, point2;
-    private Transport type;
+    private ArrayList<Transport> type;
 
-    public Link(PointOfInterest point1, PointOfInterest point2, Transport type) {
+    public Link(PointOfInterest point1, PointOfInterest point2, ArrayList<Transport> type) {
         this.point1 = point1;
         this.point2 = point2;
         this.type = type;
@@ -27,11 +29,11 @@ public class Link {
         this.point2 = point2;
     }
 
-    public Transport getType() {
+    public ArrayList<Transport> getType() {
         return type;
     }
 
-    public void setType(Transport type) {
-        this.type = type;
+    public void addType(Transport type) {
+        this.type.add(type);
     }
 }
