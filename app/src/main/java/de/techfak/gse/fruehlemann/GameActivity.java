@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -280,12 +281,12 @@ public class GameActivity extends AppCompatActivity {
         showPos.setText("Position: \n" + position.getName());
     }
 
-    public void showDestinations(){
+    public void showDestinations() {
         Spinner showDest = findViewById(R.id.choosePOI);
 
         ArrayList<String> pOIDest = new ArrayList<>();
         for (PointOfInterest poi : pOIs) {
-            if (!poi.equals(position)){
+            if (!poi.equals(position)) {
                 pOIDest.add(poi.getName());
             }
         }
@@ -299,7 +300,7 @@ public class GameActivity extends AppCompatActivity {
         showDest.setAdapter(adapter);
     }
 
-    public void showTransporttypes(){
+    public void showTransporttypes() {
         Spinner showDest = findViewById(R.id.choosePOI);
         Spinner showTypes = findViewById(R.id.chooseTransptype);
 
@@ -308,7 +309,7 @@ public class GameActivity extends AppCompatActivity {
 
         for (PointOfInterest poi : pOIs) {
             if (poi.getName().equals(dest)) {
-                for (Link link : links){
+                for (Link link : links) {
                     if ((link.getPoint1().equals(position) && link.getPoint2().equals(poi)) ||
                             (link.getPoint1().equals(poi) && link.getPoint2().equals(position))) {
                         transpTypes.addAll(link.getType());
@@ -319,7 +320,7 @@ public class GameActivity extends AppCompatActivity {
         }
 
         ArrayList<String> stringTypes = new ArrayList<>();
-        for (Transport transp : transpTypes){
+        for (Transport transp : transpTypes) {
             stringTypes.add(transp.getType());
         }
 
@@ -330,5 +331,22 @@ public class GameActivity extends AppCompatActivity {
         );
 
         showTypes.setAdapter(adapter);
+    }
+
+    public void onEndMoveClick(View view) {
+        Spinner showDest = findViewById(R.id.choosePOI);
+        Spinner showTypes = findViewById(R.id.chooseTransptype);
+
+        if (!showDest.getSelectedItem().equals(null) && !showTypes.getSelectedItem().equals(null)) {
+            for (PointOfInterest poi : pOIs) {
+                if (showDest.getSelectedItem().toString().equals(poi.getName())) {
+                    position = poi;
+                    break;
+                }
+            }
+            showPosition();
+            showDestinations();
+            showTransporttypes();
+        }
     }
 }
