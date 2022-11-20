@@ -3,6 +3,7 @@ package de.techfak.gse.fruehlemann;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
@@ -28,6 +29,7 @@ public class GameActivity extends AppCompatActivity {
     ArrayList<PointOfInterest> pOIs;
     ArrayList<Link> links;
     ArrayList<Transport> transports;
+    PointOfInterest position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,9 @@ public class GameActivity extends AppCompatActivity {
         }
 
         outLinks();
+
+        genStartPos();
+        showPosition();
     }
 
     @Override
@@ -235,12 +240,24 @@ public class GameActivity extends AppCompatActivity {
                     + " " + link.getPoint2().getCoords().getLon() + "), "
                     + transport);
 
+
             Log.i("POI -> Verbindung", link.getPoint2().getName() + " (" + link.getPoint2().getCoords().getLat()
                     + ", " + link.getPoint2().getCoords().getLon() + ") -> "
                     + link.getPoint1().getName() + " (" + link.getPoint1().getCoords().getLat()
                     + " " + link.getPoint1().getCoords().getLon() + "), "
                     + transport);
-
         }
+    }
+
+    public void genStartPos() {
+        int amPOIs = pOIs.size();
+
+        position = pOIs.get((int) (Math.random() * amPOIs));
+    }
+
+    public void showPosition() {
+        TextView showPos = findViewById(R.id.showPos);
+
+        showPos.setText("Position: \n" + position.getName());
     }
 }
