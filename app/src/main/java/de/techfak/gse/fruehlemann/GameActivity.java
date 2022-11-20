@@ -3,6 +3,10 @@ package de.techfak.gse.fruehlemann;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -73,6 +77,21 @@ public class GameActivity extends AppCompatActivity {
 
         genStartPos();
         showPosition();
+
+        showDestinations();
+
+        Spinner chooseDest = findViewById(R.id.choosePOI);
+        chooseDest.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                showTransporttypes();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
     @Override
@@ -231,20 +250,20 @@ public class GameActivity extends AppCompatActivity {
         for (Link link : links) {
             String transport = "";
             for (Transport trans : link.getType()) {
-                transport += (trans.getType() + ", ");
+                transport += (", " + trans.getType());
             }
 
             Log.i("POI -> Verbindung", link.getPoint1().getName() + " (" + link.getPoint1().getCoords().getLat()
                     + ", " + link.getPoint1().getCoords().getLon() + ") -> "
                     + link.getPoint2().getName() + " (" + link.getPoint2().getCoords().getLat()
-                    + " " + link.getPoint2().getCoords().getLon() + "), "
+                    + " " + link.getPoint2().getCoords().getLon() + ")"
                     + transport);
 
 
             Log.i("POI -> Verbindung", link.getPoint2().getName() + " (" + link.getPoint2().getCoords().getLat()
                     + ", " + link.getPoint2().getCoords().getLon() + ") -> "
                     + link.getPoint1().getName() + " (" + link.getPoint1().getCoords().getLat()
-                    + " " + link.getPoint1().getCoords().getLon() + "), "
+                    + " " + link.getPoint1().getCoords().getLon() + ")"
                     + transport);
         }
     }
@@ -259,5 +278,57 @@ public class GameActivity extends AppCompatActivity {
         TextView showPos = findViewById(R.id.showPos);
 
         showPos.setText("Position: \n" + position.getName());
+    }
+
+    public void showDestinations(){
+        Spinner showDest = findViewById(R.id.choosePOI);
+
+        ArrayList<String> pOIDest = new ArrayList<>();
+        for (PointOfInterest poi : pOIs) {
+            if (!poi.equals(position)){
+                pOIDest.add(poi.getName());
+            }
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter(
+                this,
+                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                pOIDest
+        );
+
+        showDest.setAdapter(adapter);
+    }
+
+    public void showTransporttypes(){
+        Spinner showDest = findViewById(R.id.choosePOI);
+        Spinner showTypes = findViewById(R.id.chooseTransptype);
+
+        String dest = showDest.getSelectedItem().toString();
+        ArrayList<Transport> transpTypes = new ArrayList<>();
+
+        for (PointOfInterest poi : pOIs) {
+            if (poi.getName().equals(dest)) {
+                for (Link link : links){
+                    if ((link.getPoint1().equals(position) && link.getPoint2().equals(poi)) ||
+                            (link.getPoint1().equals(poi) && link.getPoint2().equals(position))) {
+                        transpTypes.addAll(link.getType());
+                        break;
+                    }
+                }
+            }
+        }
+
+        ArrayList<String> stringTypes = new ArrayList<>();
+        for (Transport transp : transpTypes){
+            stringTypes.add(transp.getType());
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter(
+                this,
+                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                stringTypes
+        );
+
+        showTypes.setAdapter(adapter);
     }
 }
