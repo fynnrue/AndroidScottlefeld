@@ -147,7 +147,14 @@ public class GameActivity extends AppCompatActivity {
         ArrayList<String> pOIDest = new ArrayList<>();
         for (PointOfInterest poi : pOIs) {
             if (!poi.equals(position)) {
-                pOIDest.add(poi.getName());
+                for (Link link : links) {
+                    if ((link.getPoint1().equals(poi)
+                            && link.getPoint2().equals(position))
+                            || (link.getPoint2().equals(poi)
+                            && link.getPoint1().equals(position))) {
+                        pOIDest.add(poi.getName());
+                    }
+                }
             }
         }
 
