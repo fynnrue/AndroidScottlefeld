@@ -197,7 +197,7 @@ public class GameActivity extends AppCompatActivity {
         Spinner showDest = findViewById(R.id.choosePOI);
         Spinner showTypes = findViewById(R.id.chooseTransptype);
 
-        if (!showDest.getSelectedItem().equals(null) && !showTypes.getSelectedItem().equals(null)) {
+        if (showDest.getSelectedItem() != null && showTypes.getSelectedItem() != null) {
             for (PointOfInterest poi : pOIs) {
                 if (showDest.getSelectedItem().toString().equals(poi.getName())) {
                     position = poi;
