@@ -24,8 +24,8 @@ public class ParserMap {
             String featureType = jn.get("geometry").get("type").asText();
 
             if (featureType.equals("Point")) {
-                BigDecimal latP = jn.get("geometry").get("coordinates").get(0).decimalValue();
-                BigDecimal lonP = jn.get("geometry").get("coordinates").get(1).decimalValue();
+                BigDecimal lonP = jn.get("geometry").get("coordinates").get(0).decimalValue();
+                BigDecimal latP = jn.get("geometry").get("coordinates").get(1).decimalValue();
 
                 pOIsUnduped.add(new PointOfInterest(
                         jn.get("properties").get("name").asText(),
@@ -75,24 +75,28 @@ public class ParserMap {
             String featType = link.get("geometry").get("type").asText();
 
             if (featType.equals("LineString")) {
-                BigDecimal latS = link.get("geometry").get("coordinates").get(0).get(0).decimalValue();
-                BigDecimal lonS = link.get("geometry").get("coordinates").get(0).get(1).decimalValue();
+                BigDecimal lonS = link.get("geometry").get("coordinates").get(0).get(0).decimalValue();
+                BigDecimal latS = link.get("geometry").get("coordinates").get(0).get(1).decimalValue();
 
 
                 for (PointOfInterest start : pOIs) {
-                    if (start.getCoords().getLat().equals(latS) && start.getCoords().getLon().equals(lonS)) {
-                        BigDecimal latE = link.get("geometry").get("coordinates").get(1).get(0).decimalValue();
-                        BigDecimal lonE = link.get("geometry").get("coordinates").get(1).get(1).decimalValue();
+                    if (start.getCoords().getLon().equals(lonS) && start.getCoords().getLat().equals(latS)) {
+                        BigDecimal lonE = link.get("geometry").get("coordinates").get(1).get(0).decimalValue();
+                        BigDecimal latE = link.get("geometry").get("coordinates").get(1).get(1).decimalValue();
 
                         for (PointOfInterest end : pOIs) {
-                            if (end.getCoords().getLat().equals(latE) && end.getCoords().getLon().equals(lonE)) {
+                            if (end.getCoords().getLon().equals(lonE) && end.getCoords().getLat().equals(latE)) {
 
                                 if (link.get("properties").get("typeId").asText().equals(
                                         transports.get(0).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))) {
+                                            && x.getPoint2().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
+                                            && x.getPoint1().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                            if ((linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end))
+                                                    || (linkDup.getPoint2().equals(start)
+                                                    && linkDup.getPoint1().equals(end))) {
                                                 linkDup.addType(transports.get(0));
                                             }
                                         }
@@ -104,9 +108,13 @@ public class ParserMap {
                                 } else if (link.get("properties").get("typeId").asText().equals(
                                         transports.get(1).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))) {
+                                            && x.getPoint2().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
+                                            && x.getPoint1().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                            if ((linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end))
+                                                    || (linkDup.getPoint2().equals(start)
+                                                    && linkDup.getPoint1().equals(end))) {
                                                 linkDup.addType(transports.get(1));
                                             }
                                         }
@@ -118,9 +126,14 @@ public class ParserMap {
                                 } else if (link.get("properties").get("typeId").asText().equals(
                                         transports.get(2).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))) {
+                                            && x.getPoint2().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
+                                            && x.getPoint1().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                            if ((linkDup.getPoint1().equals(start)
+                                                    && linkDup.getPoint2().equals(end))
+                                                    || (linkDup.getPoint2().equals(start)
+                                                    && linkDup.getPoint1().equals(end))) {
                                                 linkDup.addType(transports.get(2));
                                             }
                                         }
@@ -132,9 +145,13 @@ public class ParserMap {
                                 } else if (link.get("properties").get("typeId").asText().equals(
                                         transports.get(3).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))) {
+                                            && x.getPoint2().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
+                                            && x.getPoint1().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if (linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end)) {
+                                            if ((linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end))
+                                                    || (linkDup.getPoint2().equals(start)
+                                                    && linkDup.getPoint1().equals(end))) {
                                                 linkDup.addType(transports.get(3));
                                             }
                                         }
