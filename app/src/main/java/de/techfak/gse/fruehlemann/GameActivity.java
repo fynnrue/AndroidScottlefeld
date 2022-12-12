@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,14 +36,18 @@ public class GameActivity extends AppCompatActivity {
         String map = getIntent().getStringExtra("map");
 
 
-        BufferedReader br = new BufferedReader(
+        String jsonContent = null;
+        try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(getResources().openRawResource(getResources().getIdentifier(
-                        map, "raw", getPackageName()))));
-        String jsonContent = br.lines().collect(Collectors.joining());
+                        map, "raw", getPackageName()))))) {
+            jsonContent = br.lines().collect(Collectors.joining());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         ObjectMapper om = new ObjectMapper();
 
-        JsonNode root = null;
+        JsonNode root;
 
         ParserMap parserMap = new ParserMap();
 
@@ -57,15 +60,7 @@ public class GameActivity extends AppCompatActivity {
 
             links = parserMap.getLinks(root);
 
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            br.close();
-        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -79,7 +74,7 @@ public class GameActivity extends AppCompatActivity {
         Spinner chooseDest = findViewById(R.id.choosePOI);
         chooseDest.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 showTransporttypes();
             }
 
@@ -109,24 +104,49 @@ public class GameActivity extends AppCompatActivity {
 
     public void outLinks() {
         for (Link link : links) {
-            String transport = "";
+            StringBuilder transport = new StringBuilder();
+            String logType = "POI -> Verbindung";
+
             for (Transport trans : link.getType()) {
-                transport += (", " + trans.getType());
+                transport.append(", ").append(trans.getType());
             }
 
-            Log.i("POI -> Verbindung", link.getPoint1().getName() + " (" + link.getPoint1().getCoords().getLat()
-                    + ", " + link.getPoint1().getCoords().getLon() + ") -> "
-                    + link.getPoint2().getName() + " (" + link.getPoint2().getCoords().getLat()
-                    + " " + link.getPoint2().getCoords().getLon() + ")"
-                    + transport);
+            String startLat = String.valueOf(link.getPointOne().getCoords().getLat());
+            String startLon = String.valueOf(link.getPointOne().getCoords().getLon());
+            String endLat = String.valueOf(link.getPointTwo().getCoords().getLat());
+            String endLon = String.valueOf(link.getPointTwo().getCoords().getLon());
+
+            String logOut = getString(
+                    link.getPointOne().getName(), startLat, startLon,
+                    link.getPointTwo().getName(), endLat, endLon,
+                    transport.toString()
+            );
+
+            Log.i(logType, logOut);
+
+            startLat = String.valueOf(link.getPointTwo().getCoords().getLat());
+            startLon = String.valueOf(link.getPointTwo().getCoords().getLon());
+            endLat = String.valueOf(link.getPointOne().getCoords().getLat());
+            endLon = String.valueOf(link.getPointOne().getCoords().getLon());
 
 
-            Log.i("POI -> Verbindung", link.getPoint2().getName() + " (" + link.getPoint2().getCoords().getLat()
-                    + ", " + link.getPoint2().getCoords().getLon() + ") -> "
-                    + link.getPoint1().getName() + " (" + link.getPoint1().getCoords().getLat()
-                    + " " + link.getPoint1().getCoords().getLon() + ")"
-                    + transport);
+            logOut = getString(
+                    link.getPointTwo().getName(), startLat, startLon,
+                    link.getPointOne().getName(), endLat, endLon,
+                    transport.toString()
+            );
+
+            Log.i(logType, logOut);
         }
+
+    }
+
+
+    private String getString(String startName, String startLat, String startLon,
+                            String endName, String endLat, String endLon, String transport) {
+        String logOut = String.format("%1s" + " (%2s" + ", %3s" + ") -> %4s" + " (%5s" + "  %6s" + ")%7s",
+                startName, startLat, startLon, endName, endLat, endLon, transport);
+        return logOut;
     }
 
     public void genStartPos() {
@@ -148,10 +168,10 @@ public class GameActivity extends AppCompatActivity {
         for (PointOfInterest poi : pOIs) {
             if (!poi.equals(position)) {
                 for (Link link : links) {
-                    if ((link.getPoint1().equals(poi)
-                            && link.getPoint2().equals(position))
-                            || (link.getPoint2().equals(poi)
-                            && link.getPoint1().equals(position))) {
+                    if ((link.getPointOne().equals(poi)
+                            && link.getPointTwo().equals(position))
+                            || (link.getPointTwo().equals(poi)
+                            && link.getPointOne().equals(position))) {
                         pOIDest.add(poi.getName());
                     }
                 }
@@ -177,8 +197,8 @@ public class GameActivity extends AppCompatActivity {
         for (PointOfInterest poi : pOIs) {
             if (poi.getName().equals(dest)) {
                 for (Link link : links) {
-                    if ((link.getPoint1().equals(position) && link.getPoint2().equals(poi)) ||
-                            (link.getPoint1().equals(poi) && link.getPoint2().equals(position))) {
+                    if ((link.getPointOne().equals(position) && link.getPointTwo().equals(poi))
+                            || (link.getPointOne().equals(poi) && link.getPointTwo().equals(position))) {
                         transpTypes.addAll(link.getType());
                         break;
                     }

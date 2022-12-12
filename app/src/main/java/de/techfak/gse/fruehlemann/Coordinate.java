@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Coordinate {
-    private BigDecimal lat, lon;
+    private BigDecimal lat;
+    private BigDecimal lon;
 
     public Coordinate(BigDecimal lat, BigDecimal lon) {
         this.lat = lat;
@@ -12,10 +13,14 @@ public class Coordinate {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Coordinate that = (Coordinate) o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Coordinate that = (Coordinate) obj;
         return lat.equals(that.lat) && lon.equals(that.lon);
     }
 

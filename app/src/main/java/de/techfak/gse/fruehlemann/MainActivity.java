@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkSelected() throws NoMapSelectedException {
         if (dropdown.getSelectedItem().equals(noSelection)) {
-            throw new NoMapSelectedException("Keine Karte ausgewählt!");
+            throw new NoMapSelectedException("No map selected!");
         }
     }
 

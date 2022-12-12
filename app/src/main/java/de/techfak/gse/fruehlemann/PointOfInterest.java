@@ -1,8 +1,5 @@
 package de.techfak.gse.fruehlemann;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class PointOfInterest {
     private String name;
     private Coordinate coords;

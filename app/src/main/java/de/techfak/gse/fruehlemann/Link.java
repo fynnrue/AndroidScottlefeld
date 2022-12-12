@@ -4,29 +4,30 @@ package de.techfak.gse.fruehlemann;
 import java.util.ArrayList;
 
 public class Link {
-    private PointOfInterest point1, point2;
+    private PointOfInterest pointOne;
+    private PointOfInterest pointTwo;
     private ArrayList<Transport> type;
 
-    public Link(PointOfInterest point1, PointOfInterest point2, ArrayList<Transport> type) {
-        this.point1 = point1;
-        this.point2 = point2;
+    public Link(PointOfInterest pointOne, PointOfInterest pointTwo, ArrayList<Transport> type) {
+        this.pointOne = pointOne;
+        this.pointTwo = pointTwo;
         this.type = type;
     }
 
-    public PointOfInterest getPoint1() {
-        return point1;
+    public PointOfInterest getPointOne() {
+        return pointOne;
     }
 
-    public void setPoint1(PointOfInterest point1) {
-        this.point1 = point1;
+    public void setPointOne(PointOfInterest pointOne) {
+        this.pointOne = pointOne;
     }
 
-    public PointOfInterest getPoint2() {
-        return point2;
+    public PointOfInterest getPointTwo() {
+        return pointTwo;
     }
 
-    public void setPoint2(PointOfInterest point2) {
-        this.point2 = point2;
+    public void setPointTwo(PointOfInterest pointTwo) {
+        this.pointTwo = pointTwo;
     }
 
     public ArrayList<Transport> getType() {

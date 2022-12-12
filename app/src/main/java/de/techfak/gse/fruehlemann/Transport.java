@@ -4,6 +4,11 @@ public class Transport {
     private String type;
     private String id;
 
+    public Transport(String type, String id) {
+        this.type = type;
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }
@@ -20,8 +25,4 @@ public class Transport {
         this.type = type;
     }
 
-    public Transport(String type, String id) {
-        this.type = type;
-        this.id = id;
-    }
 }

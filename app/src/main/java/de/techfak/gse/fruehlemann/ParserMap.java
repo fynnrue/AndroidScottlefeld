@@ -86,78 +86,85 @@ public class ParserMap {
 
                         for (PointOfInterest end : pOIs) {
                             if (end.getCoords().getLon().equals(lonE) && end.getCoords().getLat().equals(latE)) {
+                                final int indexStadtbahn = 0;
+                                final int indexBus = 1;
+                                final int indexSiggi = 2;
+                                final int indexBlack = 3;
 
                                 if (link.get("properties").get("typeId").asText().equals(
-                                        transports.get(0).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))
-                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
-                                            && x.getPoint1().equals(end))) {
+                                        transports.get(indexStadtbahn).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
+                                            && x.getPointTwo().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPointTwo().equals(start)
+                                            && x.getPointOne().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if ((linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end))
-                                                    || (linkDup.getPoint2().equals(start)
-                                                    && linkDup.getPoint1().equals(end))) {
-                                                linkDup.addType(transports.get(0));
+                                            if ((linkDup.getPointOne().equals(start)
+                                                    && linkDup.getPointTwo().equals(end))
+                                                    || (linkDup.getPointTwo().equals(start)
+                                                    && linkDup.getPointOne().equals(end))) {
+                                                linkDup.addType(transports.get(indexStadtbahn));
                                             }
                                         }
                                     } else {
                                         ArrayList<Transport> type = new ArrayList<>();
-                                        type.add(transports.get(0));
+                                        type.add(transports.get(indexStadtbahn));
                                         links.add(new Link(start, end, type));
                                     }
                                 } else if (link.get("properties").get("typeId").asText().equals(
-                                        transports.get(1).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))
-                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
-                                            && x.getPoint1().equals(end))) {
+                                        transports.get(indexBus).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
+                                            && x.getPointTwo().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPointTwo().equals(start)
+                                            && x.getPointOne().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if ((linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end))
-                                                    || (linkDup.getPoint2().equals(start)
-                                                    && linkDup.getPoint1().equals(end))) {
-                                                linkDup.addType(transports.get(1));
+                                            if ((linkDup.getPointOne().equals(start)
+                                                    && linkDup.getPointTwo().equals(end))
+                                                    || (linkDup.getPointTwo().equals(start)
+                                                    && linkDup.getPointOne().equals(end))) {
+                                                linkDup.addType(transports.get(indexBus));
                                             }
                                         }
                                     } else {
                                         ArrayList<Transport> type = new ArrayList<>();
-                                        type.add(transports.get(1));
+                                        type.add(transports.get(indexBus));
                                         links.add(new Link(start, end, type));
                                     }
                                 } else if (link.get("properties").get("typeId").asText().equals(
-                                        transports.get(2).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))
-                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
-                                            && x.getPoint1().equals(end))) {
+                                        transports.get(indexSiggi).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
+                                            && x.getPointTwo().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPointTwo().equals(start)
+                                            && x.getPointOne().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if ((linkDup.getPoint1().equals(start)
-                                                    && linkDup.getPoint2().equals(end))
-                                                    || (linkDup.getPoint2().equals(start)
-                                                    && linkDup.getPoint1().equals(end))) {
-                                                linkDup.addType(transports.get(2));
+                                            if ((linkDup.getPointOne().equals(start)
+                                                    && linkDup.getPointTwo().equals(end))
+                                                    || (linkDup.getPointTwo().equals(start)
+                                                    && linkDup.getPointOne().equals(end))) {
+                                                linkDup.addType(transports.get(indexSiggi));
                                             }
                                         }
                                     } else {
                                         ArrayList<Transport> type = new ArrayList<>();
-                                        type.add(transports.get(2));
+                                        type.add(transports.get(indexSiggi));
                                         links.add(new Link(start, end, type));
                                     }
                                 } else if (link.get("properties").get("typeId").asText().equals(
-                                        transports.get(3).getId())) {
-                                    if (links.stream().anyMatch(x -> x.getPoint1().equals(start)
-                                            && x.getPoint2().equals(end))
-                                            || links.stream().anyMatch(x -> x.getPoint2().equals(start)
-                                            && x.getPoint1().equals(end))) {
+                                        transports.get(indexBlack).getId())) {
+                                    if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
+                                            && x.getPointTwo().equals(end))
+                                            || links.stream().anyMatch(x -> x.getPointTwo().equals(start)
+                                            && x.getPointOne().equals(end))) {
                                         for (Link linkDup : links) {
-                                            if ((linkDup.getPoint1().equals(start) && linkDup.getPoint2().equals(end))
-                                                    || (linkDup.getPoint2().equals(start)
-                                                    && linkDup.getPoint1().equals(end))) {
-                                                linkDup.addType(transports.get(3));
+                                            if ((linkDup.getPointOne().equals(start)
+                                                    && linkDup.getPointTwo().equals(end))
+                                                    || (linkDup.getPointTwo().equals(start)
+                                                    && linkDup.getPointOne().equals(end))) {
+                                                linkDup.addType(transports.get(indexBlack));
                                             }
                                         }
                                     } else {
                                         ArrayList<Transport> type = new ArrayList<>();
-                                        type.add(transports.get(3));
+                                        type.add(transports.get(indexBlack));
                                         links.add(new Link(start, end, type));
                                     }
                                 }
@@ -168,7 +175,7 @@ public class ParserMap {
             }
         }
 
-        links.sort(Comparator.comparing(a -> a.getPoint1().getName()));
+        links.sort(Comparator.comparing(a -> a.getPointOne().getName()));
 
         return links;
     }
