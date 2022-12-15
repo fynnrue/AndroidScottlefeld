@@ -5,18 +5,41 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 public class ParserMap {
-    ArrayList<PointOfInterest> pOIs;
-    ArrayList<Transport> transports;
-    ArrayList<Link> links;
+    HashMap<PointOfInterest, ArrayList<Link>> map;
 
+    //Creates HashMap wich saves all POIs with their connections and transporttypes
+    public void parseMap(JsonNode root) {
+        ArrayList<PointOfInterest> pOIs;
+        ArrayList<Transport> transports;
+        ArrayList<Link> links;
+
+        pOIs = getPOIs(root);
+        transports = getTransporttypes(root);
+        links = getLinks(root, pOIs, transports);
+
+        for (PointOfInterest pOI : pOIs) {
+            ArrayList<Link> connectedPoIs = new ArrayList<>();
+
+            for (Link link : links) {
+                if (link.getPointOne().equals(pOI)) {
+                    connectedPoIs.add(link);
+                } else if (link.getPointTwo().equals(pOI)) {
+                    connectedPoIs.add(new Link(link.getPointTwo(), link.getPointOne(), link.getType()));
+                }
+            }
+            map.put(pOI, connectedPoIs);
+        }
+    }
 
     public ArrayList<PointOfInterest> getPOIs(JsonNode root) {
+        ArrayList<PointOfInterest> pOIs;
         Set<PointOfInterest> pOIsUnduped = new HashSet<>();
 
         for (JsonNode jn : root.get("features")) {
@@ -39,7 +62,7 @@ public class ParserMap {
     }
 
     public ArrayList<Transport> getTransporttypes(JsonNode root) {
-        transports = new ArrayList<>();
+        ArrayList<Transport> transports = new ArrayList<>();
         ArrayList<String[]> types = new ArrayList<>();
 
         Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get("facilmap").get("types").fields();
@@ -68,8 +91,8 @@ public class ParserMap {
         return transports;
     }
 
-    public ArrayList<Link> getLinks(JsonNode root) {
-        links = new ArrayList<>();
+    public ArrayList<Link> getLinks(JsonNode root, ArrayList<PointOfInterest> pOIs, ArrayList<Transport> transports) {
+        ArrayList<Link> links = new ArrayList<>();
 
         for (JsonNode link : root.get("features")) {
             String featType = link.get("geometry").get("type").asText();
