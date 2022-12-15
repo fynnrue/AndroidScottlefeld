@@ -23,10 +23,8 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class GameActivity extends AppCompatActivity {
-    ArrayList<PointOfInterest> pOIs;
-    ArrayList<Link> links;
-    ArrayList<Transport> transports;
-    PointOfInterest position;
+    ParserMap parserMap;
+    String position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,16 +47,12 @@ public class GameActivity extends AppCompatActivity {
 
         JsonNode root;
 
-        ParserMap parserMap = new ParserMap();
+        parserMap = new ParserMap();
 
         try {
             root = om.readTree((jsonContent));
 
-            pOIs = parserMap.getPOIs(root);
-
-            transports = parserMap.getTransporttypes(root);
-
-            links = parserMap.getLinks(root);
+            parserMap.parseMap(root);
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -103,85 +97,34 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void outLinks() {
-        for (Link link : links) {
-            StringBuilder transport = new StringBuilder();
-            String logType = "POI -> Verbindung";
+        String logType = "POI -> Verbindung";
 
-            for (Transport trans : link.getType()) {
-                transport.append(", ").append(trans.getType());
-            }
+        ArrayList<String> logOut = parserMap.outLinks();
 
-            String startLat = String.valueOf(link.getPointOne().getCoords().getLat());
-            String startLon = String.valueOf(link.getPointOne().getCoords().getLon());
-            String endLat = String.valueOf(link.getPointTwo().getCoords().getLat());
-            String endLon = String.valueOf(link.getPointTwo().getCoords().getLon());
-
-            String logOut = getString(
-                    link.getPointOne().getName(), startLat, startLon,
-                    link.getPointTwo().getName(), endLat, endLon,
-                    transport.toString()
-            );
-
-            Log.i(logType, logOut);
-
-            startLat = String.valueOf(link.getPointTwo().getCoords().getLat());
-            startLon = String.valueOf(link.getPointTwo().getCoords().getLon());
-            endLat = String.valueOf(link.getPointOne().getCoords().getLat());
-            endLon = String.valueOf(link.getPointOne().getCoords().getLon());
-
-
-            logOut = getString(
-                    link.getPointTwo().getName(), startLat, startLon,
-                    link.getPointOne().getName(), endLat, endLon,
-                    transport.toString()
-            );
-
-            Log.i(logType, logOut);
+        for (String link : logOut) {
+            Log.i(logType, link);
         }
-
-    }
-
-
-    private String getString(String startName, String startLat, String startLon,
-                            String endName, String endLat, String endLon, String transport) {
-        String logOut = String.format("%1s" + " (%2s" + ", %3s" + ") -> %4s" + " (%5s" + "  %6s" + ")%7s",
-                startName, startLat, startLon, endName, endLat, endLon, transport);
-        return logOut;
     }
 
     public void genStartPos() {
-        int amPOIs = pOIs.size();
-
-        position = pOIs.get((int) (Math.random() * amPOIs));
+        position = parserMap.genStartPosition();
     }
 
     public void showPosition() {
         TextView showPos = findViewById(R.id.showPos);
 
-        showPos.setText("Position: \n" + position.getName());
+        showPos.setText("Position: \n" + position);
     }
 
     public void showDestinations() {
         Spinner showDest = findViewById(R.id.choosePOI);
 
-        ArrayList<String> pOIDest = new ArrayList<>();
-        for (PointOfInterest poi : pOIs) {
-            if (!poi.equals(position)) {
-                for (Link link : links) {
-                    if ((link.getPointOne().equals(poi)
-                            && link.getPointTwo().equals(position))
-                            || (link.getPointTwo().equals(poi)
-                            && link.getPointOne().equals(position))) {
-                        pOIDest.add(poi.getName());
-                    }
-                }
-            }
-        }
+        ArrayList<String> possibleDestinations = parserMap.getPossibleDestinations(position);
 
         ArrayAdapter<String> adapter = new ArrayAdapter(
                 this,
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                pOIDest
+                possibleDestinations
         );
 
         showDest.setAdapter(adapter);
@@ -191,30 +134,13 @@ public class GameActivity extends AppCompatActivity {
         Spinner showDest = findViewById(R.id.choosePOI);
         Spinner showTypes = findViewById(R.id.chooseTransptype);
 
-        String dest = showDest.getSelectedItem().toString();
-        ArrayList<Transport> transpTypes = new ArrayList<>();
-
-        for (PointOfInterest poi : pOIs) {
-            if (poi.getName().equals(dest)) {
-                for (Link link : links) {
-                    if ((link.getPointOne().equals(position) && link.getPointTwo().equals(poi))
-                            || (link.getPointOne().equals(poi) && link.getPointTwo().equals(position))) {
-                        transpTypes.addAll(link.getType());
-                        break;
-                    }
-                }
-            }
-        }
-
-        ArrayList<String> stringTypes = new ArrayList<>();
-        for (Transport transp : transpTypes) {
-            stringTypes.add(transp.getType());
-        }
+        String destination = showDest.getSelectedItem().toString();
+        ArrayList<String> transportTypes = parserMap.getPossibleTransporttypes(position, destination);
 
         ArrayAdapter<String> adapter = new ArrayAdapter(
                 this,
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                stringTypes
+                transportTypes
         );
 
         showTypes.setAdapter(adapter);
@@ -225,12 +151,11 @@ public class GameActivity extends AppCompatActivity {
         Spinner showTypes = findViewById(R.id.chooseTransptype);
 
         if (showDest.getSelectedItem() != null && showTypes.getSelectedItem() != null) {
-            for (PointOfInterest poi : pOIs) {
-                if (showDest.getSelectedItem().toString().equals(poi.getName())) {
-                    position = poi;
-                    break;
-                }
+            if (parserMap.linkExists(position, showDest.getSelectedItem().toString(),
+                    showTypes.getSelectedItem().toString())) {
+                position = showDest.getSelectedItem().toString();
             }
+
             showPosition();
             showDestinations();
             showTransporttypes();
