@@ -326,4 +326,19 @@ public class ParserMap {
 
         return false;
     }
+
+    public BigDecimal[] getCoordinates(String pOIName) {
+        BigDecimal[] coords = new BigDecimal[2];
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+
+        for (PointOfInterest pOI : pOIs) {
+            if (pOI.getName().equals(pOIName)) {
+                coords[0] = pOI.getCoords().getLat();
+                coords[1] = pOI.getCoords().getLon();
+
+                break;
+            }
+        }
+        return coords;
+    }
 }

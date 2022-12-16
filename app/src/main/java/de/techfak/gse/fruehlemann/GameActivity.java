@@ -1,12 +1,10 @@
 package de.techfak.gse.fruehlemann;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,15 +14,26 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.api.IMapController;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.config.IConfigurationProvider;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class GameActivity extends AppCompatActivity {
     ParserMap parserMap;
     String position;
+    MapView mapView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,9 +72,9 @@ public class GameActivity extends AppCompatActivity {
         genStartPos();
         showPosition();
 
-        showDestinations();
+        //showDestinations();
 
-        Spinner chooseDest = findViewById(R.id.choosePOI);
+        /*Spinner chooseDest = findViewById(R.id.choosePOI);
         chooseDest.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
@@ -75,7 +84,32 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
-        });
+        });TODO löschen*/
+
+        //initialise Osmdroid MapView
+        mapView = findViewById(R.id.mapView);
+
+        Context ctx = getApplicationContext();
+
+        IConfigurationProvider provider = Configuration.getInstance();
+        provider.setUserAgentValue(BuildConfig.APPLICATION_ID);
+        provider.load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+
+        mapView.setTileSource(TileSourceFactory.MAPNIK);
+        mapView.setMultiTouchControls(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
     }
 
     @Override
@@ -116,7 +150,7 @@ public class GameActivity extends AppCompatActivity {
         showPos.setText("Position: \n" + position);
     }
 
-    public void showDestinations() {
+    /*public void showDestinations() {
         Spinner showDest = findViewById(R.id.choosePOI);
 
         ArrayList<String> possibleDestinations = parserMap.getPossibleDestinations(position);
@@ -160,5 +194,5 @@ public class GameActivity extends AppCompatActivity {
             showDestinations();
             showTransporttypes();
         }
-    }
+    }*/
 }
