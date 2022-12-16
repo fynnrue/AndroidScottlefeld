@@ -28,7 +28,6 @@ import org.osmdroid.views.overlay.Polyline;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -110,14 +109,15 @@ public class GameActivity extends AppCompatActivity {
     public void showAllPOIs() {
         ArrayList<Object[]> geoPoints = parserMap.getGeoPoints();
 
-        for(Object[] geoPoint : geoPoints) {
+        for (Object[] geoPoint : geoPoints) {
             showPositionOnMap(geoPoint);
         }
     }
 
     public void showPositionOnMap(Object[] point) {
         //center mapView
-        mapController.setZoom(16);
+        final int zoomfactor = 16;
+        mapController.setZoom(zoomfactor);
 
         //show position on map
         Marker marker = new Marker(mapView);
@@ -139,12 +139,12 @@ public class GameActivity extends AppCompatActivity {
     public void showAllLinks() {
         ArrayList<Object[]> polylines = parserMap.getPolylines();
 
-        for(Object[] polyline : polylines) {
+        for (Object[] polyline : polylines) {
             showPolylineOnMap(polyline);
         }
     }
 
-    public void showPolylineOnMap(Object[] polyline){
+    public void showPolylineOnMap(Object[] polyline) {
         mapView.getOverlays().add((Polyline) polyline[0]);
     }
 

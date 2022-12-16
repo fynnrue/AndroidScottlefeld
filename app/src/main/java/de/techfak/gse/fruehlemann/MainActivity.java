@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             mapNames[i + 1] = maps[i].getName();
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, mapNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         dropdown.setAdapter(adapter);

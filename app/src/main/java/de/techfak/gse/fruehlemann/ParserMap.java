@@ -15,10 +15,18 @@ import java.util.Map;
 import java.util.Set;
 
 public class ParserMap {
+    static final String FEATURES_ATTRIBUTE = "features";
+    static final String GEOMETRY_ATTRIBUTE = "geometry";
+    static final String TYPE_ATTRIBUTE = "type";
+    static final String COORDINATES_ATTRIBUTE = "coordinates";
+    static final String PROPERTIES_ATTRIBUTE = "properties";
+    static final String NAME_ATTRIBUTE = "name";
+
     HashMap<PointOfInterest, ArrayList<Link>> map = new HashMap<>();
     ArrayList<Transport> transports;
     ArrayList<Object[]> geoPoints = new ArrayList<>();
     ArrayList<Object[]> polylines = new ArrayList<>();
+
 
     //Creates HashMap which saves all POIs with their connections and transporttypes
     public void parseMap(JsonNode root) {
@@ -50,16 +58,16 @@ public class ParserMap {
         ArrayList<PointOfInterest> pOIs;
         Set<PointOfInterest> pOIsUnduped = new HashSet<>();
 
-        for (JsonNode jn : root.get("features")) {
+        for (JsonNode jn : root.get(FEATURES_ATTRIBUTE)) {
 
-            String featureType = jn.get("geometry").get("type").asText();
+            String featureType = jn.get(GEOMETRY_ATTRIBUTE).get(TYPE_ATTRIBUTE).asText();
 
             if (featureType.equals("Point")) {
-                BigDecimal lonP = jn.get("geometry").get("coordinates").get(0).decimalValue();
-                BigDecimal latP = jn.get("geometry").get("coordinates").get(1).decimalValue();
+                BigDecimal lonP = jn.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(0).decimalValue();
+                BigDecimal latP = jn.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(1).decimalValue();
 
                 pOIsUnduped.add(new PointOfInterest(
-                        jn.get("properties").get("name").asText(),
+                        jn.get(PROPERTIES_ATTRIBUTE).get(NAME_ATTRIBUTE).asText(),
                         (new Coordinate(latP, lonP))
                 ));
             }
@@ -81,11 +89,11 @@ public class ParserMap {
         }
 
         for (Map.Entry<String, JsonNode> entry : entries) {
-            if (entry.getValue().get("type").asText().equals("line")) {
+            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals("line")) {
                 String[] type = new String[2];
 
 
-                type[0] = entry.getValue().get("name").asText();
+                type[0] = entry.getValue().get(NAME_ATTRIBUTE).asText();
                 type[1] = entry.getKey();
 
                 types.add(type);
@@ -102,18 +110,22 @@ public class ParserMap {
     public ArrayList<Link> parseLinks(JsonNode root, ArrayList<PointOfInterest> pOIs, ArrayList<Transport> transports) {
         ArrayList<Link> links = new ArrayList<>();
 
-        for (JsonNode link : root.get("features")) {
-            String featType = link.get("geometry").get("type").asText();
+        for (JsonNode link : root.get(FEATURES_ATTRIBUTE)) {
+            String featType = link.get(GEOMETRY_ATTRIBUTE).get(TYPE_ATTRIBUTE).asText();
 
             if (featType.equals("LineString")) {
-                BigDecimal lonS = link.get("geometry").get("coordinates").get(0).get(0).decimalValue();
-                BigDecimal latS = link.get("geometry").get("coordinates").get(0).get(1).decimalValue();
+                BigDecimal lonS = link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(0).get(0).decimalValue();
+                BigDecimal latS = link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(0).get(1).decimalValue();
 
 
                 for (PointOfInterest start : pOIs) {
+                    final String typeID = "typeId";
+
                     if (start.getCoords().getLon().equals(lonS) && start.getCoords().getLat().equals(latS)) {
-                        BigDecimal lonE = link.get("geometry").get("coordinates").get(1).get(0).decimalValue();
-                        BigDecimal latE = link.get("geometry").get("coordinates").get(1).get(1).decimalValue();
+                        BigDecimal lonE =
+                                link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(1).get(0).decimalValue();
+                        BigDecimal latE =
+                                link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(1).get(1).decimalValue();
 
                         for (PointOfInterest end : pOIs) {
                             if (end.getCoords().getLon().equals(lonE) && end.getCoords().getLat().equals(latE)) {
@@ -122,7 +134,7 @@ public class ParserMap {
                                 final int indexSiggi = 2;
                                 final int indexBlack = 3;
 
-                                if (link.get("properties").get("typeId").asText().equals(
+                                if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
                                         transports.get(indexStadtbahn).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -141,7 +153,7 @@ public class ParserMap {
                                         type.add(transports.get(indexStadtbahn));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get("properties").get("typeId").asText().equals(
+                                } else if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
                                         transports.get(indexBus).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -160,7 +172,7 @@ public class ParserMap {
                                         type.add(transports.get(indexBus));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get("properties").get("typeId").asText().equals(
+                                } else if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
                                         transports.get(indexSiggi).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -179,7 +191,7 @@ public class ParserMap {
                                         type.add(transports.get(indexSiggi));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get("properties").get("typeId").asText().equals(
+                                } else if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
                                         transports.get(indexBlack).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -382,7 +394,7 @@ public class ParserMap {
             for (int j = 0; j < linksDuplicate.size(); j++) {
                 if (j > i) {
                     if (linksDuplicate.get(i).getPointOne().equals(linksDuplicate.get(j).getPointTwo())
-                        && linksDuplicate.get(i).getPointTwo().equals(linksDuplicate.get(j).getPointOne())) {
+                            && linksDuplicate.get(i).getPointTwo().equals(linksDuplicate.get(j).getPointOne())) {
                         links.remove(linksDuplicate.get(j));
                     }
                 }
@@ -390,6 +402,7 @@ public class ParserMap {
         }
 
         for (Link link : links) {
+            final int polylineAttributes = 3;
             PointOfInterest pOIFirst = link.getPointOne();
             PointOfInterest pOISecond = link.getPointTwo();
 
@@ -404,7 +417,7 @@ public class ParserMap {
             Polyline line = new Polyline();
             line.setPoints(points);
 
-            Object[] newPolyline = new Object[3];
+            Object[] newPolyline = new Object[polylineAttributes];
             newPolyline[0] = line;
             newPolyline[1] = points.get(0);
             newPolyline[2] = points.get(1);
