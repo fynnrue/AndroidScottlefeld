@@ -23,6 +23,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polyline;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -89,7 +90,8 @@ public class GameActivity extends AppCompatActivity {
 
         mapController = mapView.getController();
 
-        showPositionOnMap();
+        showAllLinks();
+        showAllPOIs();
 
     }
 
@@ -105,24 +107,45 @@ public class GameActivity extends AppCompatActivity {
         mapView.onPause();
     }
 
-    public void showPositionOnMap() {
+    public void showAllPOIs() {
+        ArrayList<Object[]> geoPoints = parserMap.getGeoPoints();
+
+        for(Object[] geoPoint : geoPoints) {
+            showPositionOnMap(geoPoint);
+        }
+    }
+
+    public void showPositionOnMap(Object[] point) {
         //center mapView
-        BigDecimal[] positionCoords = parserMap.getCoordinates(position);
-        centerMap(new GeoPoint(positionCoords[0].doubleValue(), positionCoords[1].doubleValue()));
-        mapController.setZoom(15);
+        mapController.setZoom(16);
 
         //show position on map
         Marker marker = new Marker(mapView);
 
-        marker.setPosition(new GeoPoint(positionCoords[0].doubleValue(), positionCoords[1].doubleValue()));
+        marker.setPosition((GeoPoint) point[0]);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        marker.setTitle(position);
-        marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
+        marker.setTitle((String) point[1]);
+        if (point[1].equals(position)) {
+            centerMap((GeoPoint) point[0]);
+            marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
+        }
         mapView.getOverlays().add(marker);
     }
 
     public void centerMap(GeoPoint point) {
         mapController.setCenter(point);
+    }
+
+    public void showAllLinks() {
+        ArrayList<Object[]> polylines = parserMap.getPolylines();
+
+        for(Object[] polyline : polylines) {
+            showPolylineOnMap(polyline);
+        }
+    }
+
+    public void showPolylineOnMap(Object[] polyline){
+        mapView.getOverlays().add((Polyline) polyline[0]);
     }
 
     @Override
@@ -144,8 +167,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void onCenterMapClick(View view) {
-        BigDecimal[] positionCoords = parserMap.getCoordinates(position);
-        centerMap(new GeoPoint(positionCoords[0].doubleValue(), positionCoords[1].doubleValue()));
+        centerMap(parserMap.getGeoPoint(position));
     }
 
     public void outLinks() {

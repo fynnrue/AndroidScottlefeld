@@ -1,8 +1,9 @@
 package de.techfak.gse.fruehlemann;
 
-import android.graphics.Point;
-
 import com.fasterxml.jackson.databind.JsonNode;
+
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.Polyline;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,8 +17,10 @@ import java.util.Set;
 public class ParserMap {
     HashMap<PointOfInterest, ArrayList<Link>> map = new HashMap<>();
     ArrayList<Transport> transports;
+    ArrayList<Object[]> geoPoints = new ArrayList<>();
+    ArrayList<Object[]> polylines = new ArrayList<>();
 
-    //Creates HashMap wich saves all POIs with their connections and transporttypes
+    //Creates HashMap which saves all POIs with their connections and transporttypes
     public void parseMap(JsonNode root) {
         ArrayList<PointOfInterest> pOIs;
         ArrayList<Link> links;
@@ -38,6 +41,9 @@ public class ParserMap {
             }
             map.put(pOI, connectedPoIs);
         }
+
+        parseGeoPoints();
+        parsePolylines();
     }
 
     public ArrayList<PointOfInterest> parsePOIs(JsonNode root) {
@@ -205,10 +211,6 @@ public class ParserMap {
         return links;
     }
 
-    public ArrayList<PointOfInterest> getPOIs() {
-        return (new ArrayList<>(map.keySet()));
-    }
-
     public ArrayList<Transport> getTransporttypes() {
         return transports;
     }
@@ -306,7 +308,7 @@ public class ParserMap {
 
         for (Link link : links) {
             if (link.getPointTwo().equals(destinationPOI)) {
-                for (Transport transport:  link.getType()) {
+                for (Transport transport : link.getType()) {
                     possibleTransporttypes.add(transport.getType());
                 }
             }
@@ -340,5 +342,74 @@ public class ParserMap {
             }
         }
         return coords;
+    }
+
+    public ArrayList<Object[]> getGeoPoints() {
+        return geoPoints;
+    }
+
+    public ArrayList<Object[]> getPolylines() {
+        return polylines;
+    }
+
+    public GeoPoint getGeoPoint(String name) {
+        for (Object[] point : geoPoints) {
+            if (name.equals(point[1])) {
+                return (GeoPoint) point[0];
+            }
+        }
+        return null;
+    }
+
+    public void parseGeoPoints() {
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+
+        for (PointOfInterest pOI : pOIs) {
+            Object[] geoName = new Object[2];
+
+            geoName[0] = new GeoPoint(pOI.getCoords().getLat().doubleValue(), pOI.getCoords().getLon().doubleValue());
+            geoName[1] = pOI.getName();
+
+            geoPoints.add(geoName);
+        }
+    }
+
+    public void parsePolylines() {
+        ArrayList<Link> links = getLinks();
+        ArrayList<Link> linksDuplicate = getLinks();
+
+        for (int i = 0; i < linksDuplicate.size(); i++) {
+            for (int j = 0; j < linksDuplicate.size(); j++) {
+                if (j > i) {
+                    if (linksDuplicate.get(i).getPointOne().equals(linksDuplicate.get(j).getPointTwo())
+                        && linksDuplicate.get(i).getPointTwo().equals(linksDuplicate.get(j).getPointOne())) {
+                        links.remove(linksDuplicate.get(j));
+                    }
+                }
+            }
+        }
+
+        for (Link link : links) {
+            PointOfInterest pOIFirst = link.getPointOne();
+            PointOfInterest pOISecond = link.getPointTwo();
+
+            ArrayList<GeoPoint> points = new ArrayList<>();
+            for (Object[] geoPoint : geoPoints) {
+                if (pOIFirst.getName().equals(geoPoint[1])) {
+                    points.add((GeoPoint) geoPoint[0]);
+                } else if (pOISecond.getName().equals(geoPoint[1])) {
+                    points.add((GeoPoint) geoPoint[0]);
+                }
+            }
+            Polyline line = new Polyline();
+            line.setPoints(points);
+
+            Object[] newPolyline = new Object[3];
+            newPolyline[0] = line;
+            newPolyline[1] = points.get(0);
+            newPolyline[2] = points.get(1);
+
+            polylines.add(newPolyline);
+        }
     }
 }
