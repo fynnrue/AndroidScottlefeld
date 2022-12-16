@@ -23,7 +23,9 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         app:layout_constraintBottom_toTopOf="@+id/endMove"
-        app:layout_constraintTop_toBottomOf="@+id/showPos" />
+        app:layout_constraintTop_toBottomOf="@+id/showPos" >
+
+    </org.osmdroid.views.MapView>
 
     <Button
         android:id="@+id/endMove"
@@ -33,7 +35,17 @@
         android:text="Zug Abschließen"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/showPos"
-        app:layout_constraintVertical_bias="0.97" />
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/centerButton"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:onClick="onCenterMapClick"
+        android:text="Zen trie ren"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/mapView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
