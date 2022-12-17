@@ -40,6 +40,7 @@ import de.techfak.gse22.player_bot.Player;
 import de.techfak.gse22.player_bot.PlayerFactory;
 import de.techfak.gse22.player_bot.exceptions.JSONParseException;
 import de.techfak.gse22.player_bot.exceptions.NoFreePositionException;
+import de.techfak.gse22.player_bot.exceptions.NoTicketAvailableException;
 
 public class GameActivity extends AppCompatActivity {
     ParserMap parserMap;
@@ -47,6 +48,7 @@ public class GameActivity extends AppCompatActivity {
     IMapController mapController;
     MX mxPlayer = null;
     Player[] players = new Player[1];
+    int roundnumber = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +129,17 @@ public class GameActivity extends AppCompatActivity {
         //After Player initialisations to avoid null-pointer-exception
         showAllLinks();
         showAllPOIs();
+
+        //Initialise Turns
+        while(true) {
+            showRoundnumber();
+            Round round = new Round(players.length, roundnumber, mxPlayer, players);
+            round.startRound();
+
+            mxPlayer = round.getMX();
+            players = round.getPlayers();
+            roundnumber++;
+        }
     }
 
     @Override
@@ -266,7 +279,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void showPosition() {
-        TextView showPos = findViewById(R.id.showPos);
+        TextView showPos = findViewById(R.id.showRoundNum);
 
         showPos.setText("Position: \n" + players[0].getPos());
     }
@@ -283,6 +296,12 @@ public class GameActivity extends AppCompatActivity {
         }
 
         finish();
+    }
+
+    public void showRoundnumber() {
+        TextView roundNumber = findViewById(R.id.showRoundNum);
+
+        roundNumber.setText("Runde " + roundnumber);
     }
 
     /*public void showDestinations() {
