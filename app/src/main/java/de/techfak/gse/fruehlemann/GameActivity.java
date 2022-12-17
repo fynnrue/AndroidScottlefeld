@@ -49,6 +49,7 @@ public class GameActivity extends AppCompatActivity {
     MX mxPlayer = null;
     Player[] players = new Player[1];
     int roundnumber = 1;
+    ArrayList<Marker> markers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,9 +132,12 @@ public class GameActivity extends AppCompatActivity {
         showAllPOIs();
 
         //Initialise Turns
-        while(true) {
-            showRoundnumber();
+        while (true) {
+            int[] mxShowPosition = {3, 8, 13, 18};
+            boolean showMXRound = false;
             Round round = new Round(players.length, roundnumber, mxPlayer, players);
+
+            showRoundnumber();
             try {
                 round.startRound();
             } catch (NoTicketAvailableException e) {
@@ -144,6 +148,24 @@ public class GameActivity extends AppCompatActivity {
 
             mxPlayer = round.getMX();
             players = round.getPlayers();
+
+
+            for (int roundnumber : mxShowPosition) {
+                if (roundnumber == roundnumber) {
+                    showMXRound = true;
+                }
+            }
+
+            /*MVC Pattern
+
+            if (showMXRound == true) {
+                showMXOnMap(mxPlayer.getPos());
+            }*/
+
+            if (showMXRound == true) {
+                showMarkerNormalOnMap(mxPlayer.getPos());
+            }
+
             roundnumber++;
         }
     }
@@ -184,6 +206,8 @@ public class GameActivity extends AppCompatActivity {
             marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
         }
         mapView.getOverlays().add(marker);
+
+        markers.add(marker);
     }
 
     public void centerMap(GeoPoint point) {
@@ -308,6 +332,22 @@ public class GameActivity extends AppCompatActivity {
         TextView roundNumber = findViewById(R.id.showRoundNum);
 
         roundNumber.setText("Runde " + roundnumber);
+    }
+
+    public void showMXOnMap(String position) {
+        for (Marker marker : markers) {
+            if (marker.getTitle().equals(position)) {
+                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default_focused_base, null));
+            }
+        }
+    }
+
+    public void showMarkerNormalOnMap(String position) {
+        for (Marker marker : markers) {
+            if (marker.getTitle().equals(position)) {
+                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default, null));
+            }
+        }
     }
 
     /*public void showDestinations() {

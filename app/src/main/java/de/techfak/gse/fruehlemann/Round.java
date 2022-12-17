@@ -22,8 +22,10 @@ public class Round {
     }
 
     public void startRound() throws NoTicketAvailableException {
-         mxTurn = mx.getTurn();
-         Log.i("M. X Zug:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
+        mxTurn = mx.getTurn();
+        String targetName = mxTurn.getTargetName();
+        Turn.TicketType ticket = mxTurn.getTicketType();
+        Log.i("M. X Zug:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
 
         for (Player player : players) {
             Turn turn = null;
