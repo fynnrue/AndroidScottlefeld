@@ -2,7 +2,11 @@ package de.techfak.gse.fruehlemann;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -140,12 +144,62 @@ public class GameActivity extends AppCompatActivity {
         ArrayList<Object[]> polylines = parserMap.getPolylines();
 
         for (Object[] polyline : polylines) {
-            showPolylineOnMap(polyline);
+            ArrayList<Transport> transporttypes = (ArrayList<Transport>) polyline[3];
+            Polyline line = (Polyline) polyline[0];
+            int[] colors = {};
+
+            for (Transport type : transporttypes) {
+                if (type.getType().equals("Siggi-Bike-Verbindung")) {
+                    int[] tempColor = new int[colors.length + 1];
+                    for (int i = 0; i < colors.length; i++) {
+                        tempColor[i] = colors[i];
+                    }
+                    tempColor[colors.length] = Color.RED;
+
+                    colors = tempColor;
+                } else if (type.getType().equals("Bus-Verbindung")) {
+                    int[] tempColor = new int[colors.length + 1];
+                    for (int i = 0; i < colors.length; i++) {
+                        tempColor[i] = colors[i];
+                    }
+                    tempColor[colors.length] = Color.GREEN;
+
+                    colors = tempColor;
+                } else if (type.getType().equals("Stadtbahn-Verbindung")) {
+                    int[] tempColor = new int[colors.length + 1];
+                    for (int i = 0; i < colors.length; i++) {
+                        tempColor[i] = colors[i];
+                    }
+                    tempColor[colors.length] = Color.BLUE;
+
+                    colors = tempColor;
+                }
+            }
+            showPolylineOnMap(line);
+
+            polylineChangeColor(line, new Handler(Looper.getMainLooper()), colors);
         }
     }
 
-    public void showPolylineOnMap(Object[] polyline) {
-        mapView.getOverlays().add((Polyline) polyline[0]);
+    public void showPolylineOnMap(Polyline line) {
+        mapView.getOverlays().add(line);
+    }
+
+    //Information on how to change Polylines while running from: https://stackoverflow.com/a/72381497
+    public void polylineChangeColor(final Polyline polyline, final Handler handler, int[] colors) {
+        handler.postDelayed(new Runnable() {
+            int colorIndex = 0;
+
+            @Override
+            public void run() {
+                polyline.getOutlinePaint().setColor(colors[colorIndex]);
+                colorIndex++;
+                if (colorIndex >= colors.length) {
+                    colorIndex = 0;
+                }
+                handler.postDelayed(this, 1000);
+            }
+        }, 1000);
     }
 
     @Override

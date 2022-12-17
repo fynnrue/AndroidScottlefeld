@@ -402,7 +402,7 @@ public class ParserMap {
         }
 
         for (Link link : links) {
-            final int polylineAttributes = 3;
+            final int polylineAttributes = 4;
             PointOfInterest pOIFirst = link.getPointOne();
             PointOfInterest pOISecond = link.getPointTwo();
 
@@ -421,6 +421,7 @@ public class ParserMap {
             newPolyline[0] = line;
             newPolyline[1] = points.get(0);
             newPolyline[2] = points.get(1);
+            newPolyline[3] = link.getType();
 
             polylines.add(newPolyline);
         }
