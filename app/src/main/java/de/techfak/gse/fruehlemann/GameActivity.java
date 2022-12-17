@@ -3,7 +3,6 @@ package de.techfak.gse.fruehlemann;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,11 +34,18 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import de.techfak.gse22.player_bot.MX;
+import de.techfak.gse22.player_bot.Player;
+import de.techfak.gse22.player_bot.PlayerFactory;
+import de.techfak.gse22.player_bot.exceptions.JSONParseException;
+import de.techfak.gse22.player_bot.exceptions.NoFreePositionException;
+
 public class GameActivity extends AppCompatActivity {
     ParserMap parserMap;
-    String position;
     MapView mapView;
     IMapController mapController;
+    MX mxPlayer = null;
+    Player[] players = new Player[1];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +81,7 @@ public class GameActivity extends AppCompatActivity {
 
         outLinks();
 
-        genStartPos();
-        showPosition();
+        //showPosition();
 
         //initialise Osmdroid MapView
         mapView = findViewById(R.id.mapView);
@@ -93,9 +98,29 @@ public class GameActivity extends AppCompatActivity {
 
         mapController = mapView.getController();
 
+        //Initialising Players
+        PlayerFactory playerFactory = null;
+
+        Detective detective = new Detective(8, 10, 4, parserMap.genStartPosition());
+        detective.setPos(parserMap.genStartPosition());
+        players[0] = detective;
+
+        try {
+            playerFactory = new PlayerFactory(jsonContent, players);
+
+            mxPlayer = playerFactory.createMx(3, 4, 3);
+        } catch (JSONParseException e) {
+            e.printStackTrace();
+        } catch (NoFreePositionException e) {
+            e.printStackTrace();
+        }
+
+        Log.i("M. X Position", mxPlayer.getPos());
+
+        //Show POIs and Connections on map
+        //After Player initialisations to avoid null-pointer-exception
         showAllLinks();
         showAllPOIs();
-
     }
 
     @Override
@@ -129,7 +154,7 @@ public class GameActivity extends AppCompatActivity {
         marker.setPosition((GeoPoint) point[0]);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setTitle((String) point[1]);
-        if (point[1].equals(position)) {
+        if (point[1].equals(players[0].getPos())) {
             centerMap((GeoPoint) point[0]);
             marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
         }
@@ -221,7 +246,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void onCenterMapClick(View view) {
-        centerMap(parserMap.getGeoPoint(position));
+        centerMap(parserMap.getGeoPoint(players[0].getPos()));
     }
 
     public void outLinks() {
@@ -234,14 +259,10 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void genStartPos() {
-        position = parserMap.genStartPosition();
-    }
-
     public void showPosition() {
         TextView showPos = findViewById(R.id.showPos);
 
-        showPos.setText("Position: \n" + position);
+        showPos.setText("Position: \n" + players[0].getPos());
     }
 
     /*public void showDestinations() {
