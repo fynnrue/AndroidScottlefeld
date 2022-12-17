@@ -18,6 +18,7 @@ import androidx.core.content.res.ResourcesCompat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -63,6 +64,7 @@ public class GameActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
         ObjectMapper om = new ObjectMapper();
 
@@ -110,9 +112,13 @@ public class GameActivity extends AppCompatActivity {
 
             mxPlayer = playerFactory.createMx(3, 4, 3);
         } catch (JSONParseException e) {
+            handleException("Fehler beim Verarbeiten der GeoJson!");
             e.printStackTrace();
+            endActivity();
         } catch (NoFreePositionException e) {
+            handleException("Keine freie Position auf der Karte für M. X");
             e.printStackTrace();
+            endActivity();
         }
 
         Log.i("M. X Position", mxPlayer.getPos());
@@ -263,6 +269,20 @@ public class GameActivity extends AppCompatActivity {
         TextView showPos = findViewById(R.id.showPos);
 
         showPos.setText("Position: \n" + players[0].getPos());
+    }
+
+    public void handleException(String textSnackbar) {
+        Snackbar.make(findViewById(android.R.id.content).getRootView(), textSnackbar, Snackbar.LENGTH_SHORT).show();
+    }
+
+    public void endActivity() {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        finish();
     }
 
     /*public void showDestinations() {
