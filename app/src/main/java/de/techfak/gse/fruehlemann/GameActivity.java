@@ -134,7 +134,13 @@ public class GameActivity extends AppCompatActivity {
         while(true) {
             showRoundnumber();
             Round round = new Round(players.length, roundnumber, mxPlayer, players);
-            round.startRound();
+            try {
+                round.startRound();
+            } catch (NoTicketAvailableException e) {
+                handleException("M. X kann sich nicht Fortbewegen!");
+                e.printStackTrace();
+                Log.i("M. X Zug:", "keins, " + mxPlayer.getPos());
+            }
 
             mxPlayer = round.getMX();
             players = round.getPlayers();
