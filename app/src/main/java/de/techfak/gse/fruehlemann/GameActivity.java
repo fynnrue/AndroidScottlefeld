@@ -9,6 +9,8 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -284,6 +286,14 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         marker.setPosition((GeoPoint) point[0]);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setTitle((String) point[1]);
+        marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker, MapView mapView) {
+                marker.showInfoWindow();
+                showTransporttypesAndTickets(players[0].getPos(), marker.getTitle());
+                return true;
+            }
+        });
         if (point[1].equals(players[0].getPos())) {
             centerMap((GeoPoint) point[0]);
             marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
@@ -434,6 +444,32 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         roundNumber.setText("Runde " + roundnumber);
     }
 
+    public void showTransporttypesAndTickets(String position, String destination) {
+        Spinner spinner = findViewById(R.id.showTransportTicket);
+        String[] typeTicket;
+
+        ArrayList<String> transporttypes = parserMap.getPossibleTransporttypes(position, destination);
+        typeTicket = new String[transporttypes.size()+1];
+
+        typeTicket[0] = "Ticket auswählen";
+        for (int i = 0; i < transporttypes.size(); i++){
+            if(transporttypes.get(i).startsWith("Siggi-Bike")) {
+                typeTicket[i+1] = "Siggi-Bike - " + players[0].getBikeTickets();
+            } else if(transporttypes.get(i).startsWith("Stadtbahn")) {
+                typeTicket[i+1] = "Stadtbahn - " + players[0].getTrainTickets();
+            } else if(transporttypes.get(i).startsWith("Bus")) {
+                typeTicket[i+1] = "Bus - " + players[0].getBusTickets(); //TODO all players
+            }
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, typeTicket);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+
+    }
+
     /**
      * Calls method to center map when Button is button to center is clicked.
      *
@@ -449,19 +485,33 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      * @param view Current View.
      */
     public void onEndMoveClick(View view) {
-      /*  Spinner showDest = findViewById(R.id.choosePOI);
-        Spinner showTypes = findViewById(R.id.chooseTransptype);
+        Spinner spinner = findViewById(R.id.showTransportTicket);
+        String ticket;
 
-        if (showDest.getSelectedItem() != null && showTypes.getSelectedItem() != null) {
-            if (parserMap.linkExists(position, showDest.getSelectedItem().toString(),
-                    showTypes.getSelectedItem().toString())) {
-                position = showDest.getSelectedItem().toString();
+        String transporttype = spinner.getSelectedItem().toString();
+        if(transporttype.startsWith("Siggi-Bike")) {
+            ticket = "BIKE";
+        } else if(transporttype.startsWith("Stadtbahn")) {
+            ticket = "TRAIN";
+        } else if(transporttype.startsWith("Bus")) {
+            ticket = "BUS";
+        } else {
+            return;
+        }
+
+        for (Marker marker : markers) {
+            if (marker.isInfoWindowShown()) {
+                round.endPlayerTurn(marker.getTitle(), ticket);
             }
+        }
+    }
 
-            showPosition();
-            showDestinations();
-            showTransporttypes();
-        }*/
+    public void onShowTicketsClick(View view) {
+        Intent ticketsIntent = new Intent(GameActivity.this, ShowTicktesActivity.class);
+        ticketsIntent.putExtra("Siggi", String.valueOf(players[0].getBikeTickets()));
+        ticketsIntent.putExtra("Train", String.valueOf(players[0].getTrainTickets()));
+        ticketsIntent.putExtra("Bus", String.valueOf(players[0].getBusTickets()));
+        startActivity(ticketsIntent);
     }
 
     //endregion
