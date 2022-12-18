@@ -31,7 +31,7 @@ public class Round {
             Turn turn = null;
             Turn.TicketType tickettype = null;
 
-            Log.i("Detective Zug: ", tickettype.toString());
+            Log.i("Detective Zug: ", "test");//tickettype.toString());
         }
     }
 

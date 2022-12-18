@@ -29,8 +29,13 @@ public class ParserMap {
     ArrayList<Object[]> geoPoints = new ArrayList<>();
     ArrayList<Object[]> polylines = new ArrayList<>();
 
+    //region Parse map
 
-    //Creates HashMap which saves all POIs with their connections and transporttypes
+    /**
+     * Parses all information to Hashmap and GeoPoints and Polylines to work with in Controller.
+     *
+     * @param root JsonNode to access information from given map.
+     */
     public void parseMap(JsonNode root) {
         ArrayList<PointOfInterest> pOIs;
         ArrayList<Link> links;
@@ -57,6 +62,12 @@ public class ParserMap {
         parsePolylines();
     }
 
+    /**
+     * Reads out all the POIs from map.
+     *
+     * @param root Root of given map.
+     * @return ArrayList of all existing POIs.
+     */
     public ArrayList<PointOfInterest> parsePOIs(JsonNode root) {
         ArrayList<PointOfInterest> pOIs;
         Set<PointOfInterest> pOIsUnduped = new HashSet<>();
@@ -80,6 +91,12 @@ public class ParserMap {
         return pOIs;
     }
 
+    /**
+     * Reads out all the transporttypes from map.
+     *
+     * @param root Root of given map.
+     * @return ArrayList of all existing transporttypes.
+     */
     public ArrayList<Transport> parseTransporttypes(JsonNode root) {
         ArrayList<Transport> transports = new ArrayList<>();
         ArrayList<String[]> types = new ArrayList<>();
@@ -110,6 +127,14 @@ public class ParserMap {
         return transports;
     }
 
+    /**
+     * Reads out all the connections from map with corresponding transporttypes.
+     *
+     * @param root       Root of given map.
+     * @param pOIs       All POIs in map.
+     * @param transports All transporttypes in map.
+     * @return ArrayList of all existing connections between POIs.
+     */
     public ArrayList<Link> parseLinks(JsonNode root, ArrayList<PointOfInterest> pOIs, ArrayList<Transport> transports) {
         ArrayList<Link> links = new ArrayList<>();
 
@@ -226,7 +251,12 @@ public class ParserMap {
         return links;
     }
 
-    public String[] parseTickets (JsonNode root) {
+    /**
+     * Reads out the amount of Tickets the Detectives and M. X have at the start of the game.
+     * @param root Root of map.
+     * @return Array of the amount of Tickets for each transporttype per player.
+     */
+    public String[] parseTickets(JsonNode root) {
         String[] amountTickets = new String[7];
 
         Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get("facilmap").get("types").fields();
@@ -240,7 +270,7 @@ public class ParserMap {
         for (Map.Entry<String, JsonNode> entry : entries) {
             if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals("line")) {
                 String test1 = entry.getValue().get("fields").get(0).get("default").toString();
-                amountTickets[ticketIndex-1] = test1;
+                amountTickets[ticketIndex - 1] = test1;
                 System.out.println("spieler " + test1);
                 if (ticketIndex <= 3) {
                     String test2 = entry.getValue().get("fields").get(1).get("default").toString();
@@ -253,158 +283,10 @@ public class ParserMap {
         return amountTickets;
     }
 
-    public ArrayList<Transport> getTransporttypes() {
-        return transports;
-    }
-
-    public ArrayList<Link> getLinks() {
-        ArrayList<Link> links = new ArrayList<>();
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-
-        for (PointOfInterest pOI : pOIs) {
-            for (Link link : map.get(pOI)) {
-                links.add(link);
-            }
-        }
-        return links;
-    }
-
-    public ArrayList<String> outLinks() {
-        ArrayList<String> outLinks = new ArrayList<>();
-        ArrayList<Link> links = getLinks();
-
-        for (Link link : links) {
-            StringBuilder transport = new StringBuilder();
-
-            for (Transport trans : link.getType()) {
-                transport.append(", ").append(trans.getType());
-            }
-
-            String startLat = String.valueOf(link.getPointOne().getCoords().getLat());
-            String startLon = String.valueOf(link.getPointOne().getCoords().getLon());
-            String endLat = String.valueOf(link.getPointTwo().getCoords().getLat());
-            String endLon = String.valueOf(link.getPointTwo().getCoords().getLon());
-
-            String logOut = getString(
-                    link.getPointOne().getName(), startLat, startLon,
-                    link.getPointTwo().getName(), endLat, endLon,
-                    transport.toString()
-            );
-
-            outLinks.add(logOut);
-        }
-        return outLinks;
-    }
-
-    public String[] getAmountTickets() {
-        return amountTickets;
-    }
-
-    private String getString(String startName, String startLat, String startLon,
-                             String endName, String endLat, String endLon, String transport) {
-        String logOut = String.format("%1s" + " (%2s" + ", %3s" + ") -> %4s" + " (%5s" + "  %6s" + ")%7s",
-                startName, startLat, startLon, endName, endLat, endLon, transport);
-        return logOut;
-    }
-
-    public String genStartPosition() {
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-
-        return (pOIs.get((int) (Math.random() * pOIs.size()))).getName();
-    }
-
-    public ArrayList<String> getPossibleDestinations(String position) {
-        ArrayList<String> possibleDestinations = new ArrayList<>();
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-        PointOfInterest pOIPosition = null;
-
-        for (PointOfInterest pOI : pOIs) {
-            if (pOI.getName().equals(position)) {
-                pOIPosition = pOI;
-                break;
-            }
-        }
-
-        ArrayList<Link> links = map.get(pOIPosition);
-
-        for (Link link : links) {
-            possibleDestinations.add(link.getPointTwo().getName());
-        }
-        return possibleDestinations;
-    }
-
-    public ArrayList<String> getPossibleTransporttypes(String position, String destination) {
-        ArrayList<String> possibleTransporttypes = new ArrayList<>();
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-        PointOfInterest positionPOI = new PointOfInterest(null, null);
-        PointOfInterest destinationPOI = new PointOfInterest(null, null);
-
-        for (PointOfInterest pOI : pOIs) {
-            if (pOI.getName().equals(position)) {
-                positionPOI = pOI;
-            }
-            if (pOI.getName().equals(destination)) {
-                destinationPOI = pOI;
-            }
-        }
-
-        ArrayList<Link> links = map.get(positionPOI);
-
-        for (Link link : links) {
-            if (link.getPointTwo().equals(destinationPOI)) {
-                for (Transport transport : link.getType()) {
-                    possibleTransporttypes.add(transport.getType());
-                }
-            }
-        }
-        return possibleTransporttypes;
-    }
-
-    public boolean linkExists(String position, String destination, String transporttype) {
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-        ArrayList<String> possibleTransporttypes = getPossibleTransporttypes(position, destination);
-
-        for (String types : possibleTransporttypes) {
-            if (types.equals(transporttype)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public BigDecimal[] getCoordinates(String pOIName) {
-        BigDecimal[] coords = new BigDecimal[2];
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-
-        for (PointOfInterest pOI : pOIs) {
-            if (pOI.getName().equals(pOIName)) {
-                coords[0] = pOI.getCoords().getLat();
-                coords[1] = pOI.getCoords().getLon();
-
-                break;
-            }
-        }
-        return coords;
-    }
-
-    public ArrayList<Object[]> getGeoPoints() {
-        return geoPoints;
-    }
-
-    public ArrayList<Object[]> getPolylines() {
-        return polylines;
-    }
-
-    public GeoPoint getGeoPoint(String name) {
-        for (Object[] point : geoPoints) {
-            if (name.equals(point[1])) {
-                return (GeoPoint) point[0];
-            }
-        }
-        return null;
-    }
-
+    /**
+     * Parsing all POIs into GeoPoints in form of Object Arrays (GeoPoint, Name of POI)
+     * and storing them in global ArrayList Variable geoPoints.
+     */
     public void parseGeoPoints() {
         ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
 
@@ -418,6 +300,10 @@ public class ParserMap {
         }
     }
 
+    /**
+     * Parsing all connections between POIs in form of Object Arrays (Polyline, GeoPoint1, GeoPoint2, transporttypes)
+     * and storing them in global ArrayList Variable polylines.
+     */
     public void parsePolylines() {
         ArrayList<Link> links = getLinks();
         ArrayList<Link> linksDuplicate = getLinks();
@@ -458,4 +344,235 @@ public class ParserMap {
             polylines.add(newPolyline);
         }
     }
+
+    //endregion
+
+    //region get methods
+
+    /**
+     * All connections between POIs read out from map.
+     * @return ArrayList of all connections existing between POIs on map.
+     */
+    public ArrayList<Link> getLinks() {
+        ArrayList<Link> links = new ArrayList<>();
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+
+        for (PointOfInterest pOI : pOIs) {
+            for (Link link : map.get(pOI)) {
+                links.add(link);
+            }
+        }
+        return links;
+    }
+
+    /**
+     * All avialable transporttypes read out from map.
+     * @return ArrayList of all transporttypes existing on map.
+     */
+    public ArrayList<Transport> getTransporttypes() {
+        return transports;
+    }
+
+    /**
+     * All amounts of ticktes read out from map.
+     * @return ArrayList of amount of tickets read out from map.
+     */
+    public String[] getAmountTickets() {
+        return amountTickets;
+    }
+
+    /**
+     * Gives back all GeoPoints parsed from map.
+     * @return ArrayList of Objects (GeoPoint POI, Name of POI) representing GeoPoints.
+     */
+    public ArrayList<Object[]> getGeoPoints() {
+        return geoPoints;
+    }
+
+    /**
+     * Gives back all Polylines parsed from map.
+     * @return ArrayList of Objects (Polyline, GeoPoint1, GeoPoint2, transporttypes) representing Polylines.
+     */
+    public ArrayList<Object[]> getPolylines() {
+        return polylines;
+    }
+
+    /**
+     * Gives back GeoPoint of POI.
+     * @param name Name of POI.
+     * @return GeoPoint from corresponding POI.
+     */
+    public GeoPoint getGeoPoint(String name) {
+        for (Object[] point : geoPoints) {
+            if (name.equals(point[1])) {
+                return (GeoPoint) point[0];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gives back all the POIs that are possible to visit from given POI.
+     * @param position Name of current position/POI.
+     * @return ArrayList of Strings of all names of visitable POIs.
+     */
+    public ArrayList<String> getPossibleDestinations(String position) {
+        ArrayList<String> possibleDestinations = new ArrayList<>();
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+        PointOfInterest pOIPosition = null;
+
+        for (PointOfInterest pOI : pOIs) {
+            if (pOI.getName().equals(position)) {
+                pOIPosition = pOI;
+                break;
+            }
+        }
+
+        ArrayList<Link> links = map.get(pOIPosition);
+
+        for (Link link : links) {
+            possibleDestinations.add(link.getPointTwo().getName());
+        }
+        return possibleDestinations;
+    }
+
+    /**
+     * Gives back Coordinates of given POI.
+     * @param pOIName Name of POI.
+     * @return Array of BigDecimals with Coordinates (Lat, Lon) of POI.
+     */
+    public BigDecimal[] getCoordinates(String pOIName) {
+        BigDecimal[] coords = new BigDecimal[2];
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+
+        for (PointOfInterest pOI : pOIs) {
+            if (pOI.getName().equals(pOIName)) {
+                coords[0] = pOI.getCoords().getLat();
+                coords[1] = pOI.getCoords().getLon();
+
+                break;
+            }
+        }
+        return coords;
+    }
+
+    /**
+     * Gives Back all the possible transporttypes between two POIs.
+     * @param position Name of current position/POI.
+     * @param destination Name of destination POI.
+     * @return ArrayList of all possible transporttypes between the two POIs.
+     */
+    public ArrayList<String> getPossibleTransporttypes(String position, String destination) {
+        ArrayList<String> possibleTransporttypes = new ArrayList<>();
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+        PointOfInterest positionPOI = new PointOfInterest(null, null);
+        PointOfInterest destinationPOI = new PointOfInterest(null, null);
+
+        for (PointOfInterest pOI : pOIs) {
+            if (pOI.getName().equals(position)) {
+                positionPOI = pOI;
+            }
+            if (pOI.getName().equals(destination)) {
+                destinationPOI = pOI;
+            }
+        }
+
+        ArrayList<Link> links = map.get(positionPOI);
+
+        for (Link link : links) {
+            if (link.getPointTwo().equals(destinationPOI)) {
+                for (Transport transport : link.getType()) {
+                    possibleTransporttypes.add(transport.getType());
+                }
+            }
+        }
+        return possibleTransporttypes;
+    }
+
+    //endregion
+
+    //region different methods
+
+    /**
+     * All connections between POIs corresponding Coordinates and transporttypes as Strings
+     * to print out in Logging-System.
+     * @return ArrayList of Strings of connections.
+     */
+    public ArrayList<String> outLinks() {
+        ArrayList<String> outLinks = new ArrayList<>();
+        ArrayList<Link> links = getLinks();
+
+        for (Link link : links) {
+            StringBuilder transport = new StringBuilder();
+
+            for (Transport trans : link.getType()) {
+                transport.append(", ").append(trans.getType());
+            }
+
+            String startLat = String.valueOf(link.getPointOne().getCoords().getLat());
+            String startLon = String.valueOf(link.getPointOne().getCoords().getLon());
+            String endLat = String.valueOf(link.getPointTwo().getCoords().getLat());
+            String endLon = String.valueOf(link.getPointTwo().getCoords().getLon());
+
+            String logOut = outLinkHelp(
+                    link.getPointOne().getName(), startLat, startLon,
+                    link.getPointTwo().getName(), endLat, endLon,
+                    transport.toString()
+            );
+
+            outLinks.add(logOut);
+        }
+        return outLinks;
+    }
+
+    /**
+     * Supporting method for outLinks() that creates a String with a String builder to keep Code clear.
+     * @param startName Name of start POI.
+     * @param startLat Lat coordinate of start POI.
+     * @param startLon Lon coordinate of start POI.
+     * @param endName Name of end POI.
+     * @param endLat Lat coordinate of end POI.
+     * @param endLon Lon coordinate of end POI.
+     * @param transport Transporttypes between POIs.
+     * @return Return String with information about connection to print out in Logging-System.
+     */
+    private String outLinkHelp(String startName, String startLat, String startLon,
+                               String endName, String endLat, String endLon, String transport) {
+        String logOut = String.format("%1s" + " (%2s" + ", %3s" + ") -> %4s" + " (%5s" + "  %6s" + ")%7s",
+                startName, startLat, startLon, endName, endLat, endLon, transport);
+        return logOut;
+    }
+
+    /**
+     * Generates random position from all POIs from map.
+     * @return Name of random POI.
+     */
+    public String genStartPosition() {
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+
+        return (pOIs.get((int) (Math.random() * pOIs.size()))).getName();
+    }
+
+    /**
+     * Checks if connection between two POIs exist with given transporttype.
+     * @param position Name of current position/POI.
+     * @param destination Name of destination POI.
+     * @param transporttype Name of chosen transporttype.
+     * @return true when connection between two POIs exist with transporttype, else false.
+     */
+    public boolean checkLinkExists(String position, String destination, String transporttype) {
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+        ArrayList<String> possibleTransporttypes = getPossibleTransporttypes(position, destination);
+
+        for (String types : possibleTransporttypes) {
+            if (types.equals(transporttype)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    //endregion
+
 }

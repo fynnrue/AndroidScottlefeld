@@ -56,8 +56,10 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        /**
+         * Read map.
+         */
         String map = getIntent().getStringExtra("map");
-
 
         String jsonContent = null;
         try (BufferedReader br = new BufferedReader(
@@ -68,7 +70,9 @@ public class GameActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-
+        /**
+         * Parse all needed information before game start.
+         */
         ObjectMapper om = new ObjectMapper();
 
         JsonNode root;
@@ -76,7 +80,7 @@ public class GameActivity extends AppCompatActivity {
         parserMap = new ParserMap();
 
         try {
-            root = om.readTree((jsonContent));
+            root = om.readTree(jsonContent);
 
             parserMap.parseMap(root);
 
@@ -84,11 +88,65 @@ public class GameActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        //Log all POIs and Connections
         outLinks();
 
-        //showPosition();
+        //Initialising Osmdroid MapView
+        initialiseOsmdroid();
 
-        //initialise Osmdroid MapView
+        //Initialising Players
+        initialisePlayers(1, jsonContent);
+
+        //Show POIs and Connections on map
+        //After Player initialisations to avoid null-pointer-exception
+        showAllLinks();
+        showAllPOIs();
+
+        //Initialising Game
+        startGameRounds();
+
+    }
+
+    //region Android belonging Methods
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Spiel verlassen").
+                setMessage("Zur Startansicht zurückkehren?").
+                setPositiveButton("Ja", (dialog, id) -> {
+                    Intent mainI = new Intent(GameActivity.this, MainActivity.class);
+                    startActivity(mainI);
+
+                    finish();
+                }).
+                setNegativeButton("Nein", (dialog, id) -> {
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    //endregion
+
+    //region Initialisation of Activity
+
+    /**
+     * Initialising MapView.
+     */
+    public void initialiseOsmdroid() {
         mapView = findViewById(R.id.mapView);
 
         Context ctx = getApplicationContext();
@@ -103,7 +161,17 @@ public class GameActivity extends AppCompatActivity {
 
         mapController = mapView.getController();
 
-        //Initialising Players
+        final int zoomfactor = 16;
+        mapController.setZoom(zoomfactor);
+    }
+
+    /**
+     * Initialising all players including Detectives and M. X.
+     *
+     * @param amountPlayers Amount of players that are playing Detective.
+     * @param jsonContent   Information about map that the game is played on.
+     */
+    public void initialisePlayers(int amountPlayers, String jsonContent) {
         PlayerFactory playerFactory = null;
 
         Detective detective = new Detective(8, 10, 4, parserMap.genStartPosition());
@@ -125,36 +193,35 @@ public class GameActivity extends AppCompatActivity {
         }
 
         Log.i("M. X Position", mxPlayer.getPos());
+    }
 
-        //Show POIs and Connections on map
-        //After Player initialisations to avoid null-pointer-exception
-        showAllLinks();
-        showAllPOIs();
+    /**
+     * Starts the game and administrates Rounds.
+     */
+    public void startGameRounds() {
+        // while (true) {
+        int[] mxShowPosition = {3, 8, 13, 18};
+        boolean showMXRound = false;
+        Round round = new Round(players.length, roundnumber, mxPlayer, players);
 
-        //Initialise Turns
-        while (true) {
-            int[] mxShowPosition = {3, 8, 13, 18};
-            boolean showMXRound = false;
-            Round round = new Round(players.length, roundnumber, mxPlayer, players);
+        showRoundnumber();
+        try {
+            round.startRound();
+        } catch (NoTicketAvailableException e) {
+            handleException("M. X kann sich nicht Fortbewegen!");
+            e.printStackTrace();
+            Log.i("M. X Zug:", "keins, " + mxPlayer.getPos());
+        }
 
-            showRoundnumber();
-            try {
-                round.startRound();
-            } catch (NoTicketAvailableException e) {
-                handleException("M. X kann sich nicht Fortbewegen!");
-                e.printStackTrace();
-                Log.i("M. X Zug:", "keins, " + mxPlayer.getPos());
+        mxPlayer = round.getMX();
+        players = round.getPlayers();
+
+
+        for (int roundnumber : mxShowPosition) {
+            if (roundnumber == roundnumber) {
+                showMXRound = true;
             }
-
-            mxPlayer = round.getMX();
-            players = round.getPlayers();
-
-
-            for (int roundnumber : mxShowPosition) {
-                if (roundnumber == roundnumber) {
-                    showMXRound = true;
-                }
-            }
+        }
 
             /*MVC Pattern
 
@@ -162,26 +229,34 @@ public class GameActivity extends AppCompatActivity {
                 showMXOnMap(mxPlayer.getPos());
             }*/
 
-            if (showMXRound == true) {
-                showMarkerNormalOnMap(mxPlayer.getPos());
-            }
+        if (showMXRound == true) {
+            showMarkerNormalOnMap(mxPlayer.getPos());
+        }
 
-            roundnumber++;
+        roundnumber++;
+        // }
+    }
+
+    /**
+     * Prints out POIs and connections in Android-Log when activity is started.
+     */
+    public void outLinks() {
+        String logType = "POI -> Verbindung";
+
+        ArrayList<String> logOut = parserMap.outLinks();
+
+        for (String link : logOut) {
+            Log.i(logType, link);
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
+    //endregion
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
+    //region Map Interaction
 
+    /**
+     * Goes through every POI and starts method to show on MapView.
+     */
     public void showAllPOIs() {
         ArrayList<Object[]> geoPoints = parserMap.getGeoPoints();
 
@@ -190,12 +265,12 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Adds Marker on MapView for given POI consisting of GeoPoints and Name.
+     *
+     * @param point Information about GeoPoints and name of POI.
+     */
     public void showPositionOnMap(Object[] point) {
-        //center mapView
-        final int zoomfactor = 16;
-        mapController.setZoom(zoomfactor);
-
-        //show position on map
         Marker marker = new Marker(mapView);
 
         marker.setPosition((GeoPoint) point[0]);
@@ -210,10 +285,20 @@ public class GameActivity extends AppCompatActivity {
         markers.add(marker);
     }
 
+    /**
+     * Centers MapView on GeoPoint.
+     *
+     * @param point GeoPoint for centering.
+     */
     public void centerMap(GeoPoint point) {
         mapController.setCenter(point);
     }
 
+    /**
+     * For every Polyline received from parserMap it will be checked if the connection contains the specific
+     * transporttype and adds a color to the facette, which will be taken to show the different colors on the mapView.
+     * Every Polyline gets added to the MapView and Method polylineChangeColor will be calles with the colors.
+     */
     public void showAllLinks() {
         ArrayList<Object[]> polylines = parserMap.getPolylines();
 
@@ -249,16 +334,20 @@ public class GameActivity extends AppCompatActivity {
                     colors = tempColor;
                 }
             }
-            showPolylineOnMap(line);
+            mapView.getOverlays().add(line);
 
             polylineChangeColor(line, new Handler(Looper.getMainLooper()), colors);
         }
     }
 
-    public void showPolylineOnMap(Polyline line) {
-        mapView.getOverlays().add(line);
-    }
-
+    /**
+     * At runtime the given polyline will change colors which represent the different transporttypes between
+     * the POIs it connects.
+     *
+     * @param polyline Polyline that will change colors.
+     * @param handler  Performs actions on different thread than main game.
+     * @param colors   Colors which represent the differen transporttypes.
+     */
     //Information on how to change Polylines while running from: https://stackoverflow.com/a/72381497
     public void polylineChangeColor(final Polyline polyline, final Handler handler, int[] colors) {
         handler.postDelayed(new Runnable() {
@@ -276,48 +365,48 @@ public class GameActivity extends AppCompatActivity {
         }, 1000);
     }
 
-    @Override
-    public void onBackPressed() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setTitle("Spiel verlassen").
-                setMessage("Zur Startansicht zurückkehren?").
-                setPositiveButton("Ja", (dialog, id) -> {
-                    Intent mainI = new Intent(GameActivity.this, MainActivity.class);
-                    startActivity(mainI);
-
-                    finish();
-                }).
-                setNegativeButton("Nein", (dialog, id) -> {
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    public void onCenterMapClick(View view) {
-        centerMap(parserMap.getGeoPoint(players[0].getPos()));
-    }
-
-    public void outLinks() {
-        String logType = "POI -> Verbindung";
-
-        ArrayList<String> logOut = parserMap.outLinks();
-
-        for (String link : logOut) {
-            Log.i(logType, link);
+    /**
+     * Shows given Marker on MapView as normal marker, used e.g. when player or M.X was on that POI before.
+     *
+     * @param position Name of POI that will be changed.
+     */
+    public void showMarkerNormalOnMap(String position) {
+        for (Marker marker : markers) {
+            if (marker.getTitle().equals(position)) {
+                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default, null));
+            }
         }
     }
 
-    public void showPosition() {
-        TextView showPos = findViewById(R.id.showRoundNum);
-
-        showPos.setText("Position: \n" + players[0].getPos());
+    /**
+     * Shows given Marker on MapView with a different look to show M.X. position
+     *
+     * @param position Name of POI that M. X is at.
+     */
+    public void showMXOnMap(String position) {
+        for (Marker marker : markers) {
+            if (marker.getTitle().equals(position)) {
+                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default_focused_base, null));
+            }
+        }
     }
 
+    //endregion
+
+    //region Non-Map Interaction
+
+    /**
+     * Shows Snackbar on View with given text. Called on Exceptions.
+     *
+     * @param textSnackbar Fitting text to Exception which gets shown to User in a Snackbar.
+     */
     public void handleException(String textSnackbar) {
         Snackbar.make(findViewById(android.R.id.content).getRootView(), textSnackbar, Snackbar.LENGTH_SHORT).show();
     }
 
+    /**
+     * Ends the Activity after 3 Seconds.
+     */
     public void endActivity() {
         try {
             Thread.sleep(3000);
@@ -328,27 +417,49 @@ public class GameActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Shows the round number in a TextView.
+     */
     public void showRoundnumber() {
         TextView roundNumber = findViewById(R.id.showRoundNum);
 
         roundNumber.setText("Runde " + roundnumber);
     }
 
-    public void showMXOnMap(String position) {
-        for (Marker marker : markers) {
-            if (marker.getTitle().equals(position)) {
-                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default_focused_base, null));
-            }
-        }
+    /**
+     * Calls method to center map when Button is button to center is clicked.
+     *
+     * @param view Current View.
+     */
+    public void onCenterMapClick(View view) {
+        centerMap(parserMap.getGeoPoint(players[0].getPos()));
     }
 
-    public void showMarkerNormalOnMap(String position) {
-        for (Marker marker : markers) {
-            if (marker.getTitle().equals(position)) {
-                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default, null));
+    /**
+     * Ends Turn of player.
+     *
+     * @param view Current View.
+     */
+    public void onEndMoveClick(View view) {
+      /*  Spinner showDest = findViewById(R.id.choosePOI);
+        Spinner showTypes = findViewById(R.id.chooseTransptype);
+
+        if (showDest.getSelectedItem() != null && showTypes.getSelectedItem() != null) {
+            if (parserMap.linkExists(position, showDest.getSelectedItem().toString(),
+                    showTypes.getSelectedItem().toString())) {
+                position = showDest.getSelectedItem().toString();
             }
-        }
+
+            showPosition();
+            showDestinations();
+            showTransporttypes();
+        }*/
     }
+
+    //endregion
+
+
+
 
     /*public void showDestinations() {
         Spinner showDest = findViewById(R.id.choosePOI);
@@ -378,21 +489,7 @@ public class GameActivity extends AppCompatActivity {
         );
 
         showTypes.setAdapter(adapter);
-    }
-
-    public void onEndMoveClick(View view) {
-        Spinner showDest = findViewById(R.id.choosePOI);
-        Spinner showTypes = findViewById(R.id.chooseTransptype);
-
-        if (showDest.getSelectedItem() != null && showTypes.getSelectedItem() != null) {
-            if (parserMap.linkExists(position, showDest.getSelectedItem().toString(),
-                    showTypes.getSelectedItem().toString())) {
-                position = showDest.getSelectedItem().toString();
-            }
-
-            showPosition();
-            showDestinations();
-            showTransporttypes();
-        }
     }*/
+
+
 }
