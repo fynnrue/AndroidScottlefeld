@@ -1,5 +1,9 @@
 package de.techfak.gse.fruehlemann;
 
+import static de.techfak.gse22.player_bot.Turn.TicketType.BUS;
+import static de.techfak.gse22.player_bot.Turn.TicketType.TRAIN;
+import static de.techfak.gse22.player_bot.Turn.TicketType.BIKE;
+
 import android.util.Log;
 
 import java.beans.PropertyChangeListener;
@@ -14,11 +18,13 @@ public class Round {
     private PropertyChangeSupport support;
     int amountPlayers;
     int roundnumber;
-    int amountTurnComplete;
+    int amountTurnsComplete;
     boolean mXTurnComplete;
+    String destination = "";
     MX mx;
     Player[] players;
     Turn mxTurn = null;
+    Turn[] turns;
 
     public Round(int amountPlayers, int roundnumber, MX mx, Player[] players) {
         this.amountPlayers = amountPlayers;
@@ -30,20 +36,13 @@ public class Round {
     }
 
     public void startRound() throws NoTicketAvailableException {
-        amountTurnComplete = 0;
+        amountTurnsComplete = 0;
         mXTurnComplete = false;
+
+        turns = new Turn[players.length];
 
         mXTurn();
         setMXTurnComplete(true);
-
-        for (Player player : players) {
-            Turn turn = null;
-            Turn.TicketType tickettype = null;
-
-            Log.i("Detective Zug: ", "test");//tickettype.toString());
-
-            turnComplete();
-        }
     }
 
     public MX getMX() {
@@ -62,9 +61,11 @@ public class Round {
         return roundnumber;
     }
 
-    public void turnComplete() {
-        this.support.firePropertyChange("TurnsComplete", amountTurnComplete, amountTurnComplete + 1);
-        amountTurnComplete++;
+    public void turnComplete(Turn turn) {
+        this.support.firePropertyChange("TurnsComplete", amountTurnsComplete, amountTurnsComplete + 1);
+        amountTurnsComplete++;
+
+        Log.i("Spieler Verkehrsmittel:", turn.getTicketType().toString());
     }
 
     public void mXTurn() throws NoTicketAvailableException {
@@ -74,10 +75,29 @@ public class Round {
         Log.i("M. X Zug:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
     }
 
+    public void endPlayerTurn(String destination, String transporttype){
+        this.destination = destination;
+
+        Turn turn = null;
+        if (transporttype.equals("Siggi-Bike")) {
+            turn = new Turn(BIKE, destination);
+        } else if (transporttype.equals("Stadtbahn")) {
+            turn = new Turn(TRAIN, destination);
+        } else if (transporttype.equals("Bus")) {
+            turn = new Turn(BUS, destination);
+        }
+
+        turnComplete(turn);
+    }
+
     public void setMXTurnComplete(boolean complete) {
         support.firePropertyChange("MXTurnComplete", complete, mXTurnComplete);
         mXTurnComplete = complete;
     }
+
+
+
+    //PropertyChangeHandler methods
 
     public void addListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
