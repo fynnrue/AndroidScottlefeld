@@ -269,15 +269,13 @@ public class ParserMap {
         int ticketIndex = 1;
         for (Map.Entry<String, JsonNode> entry : entries) {
             if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals("line")) {
-                String test1 = entry.getValue().get("fields").get(0).get("default").toString();
-                amountTickets[ticketIndex - 1] = test1;
-                System.out.println("spieler " + test1);
-                if (ticketIndex <= 3) {
-                    String test2 = entry.getValue().get("fields").get(1).get("default").toString();
-                    amountTickets[ticketIndex] = test2;
-                    System.out.println("mx " + test2);
+                String amountOne = entry.getValue().get("fields").get(0).get("default").textValue();
+                amountTickets[ticketIndex - 1] = amountOne;
+                if (ticketIndex <= 5) {
+                    String amountTwo = entry.getValue().get("fields").get(1).get("default").textValue();
+                    amountTickets[ticketIndex] = amountTwo;
                 }
-                ticketIndex++;
+                ticketIndex += 2;
             }
         }
         return amountTickets;

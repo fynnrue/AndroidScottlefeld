@@ -29,6 +29,8 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,13 +44,13 @@ import de.techfak.gse22.player_bot.exceptions.JSONParseException;
 import de.techfak.gse22.player_bot.exceptions.NoFreePositionException;
 import de.techfak.gse22.player_bot.exceptions.NoTicketAvailableException;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements PropertyChangeListener {
     ParserMap parserMap;
     MapView mapView;
     IMapController mapController;
+    Round round = null;
     MX mxPlayer = null;
     Player[] players = new Player[1];
-    int roundnumber = 1;
     ArrayList<Marker> markers = new ArrayList<>();
 
     @Override
@@ -105,6 +107,8 @@ public class GameActivity extends AppCompatActivity {
         //Initialising Game
         startGameRounds();
 
+        //show
+
     }
 
     //region Android belonging Methods
@@ -119,6 +123,12 @@ public class GameActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mapView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        round.removeListener(this);
+        super.onDestroy();
     }
 
     @Override
@@ -173,15 +183,17 @@ public class GameActivity extends AppCompatActivity {
      */
     public void initialisePlayers(int amountPlayers, String jsonContent) {
         PlayerFactory playerFactory = null;
+        String[] amountTickets = parserMap.getAmountTickets();
 
-        Detective detective = new Detective(8, 10, 4, parserMap.genStartPosition());
-        detective.setPos(parserMap.genStartPosition());
-        players[0] = detective;
+        for (int i = 0; i < amountPlayers; i++) {
+            Detective detective = new Detective(Integer.parseInt(amountTickets[2]), Integer.parseInt(amountTickets[4]), Integer.parseInt(amountTickets[0]), parserMap.genStartPosition());
+            players[i] = detective;
+        }
 
         try {
             playerFactory = new PlayerFactory(jsonContent, players);
 
-            mxPlayer = playerFactory.createMx(3, 4, 3);
+            mxPlayer = playerFactory.createMx(Integer.parseInt(amountTickets[3]), Integer.parseInt(amountTickets[5]), Integer.parseInt(amountTickets[1]));
         } catch (JSONParseException e) {
             handleException("Fehler beim Verarbeiten der GeoJson!");
             e.printStackTrace();
@@ -199,42 +211,50 @@ public class GameActivity extends AppCompatActivity {
      * Starts the game and administrates Rounds.
      */
     public void startGameRounds() {
-        // while (true) {
-        int[] mxShowPosition = {3, 8, 13, 18};
-        boolean showMXRound = false;
-        Round round = new Round(players.length, roundnumber, mxPlayer, players);
+        boolean gameRunning = true;
+        int roundnumber = 1;
 
-        showRoundnumber();
-        try {
-            round.startRound();
-        } catch (NoTicketAvailableException e) {
-            handleException("M. X kann sich nicht Fortbewegen!");
-            e.printStackTrace();
-            Log.i("M. X Zug:", "keins, " + mxPlayer.getPos());
-        }
+        while (gameRunning) {
+            int[] mxShowPosition = {3, 8, 13, 18};
+            boolean showMXRound = false;
 
-        mxPlayer = round.getMX();
-        players = round.getPlayers();
+            round = new Round(players.length, roundnumber, mxPlayer, players);
+            round.addListener(this);
 
+            showRoundnumber(roundnumber);
 
-        for (int roundnumber : mxShowPosition) {
-            if (roundnumber == roundnumber) {
-                showMXRound = true;
+            try {
+                round.startRound();
+            } catch (NoTicketAvailableException e) {
+                handleException("M. X kann sich nicht Fortbewegen!");
+                e.printStackTrace();
+                Log.i("M. X Zug:", "keins, " + mxPlayer.getPos());
             }
-        }
 
-            /*MVC Pattern
+            mxPlayer = round.getMX();
+            players = round.getPlayers();
+
+
+            for (int showPos : mxShowPosition) {
+                if (roundnumber == showPos) {
+                    showMXRound = true;
+                }
+            }
+
+            /*Observer Pattern
 
             if (showMXRound == true) {
                 showMXOnMap(mxPlayer.getPos());
             }*/
 
-        if (showMXRound == true) {
-            showMarkerNormalOnMap(mxPlayer.getPos());
-        }
+            if (showMXRound == true) {
+                showMarkerNormalOnMap(mxPlayer.getPos());
+            }
 
-        roundnumber++;
-        // }
+            roundnumber++;
+
+            gameRunning = false;
+        }
     }
 
     /**
@@ -420,7 +440,7 @@ public class GameActivity extends AppCompatActivity {
     /**
      * Shows the round number in a TextView.
      */
-    public void showRoundnumber() {
+    public void showRoundnumber(int roundnumber) {
         TextView roundNumber = findViewById(R.id.showRoundNum);
 
         roundNumber.setText("Runde " + roundnumber);
@@ -457,6 +477,16 @@ public class GameActivity extends AppCompatActivity {
     }
 
     //endregion
+
+    //region Observer
+    @Override
+    public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+
+    }
+
+    //endRegion
+
+
 
 
 
