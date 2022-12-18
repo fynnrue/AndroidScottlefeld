@@ -15,7 +15,6 @@ import de.techfak.gse22.player_bot.Turn;
 import de.techfak.gse22.player_bot.exceptions.NoTicketAvailableException;
 
 public class Round {
-    private PropertyChangeSupport support;
     int amountPlayers;
     int roundnumber;
     int amountTurnsComplete;
@@ -25,6 +24,7 @@ public class Round {
     Player[] players;
     Turn mxTurn = null;
     Turn[] turns;
+    private PropertyChangeSupport support;
 
     public Round(int amountPlayers, int roundnumber, MX mx, Player[] players) {
         this.amountPlayers = amountPlayers;
@@ -75,7 +75,7 @@ public class Round {
         Log.i("M. X Zug:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
     }
 
-    public void endPlayerTurn(String destination, String transporttype){
+    public void endPlayerTurn(String destination, String transporttype) {
         this.destination = destination;
 
         Turn turn = null;

@@ -21,8 +21,14 @@ public class ParserMap {
     static final String COORDINATES_ATTRIBUTE = "coordinates";
     static final String PROPERTIES_ATTRIBUTE = "properties";
     static final String NAME_ATTRIBUTE = "name";
+    static final String FACILMAP_ATTRIBUTE = "facilmap";
+    static final String TYPES_ATTRIBUTE = "types";
+    static final String DEFAULT_ATTRIBUTE = "default";
+    static final String FIELDS_ATTRIBUTE = "fields";
+    static final String LINE_ATTRIBUTE = "line";
+    final int amountTicketTypes = 7;
 
-    String[] amountTickets = new String[7];
+    String[] amountTickets = new String[amountTicketTypes];
 
     HashMap<PointOfInterest, ArrayList<Link>> map = new HashMap<>();
     ArrayList<Transport> transports;
@@ -101,7 +107,7 @@ public class ParserMap {
         ArrayList<Transport> transports = new ArrayList<>();
         ArrayList<String[]> types = new ArrayList<>();
 
-        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get("facilmap").get("types").fields();
+        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get(FACILMAP_ATTRIBUTE).get(TYPES_ATTRIBUTE).fields();
         ArrayList<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
         while (typesEntry.hasNext()) {
             Map.Entry<String, JsonNode> entry = typesEntry.next();
@@ -109,7 +115,7 @@ public class ParserMap {
         }
 
         for (Map.Entry<String, JsonNode> entry : entries) {
-            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals("line")) {
+            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals(LINE_ATTRIBUTE)) {
                 String[] type = new String[2];
 
 
@@ -257,9 +263,9 @@ public class ParserMap {
      * @return Array of the amount of Tickets for each transporttype per player.
      */
     public String[] parseTickets(JsonNode root) {
-        String[] amountTickets = new String[7];
+        String[] amountTickets = new String[amountTicketTypes];
 
-        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get("facilmap").get("types").fields();
+        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get(FACILMAP_ATTRIBUTE).get(TYPES_ATTRIBUTE).fields();
         ArrayList<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
         while (typesEntry.hasNext()) {
             Map.Entry<String, JsonNode> entry = typesEntry.next();
@@ -267,12 +273,13 @@ public class ParserMap {
         }
 
         int ticketIndex = 1;
+        final int amntTickets = 5;
         for (Map.Entry<String, JsonNode> entry : entries) {
-            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals("line")) {
-                String amountOne = entry.getValue().get("fields").get(0).get("default").textValue();
+            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals(LINE_ATTRIBUTE)) {
+                String amountOne = entry.getValue().get(FIELDS_ATTRIBUTE).get(0).get(DEFAULT_ATTRIBUTE).textValue();
                 amountTickets[ticketIndex - 1] = amountOne;
-                if (ticketIndex <= 5) {
-                    String amountTwo = entry.getValue().get("fields").get(1).get("default").textValue();
+                if (ticketIndex <= amntTickets) {
+                    String amountTwo = entry.getValue().get(FIELDS_ATTRIBUTE).get(1).get(DEFAULT_ATTRIBUTE).textValue();
                     amountTickets[ticketIndex] = amountTwo;
                 }
                 ticketIndex += 2;
@@ -333,11 +340,13 @@ public class ParserMap {
             Polyline line = new Polyline();
             line.setPoints(points);
 
+            final int indexTransporttypes = 3;
+
             Object[] newPolyline = new Object[polylineAttributes];
             newPolyline[0] = line;
             newPolyline[1] = points.get(0);
             newPolyline[2] = points.get(1);
-            newPolyline[3] = link.getType();
+            newPolyline[indexTransporttypes] = link.getType();
 
             polylines.add(newPolyline);
         }

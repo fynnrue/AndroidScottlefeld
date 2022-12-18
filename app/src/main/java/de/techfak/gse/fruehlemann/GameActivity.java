@@ -188,14 +188,25 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         String[] amountTickets = parserMap.getAmountTickets();
 
         for (int i = 0; i < amountPlayers; i++) {
-            Detective detective = new Detective(Integer.parseInt(amountTickets[2]), Integer.parseInt(amountTickets[4]), Integer.parseInt(amountTickets[0]), parserMap.genStartPosition());
+            final int indexTrain = 2;
+            final int indexBus = 4;
+            final int indexBike = 0;
+
+            Detective detective = new Detective(Integer.parseInt(amountTickets[indexTrain]),
+                    Integer.parseInt(amountTickets[indexBus]), Integer.parseInt(amountTickets[indexBike]),
+                    parserMap.genStartPosition());
             players[i] = detective;
         }
 
         try {
+            final int indexTrain = 3;
+            final int indexBus = 5;
+            final int indexBike = 1;
+
             playerFactory = new PlayerFactory(jsonContent, players);
 
-            mxPlayer = playerFactory.createMx(Integer.parseInt(amountTickets[3]), Integer.parseInt(amountTickets[5]), Integer.parseInt(amountTickets[1]));
+            mxPlayer = playerFactory.createMx(Integer.parseInt(amountTickets[indexTrain]),
+                    Integer.parseInt(amountTickets[indexBus]), Integer.parseInt(amountTickets[indexBike]));
         } catch (JSONParseException e) {
             handleException("Fehler beim Verarbeiten der GeoJson!");
             e.printStackTrace();
@@ -217,8 +228,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         int roundnumber = 1;
 
         while (gameRunning) {
-            boolean showMXRound = false;
-
             round = new Round(players.length, roundnumber, mxPlayer, players);
             round.addListener(this);
 
@@ -234,10 +243,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
 
             mxPlayer = round.getMX();
             players = round.getPlayers();
-
-            if (showMXRound == true) {
-                showMarkerNormalOnMap(mxPlayer.getPos());
-            }
 
             roundnumber++;
 
@@ -321,7 +326,9 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         ArrayList<Object[]> polylines = parserMap.getPolylines();
 
         for (Object[] polyline : polylines) {
-            ArrayList<Transport> transporttypes = (ArrayList<Transport>) polyline[3];
+            final int indexTransporttypes = 3;
+
+            ArrayList<Transport> transporttypes = (ArrayList<Transport>) polyline[indexTransporttypes];
             Polyline line = (Polyline) polyline[0];
             int[] colors = {};
 
@@ -368,6 +375,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      */
     //Information on how to change Polylines while running from: https://stackoverflow.com/a/72381497
     public void polylineChangeColor(final Polyline polyline, final Handler handler, int[] colors) {
+        final int delay = 1000;
         handler.postDelayed(new Runnable() {
             int colorIndex = 0;
 
@@ -378,9 +386,9 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 if (colorIndex >= colors.length) {
                     colorIndex = 0;
                 }
-                handler.postDelayed(this, 1000);
+                handler.postDelayed(this, delay);
             }
-        }, 1000);
+        }, delay);
     }
 
     /**
@@ -391,7 +399,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     public void showMarkerNormalOnMap(String position) {
         for (Marker marker : markers) {
             if (marker.getTitle().equals(position)) {
-                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default, null));
+                marker.setIcon(ResourcesCompat.getDrawable(getResources(),
+                        org.osmdroid.library.R.drawable.marker_default, null));
             }
         }
     }
@@ -404,7 +413,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     public void showMXOnMap(String position) {
         for (Marker marker : markers) {
             if (marker.getTitle().equals(position)) {
-                marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.marker_default_focused_base, null));
+                marker.setIcon(ResourcesCompat.getDrawable(getResources(),
+                        org.osmdroid.library.R.drawable.marker_default_focused_base, null));
             }
         }
     }
@@ -427,7 +437,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      */
     public void endActivity() {
         try {
-            Thread.sleep(3000);
+            final int delay = 3000;
+            Thread.sleep(delay);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -449,16 +460,16 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         String[] typeTicket;
 
         ArrayList<String> transporttypes = parserMap.getPossibleTransporttypes(position, destination);
-        typeTicket = new String[transporttypes.size()+1];
+        typeTicket = new String[transporttypes.size() + 1];
 
         typeTicket[0] = "Ticket auswählen";
-        for (int i = 0; i < transporttypes.size(); i++){
-            if(transporttypes.get(i).startsWith("Siggi-Bike")) {
-                typeTicket[i+1] = "Siggi-Bike - " + players[0].getBikeTickets();
-            } else if(transporttypes.get(i).startsWith("Stadtbahn")) {
-                typeTicket[i+1] = "Stadtbahn - " + players[0].getTrainTickets();
-            } else if(transporttypes.get(i).startsWith("Bus")) {
-                typeTicket[i+1] = "Bus - " + players[0].getBusTickets(); //TODO all players
+        for (int i = 0; i < transporttypes.size(); i++) {
+            if (transporttypes.get(i).startsWith("Siggi-Bike-Verb")) {
+                typeTicket[i + 1] = "Siggi-Bike - " + players[0].getBikeTickets();
+            } else if (transporttypes.get(i).startsWith("Stadtbahn-Verb")) {
+                typeTicket[i + 1] = "Stadtbahn - " + players[0].getTrainTickets();
+            } else if (transporttypes.get(i).startsWith("Bus-Verb")) {
+                typeTicket[i + 1] = "Bus - " + players[0].getBusTickets();
             }
         }
 
@@ -489,11 +500,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         String ticket;
 
         String transporttype = spinner.getSelectedItem().toString();
-        if(transporttype.startsWith("Siggi-Bike")) {
+        if (transporttype.startsWith("Siggi-")) {
             ticket = "BIKE";
-        } else if(transporttype.startsWith("Stadtbahn")) {
+        } else if (transporttype.startsWith("Stadtbahn-")) {
             ticket = "TRAIN";
-        } else if(transporttype.startsWith("Bus")) {
+        } else if (transporttype.startsWith("Bus-")) {
             ticket = "BUS";
         } else {
             return;
@@ -519,7 +530,12 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     //region Observer
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-        int[] mxShowPosition = {3, 8, 13, 18};
+        final int mxRoundThree = 3;
+        final int mxRoundEight = 3;
+        final int mxRoundThirteen = 3;
+        final int mxRoundEighteen = 3;
+
+        int[] mxShowPosition = {mxRoundThree, mxRoundEight, mxRoundThirteen, mxRoundEighteen};
         int roundnumber = round.getRoundnumber();
 
         for (int number : mxShowPosition) {
