@@ -215,7 +215,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         int roundnumber = 1;
 
         while (gameRunning) {
-            int[] mxShowPosition = {3, 8, 13, 18};
             boolean showMXRound = false;
 
             round = new Round(players.length, roundnumber, mxPlayer, players);
@@ -234,19 +233,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             mxPlayer = round.getMX();
             players = round.getPlayers();
 
-
-            for (int showPos : mxShowPosition) {
-                if (roundnumber == showPos) {
-                    showMXRound = true;
-                }
-            }
-
-            /*Observer Pattern
-
-            if (showMXRound == true) {
-                showMXOnMap(mxPlayer.getPos());
-            }*/
-
             if (showMXRound == true) {
                 showMarkerNormalOnMap(mxPlayer.getPos());
             }
@@ -254,6 +240,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             roundnumber++;
 
             gameRunning = false;
+
+            showMarkerNormalOnMap(mxPlayer.getPos());
         }
     }
 
@@ -481,7 +469,14 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     //region Observer
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+        int[] mxShowPosition = {3, 8, 13, 18};
+        int roundnumber = round.getRoundnumber();
 
+        for (int number : mxShowPosition) {
+            if (number == roundnumber) {
+                showMXOnMap(mxPlayer.getPos());
+            }
+        }
     }
 
     //endRegion

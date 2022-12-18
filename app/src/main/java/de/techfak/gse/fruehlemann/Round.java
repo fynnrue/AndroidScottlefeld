@@ -15,6 +15,7 @@ public class Round {
     int amountPlayers;
     int roundnumber;
     int amountTurnComplete;
+    boolean mXTurnComplete;
     MX mx;
     Player[] players;
     Turn mxTurn = null;
@@ -30,8 +31,10 @@ public class Round {
 
     public void startRound() throws NoTicketAvailableException {
         amountTurnComplete = 0;
+        mXTurnComplete = false;
 
         mXTurn();
+        setMXTurnComplete(true);
 
         for (Player player : players) {
             Turn turn = null;
@@ -55,8 +58,12 @@ public class Round {
         return players;
     }
 
+    public int getRoundnumber() {
+        return roundnumber;
+    }
+
     public void turnComplete() {
-        this.support.firePropertyChange("TurnsComplete", amountTurnComplete, amountTurnComplete+1);
+        this.support.firePropertyChange("TurnsComplete", amountTurnComplete, amountTurnComplete + 1);
         amountTurnComplete++;
     }
 
@@ -65,6 +72,11 @@ public class Round {
         String targetName = mxTurn.getTargetName();
         Turn.TicketType ticket = mxTurn.getTicketType();
         Log.i("M. X Zug:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
+    }
+
+    public void setMXTurnComplete(boolean complete) {
+        support.firePropertyChange("MXTurnComplete", complete, mXTurnComplete);
+        mXTurnComplete = complete;
     }
 
     public void addListener(PropertyChangeListener listener) {
