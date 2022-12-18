@@ -22,6 +22,8 @@ public class ParserMap {
     static final String PROPERTIES_ATTRIBUTE = "properties";
     static final String NAME_ATTRIBUTE = "name";
 
+    String[] amountTickets = new String[7];
+
     HashMap<PointOfInterest, ArrayList<Link>> map = new HashMap<>();
     ArrayList<Transport> transports;
     ArrayList<Object[]> geoPoints = new ArrayList<>();
@@ -36,6 +38,7 @@ public class ParserMap {
         pOIs = parsePOIs(root);
         transports = parseTransporttypes(root);
         links = parseLinks(root, pOIs, transports);
+        amountTickets = parseTickets(root);
 
         for (PointOfInterest pOI : pOIs) {
             ArrayList<Link> connectedPoIs = new ArrayList<>();
@@ -223,6 +226,33 @@ public class ParserMap {
         return links;
     }
 
+    public String[] parseTickets (JsonNode root) {
+        String[] amountTickets = new String[7];
+
+        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get("facilmap").get("types").fields();
+        ArrayList<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
+        while (typesEntry.hasNext()) {
+            Map.Entry<String, JsonNode> entry = typesEntry.next();
+            entries.add(entry);
+        }
+
+        int ticketIndex = 1;
+        for (Map.Entry<String, JsonNode> entry : entries) {
+            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals("line")) {
+                String test1 = entry.getValue().get("fields").get(0).get("default").toString();
+                amountTickets[ticketIndex-1] = test1;
+                System.out.println("spieler " + test1);
+                if (ticketIndex <= 3) {
+                    String test2 = entry.getValue().get("fields").get(1).get("default").toString();
+                    amountTickets[ticketIndex] = test2;
+                    System.out.println("mx " + test2);
+                }
+                ticketIndex++;
+            }
+        }
+        return amountTickets;
+    }
+
     public ArrayList<Transport> getTransporttypes() {
         return transports;
     }
@@ -238,7 +268,6 @@ public class ParserMap {
         }
         return links;
     }
-
 
     public ArrayList<String> outLinks() {
         ArrayList<String> outLinks = new ArrayList<>();
@@ -267,13 +296,16 @@ public class ParserMap {
         return outLinks;
     }
 
+    public String[] getAmountTickets() {
+        return amountTickets;
+    }
+
     private String getString(String startName, String startLat, String startLon,
                              String endName, String endLat, String endLon, String transport) {
         String logOut = String.format("%1s" + " (%2s" + ", %3s" + ") -> %4s" + " (%5s" + "  %6s" + ")%7s",
                 startName, startLat, startLon, endName, endLat, endLon, transport);
         return logOut;
     }
-
 
     public String genStartPosition() {
         ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
