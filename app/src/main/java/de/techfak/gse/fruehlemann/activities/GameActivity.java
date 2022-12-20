@@ -352,7 +352,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             for (Marker marker : markers) {
                 if (marker.getTitle().equals(game.getPlayerPosition())) {
                     centerMap(parserMap.getGeoPoint(marker.getTitle()));
-                    marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
+                    marker.setIcon(ResourcesCompat.getDrawable(getResources(),
+                            org.osmdroid.library.R.drawable.person, null));
                 }
             }
         }

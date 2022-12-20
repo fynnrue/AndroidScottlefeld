@@ -154,14 +154,16 @@ public class Game {
     }
 
     public void checkIfGameEnds() {
+        final int maxRound = 22;
         for (Player player : players) {
             if (player.getPos().equals(mX.getPos())) {
                 winner = "Detective";
                 gameFinished(true);
             }
-            if (player.getBusTickets() == 0 && player.getTrainTickets() == 0 && playerGetBikeTickets() == 0)
+            if (player.getBusTickets() == 0 && player.getTrainTickets() == 0 && playerGetBikeTickets() == 0) {
                 gameFinished(true);
-            if (roundnumber >= 23) {
+            }
+            if (roundnumber > maxRound) {
                 gameFinished(true);
             }
             for (String destinations : parserMap.getPossibleDestinations(player.getPos())) {
