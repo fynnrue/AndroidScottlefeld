@@ -6,7 +6,6 @@ import static de.techfak.gse22.player_bot.Turn.TicketType.BIKE;
 
 import android.util.Log;
 
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import de.techfak.gse22.player_bot.MX;
@@ -19,6 +18,7 @@ public class Round {
     int roundnumber;
     int amountTurnsComplete;
     boolean mXTurnComplete;
+    boolean endGame = false;
     String destination = "";
     MX mx;
     Player[] players;
@@ -26,13 +26,11 @@ public class Round {
     Turn[] turns;
     private PropertyChangeSupport support;
 
-    public Round(int amountPlayers, int roundnumber, MX mx, Player[] players) {
+    public Round(int amountPlayers, int roundnumber, MX mX, Player[] players) {
         this.amountPlayers = amountPlayers;
         this.roundnumber = roundnumber;
-        this.mx = mx;
+        this.mx = mX;
         this.players = players;
-
-        this.support = new PropertyChangeSupport(this);
     }
 
     public void startRound() throws NoTicketAvailableException {
@@ -42,7 +40,12 @@ public class Round {
         turns = new Turn[players.length];
 
         mXTurn();
-        setMXTurnComplete(true);
+
+        for (Player player : players) {
+            if (player.getPos().equals(mx.getPos())) {
+                endGame = true;
+            }
+        }
     }
 
     public MX getMX() {
@@ -53,57 +56,65 @@ public class Round {
         return mxTurn.getTicketType();
     }
 
+    public void mXTurn() throws NoTicketAvailableException {
+        mxTurn = mx.getTurn();
+        Log.i("M. X Turn:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
+    }
+
+    public boolean endPlayerTurn(String destination, String transporttype) {
+        this.destination = destination;
+
+        Turn turn = null;
+        if (transporttype.equals("BIKE")) {
+            turn = new Turn(BIKE, destination);
+        } else if (transporttype.equals("TRAIN")) {
+            turn = new Turn(TRAIN, destination);
+        } else if (transporttype.equals("BUS")) {
+            turn = new Turn(BUS, destination);
+        }
+
+        Detective player = (Detective) players[amountTurnsComplete];
+        player.setPos(destination);
+        players[amountTurnsComplete] = player;
+
+        turns[amountTurnsComplete] = turn;
+
+        Log.i("Turn Detective " + amountTurnsComplete, transporttype);
+
+        amountTurnsComplete++;
+
+        if (player.getPos().equals(mx.getPos())) {
+            endGame = true;
+        }
+
+        if (amountTurnsComplete >= amountPlayers) {
+            return true;
+        }
+
+        return false;
+    }
+
     public Player[] getPlayers() {
         return players;
     }
 
-    public int getRoundnumber() {
-        return roundnumber;
+    public boolean gameComplete() {
+        return endGame;
     }
 
-    public void turnComplete(Turn turn) {
-        this.support.firePropertyChange("TurnsComplete", amountTurnsComplete, amountTurnsComplete + 1);
-        amountTurnsComplete++;
-
-        Log.i("Spieler Verkehrsmittel:", turn.getTicketType().toString());
+    public String getPlayerPosition() {
+        return players[amountTurnsComplete].getPos();
     }
 
-    public void mXTurn() throws NoTicketAvailableException {
-        mxTurn = mx.getTurn();
-        String targetName = mxTurn.getTargetName();
-        Turn.TicketType ticket = mxTurn.getTicketType();
-        Log.i("M. X Zug:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
+    public int playerGetBusTickets() {
+        return players[amountTurnsComplete].getBusTickets();
     }
 
-    public void endPlayerTurn(String destination, String transporttype) {
-        this.destination = destination;
-
-        Turn turn = null;
-        if (transporttype.equals("Siggi-Bike")) {
-            turn = new Turn(BIKE, destination);
-        } else if (transporttype.equals("Stadtbahn")) {
-            turn = new Turn(TRAIN, destination);
-        } else if (transporttype.equals("Bus")) {
-            turn = new Turn(BUS, destination);
-        }
-
-        turnComplete(turn);
+    public int playerGetTrainTickets() {
+        return players[amountTurnsComplete].getTrainTickets();
     }
 
-    public void setMXTurnComplete(boolean complete) {
-        support.firePropertyChange("MXTurnComplete", complete, mXTurnComplete);
-        mXTurnComplete = complete;
-    }
-
-
-
-    //PropertyChangeHandler methods
-
-    public void addListener(PropertyChangeListener listener) {
-        support.addPropertyChangeListener(listener);
-    }
-
-    public void removeListener(PropertyChangeListener listener) {
-        support.removePropertyChangeListener(listener);
+    public int playerGetBikeTickets() {
+        return players[amountTurnsComplete].getBikeTickets();
     }
 }

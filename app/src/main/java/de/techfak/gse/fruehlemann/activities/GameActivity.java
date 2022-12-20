@@ -40,24 +40,15 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import de.techfak.gse.fruehlemann.BuildConfig;
+import de.techfak.gse.fruehlemann.model.Game;
 import de.techfak.gse.fruehlemann.model.ParserMap;
 import de.techfak.gse.fruehlemann.R;
-import de.techfak.gse.fruehlemann.model.Round;
-import de.techfak.gse.fruehlemann.model.Detective;
-import de.techfak.gse22.player_bot.MX;
-import de.techfak.gse22.player_bot.Player;
-import de.techfak.gse22.player_bot.PlayerFactory;
-import de.techfak.gse22.player_bot.exceptions.JSONParseException;
-import de.techfak.gse22.player_bot.exceptions.NoFreePositionException;
-import de.techfak.gse22.player_bot.exceptions.NoTicketAvailableException;
 
 public class GameActivity extends AppCompatActivity implements PropertyChangeListener {
     ParserMap parserMap;
     MapView mapView;
     IMapController mapController;
-    Round round = null;
-    MX mxPlayer = null;
-    Player[] players = new Player[1];
+    Game game;
     ArrayList<Marker> markers = new ArrayList<>();
 
     @Override
@@ -100,19 +91,16 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         //Log all POIs and Connections
         outLinks();
 
+        //Initialising Game
+        startGame(1, jsonContent);
+
         //Initialising Osmdroid MapView
         initialiseOsmdroid();
-
-        //Initialising Players
-        initialisePlayers(1, jsonContent);
 
         //Show POIs and Connections on map
         //After Player initialisations to avoid null-pointer-exception
         showAllLinks();
         showAllPOIs();
-
-        //Initialising Game
-        startGameRounds();
 
         //show
 
@@ -134,7 +122,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
 
     @Override
     protected void onDestroy() {
-        round.removeListener(this);
+        game.removeListener(this);
         super.onDestroy();
     }
 
@@ -183,78 +171,15 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     }
 
     /**
-     * Initialising all players including Detectives and M. X.
-     *
-     * @param amountPlayers Amount of players that are playing Detective.
-     * @param jsonContent   Information about map that the game is played on.
-     */
-    public void initialisePlayers(int amountPlayers, String jsonContent) {
-        PlayerFactory playerFactory = null;
-        String[] amountTickets = parserMap.getAmountTickets();
-
-        for (int i = 0; i < amountPlayers; i++) {
-            final int indexTrain = 2;
-            final int indexBus = 4;
-            final int indexBike = 0;
-
-            Detective detective = new Detective(Integer.parseInt(amountTickets[indexTrain]),
-                    Integer.parseInt(amountTickets[indexBus]), Integer.parseInt(amountTickets[indexBike]),
-                    parserMap.genStartPosition());
-            players[i] = detective;
-        }
-
-        try {
-            final int indexTrain = 3;
-            final int indexBus = 5;
-            final int indexBike = 1;
-
-            playerFactory = new PlayerFactory(jsonContent, players);
-
-            mxPlayer = playerFactory.createMx(Integer.parseInt(amountTickets[indexTrain]),
-                    Integer.parseInt(amountTickets[indexBus]), Integer.parseInt(amountTickets[indexBike]));
-        } catch (JSONParseException e) {
-            handleException("Fehler beim Verarbeiten der GeoJson!");
-            e.printStackTrace();
-            endActivity();
-        } catch (NoFreePositionException e) {
-            handleException("Keine freie Position auf der Karte für M. X");
-            e.printStackTrace();
-            endActivity();
-        }
-
-        Log.i("M. X Position", mxPlayer.getPos());
-    }
-
-    /**
      * Starts the game and administrates Rounds.
      */
-    public void startGameRounds() {
-        boolean gameRunning = true;
-        int roundnumber = 1;
+    public void startGame(int amountPlayers, String jsonContent) {
+        game = new Game(amountPlayers, parserMap);
+        game.addListener(this);
 
-        while (gameRunning) {
-            round = new Round(players.length, roundnumber, mxPlayer, players);
-            round.addListener(this);
+        game.startGame(jsonContent);
 
-            showRoundnumber(roundnumber);
 
-            try {
-                round.startRound();
-            } catch (NoTicketAvailableException e) {
-                handleException("M. X kann sich nicht Fortbewegen!");
-                e.printStackTrace();
-                Log.i("M. X Zug:", "keins, " + mxPlayer.getPos());
-            }
-
-            mxPlayer = round.getMX();
-            players = round.getPlayers();
-
-            roundnumber++;
-
-            gameRunning = false;
-
-            showMarkerNormalOnMap(mxPlayer.getPos());
-        }
     }
 
     /**
@@ -300,11 +225,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {
                 marker.showInfoWindow();
-                showTransporttypesAndTickets(players[0].getPos(), marker.getTitle());
+                showTransporttypesAndTickets(game.getPlayerPosition(), marker.getTitle());
                 return true;
             }
         });
-        if (point[1].equals(players[0].getPos())) {
+        if (point[1].equals(game.getPlayerPosition())) {
             centerMap((GeoPoint) point[0]);
             marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
         }
@@ -470,11 +395,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         typeTicket[0] = "Ticket auswählen";
         for (int i = 0; i < transporttypes.size(); i++) {
             if (transporttypes.get(i).startsWith("Siggi-Bike-Verb")) {
-                typeTicket[i + 1] = "Siggi-Bike - " + players[0].getBikeTickets();
+                typeTicket[i + 1] = "Siggi-Bike - " + game.playerGetBikeTickets();
             } else if (transporttypes.get(i).startsWith("Stadtbahn-Verb")) {
-                typeTicket[i + 1] = "Stadtbahn - " + players[0].getTrainTickets();
+                typeTicket[i + 1] = "Stadtbahn - " + game.playerGetTrainTickets();
             } else if (transporttypes.get(i).startsWith("Bus-Verb")) {
-                typeTicket[i + 1] = "Bus - " + players[0].getBusTickets();
+                typeTicket[i + 1] = "Bus - " + game.playerGetBusTickets();
             }
         }
 
@@ -492,7 +417,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      * @param view Current View.
      */
     public void onCenterMapClick(View view) {
-        centerMap(parserMap.getGeoPoint(players[0].getPos()));
+        centerMap(parserMap.getGeoPoint(game.getPlayerPosition()));
     }
 
     /**
@@ -504,6 +429,9 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         Spinner spinner = findViewById(R.id.showTransportTicket);
         String ticket;
 
+        if (spinner.getSelectedItem() == null) {
+            return;
+        }
         String transporttype = spinner.getSelectedItem().toString();
         if (transporttype.startsWith("Siggi-")) {
             ticket = "BIKE";
@@ -517,16 +445,16 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
 
         for (Marker marker : markers) {
             if (marker.isInfoWindowShown()) {
-                round.endPlayerTurn(marker.getTitle(), ticket);
+                game.endPlayerTurn(marker.getTitle(), ticket);
             }
         }
     }
 
     public void onShowTicketsClick(View view) {
         Intent ticketsIntent = new Intent(GameActivity.this, ShowTicktesActivity.class);
-        ticketsIntent.putExtra("Siggi", String.valueOf(players[0].getBikeTickets()));
-        ticketsIntent.putExtra("Train", String.valueOf(players[0].getTrainTickets()));
-        ticketsIntent.putExtra("Bus", String.valueOf(players[0].getBusTickets()));
+        ticketsIntent.putExtra("Siggi", String.valueOf(game.playerGetBikeTickets()));
+        ticketsIntent.putExtra("Train", String.valueOf(game.playerGetTrainTickets()));
+        ticketsIntent.putExtra("Bus", String.valueOf(game.playerGetBusTickets()));
         startActivity(ticketsIntent);
     }
 
@@ -535,18 +463,24 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     //region Observer
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-        final int mxRoundThree = 3;
-        final int mxRoundEight = 3;
-        final int mxRoundThirteen = 3;
-        final int mxRoundEighteen = 3;
+        String event = propertyChangeEvent.getPropertyName();
 
-        int[] mxShowPosition = {mxRoundThree, mxRoundEight, mxRoundThirteen, mxRoundEighteen};
-        int roundnumber = round.getRoundnumber();
+        if (event.equals("NextRound")) {
+            final int mxRoundThree = 3;
+            final int mxRoundEight = 8;
+            final int mxRoundThirteen = 13;
+            final int mxRoundEighteen = 18;
 
-        for (int number : mxShowPosition) {
-            if (number == roundnumber) {
-                showMXOnMap(mxPlayer.getPos());
+            int[] mxShowPosition = {mxRoundThree, mxRoundEight, mxRoundThirteen, mxRoundEighteen};
+            int roundnumber = game.getRoundnumber();
+
+            for (int number : mxShowPosition) {
+                if (number == roundnumber) {
+                    showMXOnMap(game.getMXPos());
+                }
             }
+        } else if (event.equals("GameRunning")) {
+            System.out.println("angekommen"); //TODO löschen
         }
     }
 
