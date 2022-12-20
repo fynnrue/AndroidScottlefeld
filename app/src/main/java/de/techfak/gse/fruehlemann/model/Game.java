@@ -181,7 +181,7 @@ public class Game {
                     if (player.getBusTickets() > 0 && transporttype.equals("Bus-Verbindung")) {
                         return;
                     }
-                    if (player.getTrainTickets() > 0 && transporttype.equals("Siggi-Bike-Verbindung")) {
+                    if (player.getBikeTickets() > 0 && transporttype.equals("Siggi-Bike-Verbindung")) {
                         return;
                     }
                     gameFinished(true);

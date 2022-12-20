@@ -425,11 +425,17 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 }
             }
         }
+        ArrayList<String> transportTicketList = new ArrayList<>();
+        for (String ticket : typeTicket) {
+            if (ticket != null) {
+                transportTicketList.add(ticket);
+            }
+        }
 
-        setTransportSpinner(typeTicket);
+        setTransportSpinner(transportTicketList);
     }
 
-    public void setTransportSpinner(String[] transportTicket) {
+    public void setTransportSpinner(ArrayList<String> transportTicket) {
         Spinner spinner = findViewById(R.id.showTransportTicket);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
@@ -478,7 +484,9 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             }
         }
 
-        setTransportSpinner(new String[0]);
+        ArrayList<String> emptySpinner = new ArrayList<>();
+        emptySpinner.add("Ziel auswählen");
+        setTransportSpinner(emptySpinner);
     }
 
     public void onShowTicketsClick(View view) {
