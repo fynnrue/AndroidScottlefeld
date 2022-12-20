@@ -397,15 +397,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         finish();
     }
 
-    /**
-     * Shows the round number in a TextView.
-     */
-    public void showRoundnumber(int roundnumber) {
-        TextView roundNumber = findViewById(R.id.showRoundText);
-
-        roundNumber.setText("Runde " + roundnumber);
-    }
-
     public void showTransporttypesAndTickets(String position, String destination) {
         Spinner spinner = findViewById(R.id.showTransportTicket);
         String[] typeTicket;
@@ -499,7 +490,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
 
             round.setText("Runde " + roundnumber);
 
-        }else if (event.equals("MXTurn")) {
+        } else if (event.equals("MXTurn")) {
             final int mxShowRoundThree = 3;
             final int mxShowRoundEight = 8;
             final int mxShowRoundThirteen = 13;

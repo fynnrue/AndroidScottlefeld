@@ -143,7 +143,7 @@ public class Game {
         support.firePropertyChange("NextRound", (roundnumber - 1), roundnumber);
     }
 
-    public void mXTurnFinished(){
+    public void mXTurnFinished() {
         support.firePropertyChange("MXTurn", 0, 1);
     }
 
