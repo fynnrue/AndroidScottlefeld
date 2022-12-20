@@ -38,4 +38,14 @@ public class Detective implements Player {
     public void setPos(String position) {
         this.position = position;
     }
+
+    public void decreaseTicket(String type) {
+        if(type.equals("BIKE")) {
+            amountBikeTickets--;
+        } else if(type.equals("TRAIN")) {
+            amountTrainTickets--;
+        } else if(type.equals("BUS")) {
+            amountBusTickets--;
+        }
+    }
 }

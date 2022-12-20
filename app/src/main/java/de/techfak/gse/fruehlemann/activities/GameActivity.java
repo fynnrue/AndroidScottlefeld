@@ -398,7 +398,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     }
 
     public void showTransporttypesAndTickets(String position, String destination) {
-        Spinner spinner = findViewById(R.id.showTransportTicket);
         String[] typeTicket;
 
         ArrayList<String> transporttypes = parserMap.getPossibleTransporttypes(position, destination);
@@ -407,20 +406,36 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         typeTicket[0] = "Ticket auswählen";
         for (int i = 0; i < transporttypes.size(); i++) {
             if (transporttypes.get(i).startsWith("Siggi-Bike-Verb")) {
-                typeTicket[i + 1] = "Siggi-Bike - " + game.playerGetBikeTickets();
+                int amountBikeTickets = game.playerGetBikeTickets();
+
+                if (amountBikeTickets > 0) {
+                    typeTicket[i + 1] = "Siggi-Bike - " + amountBikeTickets;
+                }
             } else if (transporttypes.get(i).startsWith("Stadtbahn-Verb")) {
-                typeTicket[i + 1] = "Stadtbahn - " + game.playerGetTrainTickets();
+                int amountTrainTickets = game.playerGetTrainTickets();
+
+                if (amountTrainTickets > 0) {
+                    typeTicket[i + 1] = "Stadtbahn - " + amountTrainTickets;
+                }
             } else if (transporttypes.get(i).startsWith("Bus-Verb")) {
-                typeTicket[i + 1] = "Bus - " + game.playerGetBusTickets();
+                int amountBusTickets = game.playerGetBusTickets();
+
+                if (amountBusTickets > 0) {
+                    typeTicket[i + 1] = "Bus - " + amountBusTickets;
+                }
             }
         }
 
+        setTransportSpinner(typeTicket);
+    }
+
+    public void setTransportSpinner(String[] transportTicket) {
+        Spinner spinner = findViewById(R.id.showTransportTicket);
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, typeTicket);
+                android.R.layout.simple_spinner_item, transportTicket);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-
-
     }
 
     /**
@@ -462,6 +477,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 game.endPlayerTurn(marker.getTitle(), ticket);
             }
         }
+
+        setTransportSpinner(new String[0]);
     }
 
     public void onShowTicketsClick(View view) {

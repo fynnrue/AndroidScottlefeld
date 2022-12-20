@@ -19,7 +19,7 @@ public class Round {
     boolean mXTurnComplete;
     boolean gameFinished = false;
     String destination = "";
-    MX mx;
+    MX mX;
     Player[] players;
     Turn mxTurn = null;
     Turn[] turns;
@@ -27,7 +27,7 @@ public class Round {
 
     public Round(int amountPlayers, MX mX, Player[] players) {
         this.amountPlayers = amountPlayers;
-        this.mx = mX;
+        this.mX = mX;
         this.players = players;
     }
 
@@ -40,14 +40,14 @@ public class Round {
         mXTurn();
 
         for (Player player : players) {
-            if (player.getPos().equals(mx.getPos())) {
+            if (player.getPos().equals(mX.getPos())) {
                 gameFinished = true;
             }
         }
     }
 
     public MX getMX() {
-        return mx;
+        return mX;
     }
 
     public Turn.TicketType getMXTransporttype() {
@@ -55,23 +55,33 @@ public class Round {
     }
 
     public void mXTurn() throws NoTicketAvailableException {
-        mxTurn = mx.getTurn();
+        mxTurn = mX.getTurn();
         Log.i("M. X Turn:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
     }
 
     public boolean endPlayerTurn(String destination, String transporttype) {
+        final String typeBike = "BIKE";
+        final String typeTrain = "TRAIN";
+        final String typeBus = "BUS";
+
         this.destination = destination;
+        Detective player = (Detective) players[amountTurnsComplete];
 
         Turn turn = null;
-        if (transporttype.equals("BIKE")) {
+        if (transporttype.equals(typeBike)) {
             turn = new Turn(BIKE, destination);
-        } else if (transporttype.equals("TRAIN")) {
+            player.decreaseTicket(typeBike);
+            mX.giveBikeTicket();
+        } else if (transporttype.equals(typeTrain)) {
             turn = new Turn(TRAIN, destination);
-        } else if (transporttype.equals("BUS")) {
+            player.decreaseTicket(typeTrain);
+            mX.giveTrainTicket();
+        } else if (transporttype.equals(typeBus)) {
             turn = new Turn(BUS, destination);
+            player.decreaseTicket(typeBus);
+            mX.giveTrainTicket();
         }
 
-        Detective player = (Detective) players[amountTurnsComplete];
         player.setPos(destination);
         players[amountTurnsComplete] = player;
 
@@ -81,7 +91,7 @@ public class Round {
 
         amountTurnsComplete++;
 
-        if (player.getPos().equals(mx.getPos())) {
+        if (player.getPos().equals(mX.getPos())) {
             gameFinished = true;
         }
 

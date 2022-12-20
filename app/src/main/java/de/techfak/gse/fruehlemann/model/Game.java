@@ -108,6 +108,7 @@ public class Game {
         checkIfGameEnds();
 
         players = round.getPlayers();
+        mX = round.getMX();
         checkIfGameEnds();
 
         if (roundEnded) {
