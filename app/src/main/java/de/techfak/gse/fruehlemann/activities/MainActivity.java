@@ -1,6 +1,6 @@
 // Setting Spinner options from: https://stackoverflow.com/a/5241720
 
-package de.techfak.gse.fruehlemann;
+package de.techfak.gse.fruehlemann.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,6 +15,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import java.lang.reflect.Field;
+
+import de.techfak.gse.fruehlemann.R;
 
 public class MainActivity extends AppCompatActivity {
     Spinner dropdown;

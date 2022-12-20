@@ -1,4 +1,4 @@
-package de.techfak.gse.fruehlemann;
+package de.techfak.gse.fruehlemann.model;
 
 import static de.techfak.gse22.player_bot.Turn.TicketType.BUS;
 import static de.techfak.gse22.player_bot.Turn.TicketType.TRAIN;

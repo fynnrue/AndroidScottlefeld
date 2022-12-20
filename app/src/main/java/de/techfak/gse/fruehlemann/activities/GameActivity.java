@@ -1,4 +1,4 @@
-package de.techfak.gse.fruehlemann;
+package de.techfak.gse.fruehlemann.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +39,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import de.techfak.gse.fruehlemann.BuildConfig;
+import de.techfak.gse.fruehlemann.model.ParserMap;
+import de.techfak.gse.fruehlemann.R;
+import de.techfak.gse.fruehlemann.model.Round;
+import de.techfak.gse.fruehlemann.model.Transport;
+import de.techfak.gse.fruehlemann.model.Detective;
 import de.techfak.gse22.player_bot.MX;
 import de.techfak.gse22.player_bot.Player;
 import de.techfak.gse22.player_bot.PlayerFactory;

@@ -1,10 +1,12 @@
-package de.techfak.gse.fruehlemann;
+package de.techfak.gse.fruehlemann.activities;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import de.techfak.gse.fruehlemann.R;
 
 public class ShowTicktesActivity extends AppCompatActivity {
 

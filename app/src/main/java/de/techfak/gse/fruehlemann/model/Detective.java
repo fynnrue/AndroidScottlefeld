@@ -1,4 +1,4 @@
-package de.techfak.gse.fruehlemann;
+package de.techfak.gse.fruehlemann.model;
 
 import de.techfak.gse22.player_bot.Player;
 

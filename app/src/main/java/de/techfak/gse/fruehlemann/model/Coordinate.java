@@ -1,4 +1,4 @@
-package de.techfak.gse.fruehlemann;
+package de.techfak.gse.fruehlemann.model;
 
 import java.math.BigDecimal;
 import java.util.Objects;

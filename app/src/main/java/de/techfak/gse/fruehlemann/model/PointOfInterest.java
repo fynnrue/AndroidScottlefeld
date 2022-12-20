@@ -1,4 +1,6 @@
-package de.techfak.gse.fruehlemann;
+package de.techfak.gse.fruehlemann.model;
+
+import de.techfak.gse.fruehlemann.model.Coordinate;
 
 public class PointOfInterest {
     private String name;
