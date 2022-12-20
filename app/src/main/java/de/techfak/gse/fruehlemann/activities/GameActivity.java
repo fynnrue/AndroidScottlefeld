@@ -51,6 +51,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     IMapController mapController;
     Game game;
     ArrayList<Marker> markers = new ArrayList<>();
+    String markerName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -343,6 +344,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             if (marker.getTitle().equals(position)) {
                 marker.setIcon(ResourcesCompat.getDrawable(getResources(),
                         org.osmdroid.library.R.drawable.marker_default_focused_base, null));
+                markerName = marker.getTitle();
             }
         }
     }
@@ -350,11 +352,20 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     public void showPlayerOnMap(String position) {
         if (!game.isFinished()) {
             for (Marker marker : markers) {
-                if (marker.getTitle().equals(game.getPlayerPosition())) {
+                if (marker.getTitle().equals(position)) {
                     centerMap(parserMap.getGeoPoint(marker.getTitle()));
                     marker.setIcon(ResourcesCompat.getDrawable(getResources(),
                             org.osmdroid.library.R.drawable.person, null));
                 }
+            }
+        }
+    }
+
+    public void showMXNormal() {
+        for (Marker marker : markers) {
+            if (marker.getTitle().equals(markerName)) {
+                marker.setIcon(ResourcesCompat.getDrawable(getResources(),
+                        org.osmdroid.library.R.drawable.marker_default, null));
             }
         }
     }
@@ -453,9 +464,10 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             return;
         }
 
-
         for (Marker marker : markers) {
             if (marker.isInfoWindowShown()) {
+                showMarkerNormalOnMap(game.getPlayerPosition());
+                showPlayerOnMap(marker.getTitle());
                 game.endPlayerTurn(marker.getTitle(), ticket);
             }
         }
@@ -483,23 +495,26 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         if (event.equals("NextRound")) {
             TextView round = findViewById(R.id.showRoundText);
 
-            final int mxRoundThree = 3;
-            final int mxRoundEight = 8;
-            final int mxRoundThirteen = 13;
-            final int mxRoundEighteen = 18;
+            int roundnumber = game.getRoundnumber();
 
-            int[] mxShowPosition = {mxRoundThree, mxRoundEight, mxRoundThirteen, mxRoundEighteen};
+            round.setText("Runde " + roundnumber);
+
+        }else if (event.equals("MXTurn")) {
+            final int mxShowRoundThree = 3;
+            final int mxShowRoundEight = 8;
+            final int mxShowRoundThirteen = 13;
+            final int mxShowRoundEighteen = 18;
+
+            int[] mxShowPosition = {mxShowRoundThree, mxShowRoundEight, mxShowRoundThirteen, mxShowRoundEighteen};
             int roundnumber = game.getRoundnumber();
 
             for (int number : mxShowPosition) {
                 if (number == roundnumber) {
                     showMXOnMap(game.getMXPos());
+                } else if ((number + 1) == roundnumber) {
+                    showMXNormal();
                 }
             }
-
-            round.setText("Runde " + roundnumber);
-
-
         } else if (event.equals("GameEnded")) {
             TextView winnerText = findViewById(R.id.showWinnerText);
             TextView round = findViewById(R.id.showRoundText);

@@ -53,6 +53,7 @@ public class Game {
         }
 
         mX = round.getMX();
+        mXTurnFinished();
 
         checkIfGameEnds();
     }
@@ -139,7 +140,11 @@ public class Game {
 
     public void increaseRoundNumber() {
         roundnumber++;
-        this.support.firePropertyChange("NextRound", (roundnumber - 1), roundnumber);
+        support.firePropertyChange("NextRound", (roundnumber - 1), roundnumber);
+    }
+
+    public void mXTurnFinished(){
+        support.firePropertyChange("MXTurn", 0, 1);
     }
 
     public String getPlayerPosition() {
