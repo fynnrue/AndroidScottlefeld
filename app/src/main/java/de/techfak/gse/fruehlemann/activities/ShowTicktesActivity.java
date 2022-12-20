@@ -21,8 +21,8 @@ public class ShowTicktesActivity extends AppCompatActivity {
 
         TextView showTickets = findViewById(R.id.textTickets);
 
-        showTickets.setText("Siggi-Bike-Tickets: " + siggiTickts
-                + "\nStadtbahn-Tickets: " + trainTickts + "\nBus-Tickets: " + busTickts);
+        showTickets.setText("Siggi-Bike-Tickets (Rot): " + siggiTickts
+                + "\nStadtbahn-Tickets (Blau): " + trainTickts + "\nBus-Tickets (Grün): " + busTickts);
 
     }
 
