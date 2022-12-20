@@ -43,7 +43,6 @@ import de.techfak.gse.fruehlemann.BuildConfig;
 import de.techfak.gse.fruehlemann.model.ParserMap;
 import de.techfak.gse.fruehlemann.R;
 import de.techfak.gse.fruehlemann.model.Round;
-import de.techfak.gse.fruehlemann.model.Transport;
 import de.techfak.gse.fruehlemann.model.Detective;
 import de.techfak.gse22.player_bot.MX;
 import de.techfak.gse22.player_bot.Player;
@@ -334,12 +333,12 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         for (Object[] polyline : polylines) {
             final int indexTransporttypes = 3;
 
-            ArrayList<Transport> transporttypes = (ArrayList<Transport>) polyline[indexTransporttypes];
+            ArrayList<String> transporttypes = (ArrayList<String>) polyline[indexTransporttypes];
             Polyline line = (Polyline) polyline[0];
             int[] colors = {};
 
-            for (Transport type : transporttypes) {
-                if (type.getType().equals("Siggi-Bike-Verbindung")) {
+            for (String type : transporttypes) {
+                if (type.equals("Siggi-Bike-Verbindung")) {
                     int[] tempColor = new int[colors.length + 1];
                     for (int i = 0; i < colors.length; i++) {
                         tempColor[i] = colors[i];
@@ -347,7 +346,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                     tempColor[colors.length] = Color.RED;
 
                     colors = tempColor;
-                } else if (type.getType().equals("Bus-Verbindung")) {
+                } else if (type.equals("Bus-Verbindung")) {
                     int[] tempColor = new int[colors.length + 1];
                     for (int i = 0; i < colors.length; i++) {
                         tempColor[i] = colors[i];
@@ -355,7 +354,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                     tempColor[colors.length] = Color.GREEN;
 
                     colors = tempColor;
-                } else if (type.getType().equals("Stadtbahn-Verbindung")) {
+                } else if (type.equals("Stadtbahn-Verbindung")) {
                     int[] tempColor = new int[colors.length + 1];
                     for (int i = 0; i < colors.length; i++) {
                         tempColor[i] = colors[i];

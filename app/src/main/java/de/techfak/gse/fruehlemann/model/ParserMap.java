@@ -259,6 +259,7 @@ public class ParserMap {
 
     /**
      * Reads out the amount of Tickets the Detectives and M. X have at the start of the game.
+     *
      * @param root Root of map.
      * @return Array of the amount of Tickets for each transporttype per player.
      */
@@ -328,6 +329,7 @@ public class ParserMap {
             final int polylineAttributes = 4;
             PointOfInterest pOIFirst = link.getPointOne();
             PointOfInterest pOISecond = link.getPointTwo();
+            ArrayList<String> transporttypes = new ArrayList<>();
 
             ArrayList<GeoPoint> points = new ArrayList<>();
             for (Object[] geoPoint : geoPoints) {
@@ -336,6 +338,9 @@ public class ParserMap {
                 } else if (pOISecond.getName().equals(geoPoint[1])) {
                     points.add((GeoPoint) geoPoint[0]);
                 }
+            }
+            for (Transport type : link.getType()) {
+                transporttypes.add(type.getType());
             }
             Polyline line = new Polyline();
             line.setPoints(points);
@@ -346,7 +351,7 @@ public class ParserMap {
             newPolyline[0] = line;
             newPolyline[1] = points.get(0);
             newPolyline[2] = points.get(1);
-            newPolyline[indexTransporttypes] = link.getType();
+            newPolyline[indexTransporttypes] = transporttypes;
 
             polylines.add(newPolyline);
         }
@@ -358,6 +363,7 @@ public class ParserMap {
 
     /**
      * All connections between POIs read out from map.
+     *
      * @return ArrayList of all connections existing between POIs on map.
      */
     public ArrayList<Link> getLinks() {
@@ -374,6 +380,7 @@ public class ParserMap {
 
     /**
      * All avialable transporttypes read out from map.
+     *
      * @return ArrayList of all transporttypes existing on map.
      */
     public ArrayList<Transport> getTransporttypes() {
@@ -382,6 +389,7 @@ public class ParserMap {
 
     /**
      * All amounts of ticktes read out from map.
+     *
      * @return ArrayList of amount of tickets read out from map.
      */
     public String[] getAmountTickets() {
@@ -390,6 +398,7 @@ public class ParserMap {
 
     /**
      * Gives back all GeoPoints parsed from map.
+     *
      * @return ArrayList of Objects (GeoPoint POI, Name of POI) representing GeoPoints.
      */
     public ArrayList<Object[]> getGeoPoints() {
@@ -398,6 +407,7 @@ public class ParserMap {
 
     /**
      * Gives back all Polylines parsed from map.
+     *
      * @return ArrayList of Objects (Polyline, GeoPoint1, GeoPoint2, transporttypes) representing Polylines.
      */
     public ArrayList<Object[]> getPolylines() {
@@ -406,6 +416,7 @@ public class ParserMap {
 
     /**
      * Gives back GeoPoint of POI.
+     *
      * @param name Name of POI.
      * @return GeoPoint from corresponding POI.
      */
@@ -420,6 +431,7 @@ public class ParserMap {
 
     /**
      * Gives back all the POIs that are possible to visit from given POI.
+     *
      * @param position Name of current position/POI.
      * @return ArrayList of Strings of all names of visitable POIs.
      */
@@ -445,6 +457,7 @@ public class ParserMap {
 
     /**
      * Gives back Coordinates of given POI.
+     *
      * @param pOIName Name of POI.
      * @return Array of BigDecimals with Coordinates (Lat, Lon) of POI.
      */
@@ -465,7 +478,8 @@ public class ParserMap {
 
     /**
      * Gives Back all the possible transporttypes between two POIs.
-     * @param position Name of current position/POI.
+     *
+     * @param position    Name of current position/POI.
      * @param destination Name of destination POI.
      * @return ArrayList of all possible transporttypes between the two POIs.
      */
@@ -503,6 +517,7 @@ public class ParserMap {
     /**
      * All connections between POIs corresponding Coordinates and transporttypes as Strings
      * to print out in Logging-System.
+     *
      * @return ArrayList of Strings of connections.
      */
     public ArrayList<String> outLinks() {
@@ -534,12 +549,13 @@ public class ParserMap {
 
     /**
      * Supporting method for outLinks() that creates a String with a String builder to keep Code clear.
+     *
      * @param startName Name of start POI.
-     * @param startLat Lat coordinate of start POI.
-     * @param startLon Lon coordinate of start POI.
-     * @param endName Name of end POI.
-     * @param endLat Lat coordinate of end POI.
-     * @param endLon Lon coordinate of end POI.
+     * @param startLat  Lat coordinate of start POI.
+     * @param startLon  Lon coordinate of start POI.
+     * @param endName   Name of end POI.
+     * @param endLat    Lat coordinate of end POI.
+     * @param endLon    Lon coordinate of end POI.
      * @param transport Transporttypes between POIs.
      * @return Return String with information about connection to print out in Logging-System.
      */
@@ -552,6 +568,7 @@ public class ParserMap {
 
     /**
      * Generates random position from all POIs from map.
+     *
      * @return Name of random POI.
      */
     public String genStartPosition() {
@@ -562,8 +579,9 @@ public class ParserMap {
 
     /**
      * Checks if connection between two POIs exist with given transporttype.
-     * @param position Name of current position/POI.
-     * @param destination Name of destination POI.
+     *
+     * @param position      Name of current position/POI.
+     * @param destination   Name of destination POI.
      * @param transporttype Name of chosen transporttype.
      * @return true when connection between two POIs exist with transporttype, else false.
      */
