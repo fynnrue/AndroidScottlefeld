@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -91,8 +92,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         //Log all POIs and Connections
         outLinks();
 
-        //Initialising Game
-        startGame(1, jsonContent);
+        //Creating Game
+        createGame(1, jsonContent);
 
         //Initialising Osmdroid MapView
         initialiseOsmdroid();
@@ -102,8 +103,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         showAllLinks();
         showAllPOIs();
 
-        //show
-
+        //Starting Game
+        startGame();
     }
 
     //region Android belonging Methods
@@ -173,13 +174,14 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     /**
      * Starts the game and administrates Rounds.
      */
-    public void startGame(int amountPlayers, String jsonContent) {
-        game = new Game(amountPlayers, parserMap);
+    public void createGame(int amountPlayers, String jsonContent) {
+        game = new Game(amountPlayers, parserMap, jsonContent);
         game.addListener(this);
+    }
 
-        game.startGame(jsonContent);
-
-
+    public void startGame() {
+        game.startGame();
+        showPlayerOnMap(game.getPlayerPosition());
     }
 
     /**
@@ -229,10 +231,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 return true;
             }
         });
-        if (point[1].equals(game.getPlayerPosition())) {
-            centerMap((GeoPoint) point[0]);
-            marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
-        }
         mapView.getOverlays().add(marker);
 
         markers.add(marker);
@@ -349,6 +347,17 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         }
     }
 
+    public void showPlayerOnMap(String position) {
+        if (!game.isFinished()) {
+            for (Marker marker : markers) {
+                if (marker.getTitle().equals(game.getPlayerPosition())) {
+                    centerMap(parserMap.getGeoPoint(marker.getTitle()));
+                    marker.setIcon(ResourcesCompat.getDrawable(getResources(), org.osmdroid.library.R.drawable.person, null));
+                }
+            }
+        }
+    }
+
     //endregion
 
     //region Non-Map Interaction
@@ -380,7 +389,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      * Shows the round number in a TextView.
      */
     public void showRoundnumber(int roundnumber) {
-        TextView roundNumber = findViewById(R.id.showRoundNum);
+        TextView roundNumber = findViewById(R.id.showRoundText);
 
         roundNumber.setText("Runde " + roundnumber);
     }
@@ -458,6 +467,10 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         startActivity(ticketsIntent);
     }
 
+    public void onEndGameClick(View view) {
+        finish();
+    }
+
     //endregion
 
     //region Observer
@@ -479,8 +492,27 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                     showMXOnMap(game.getMXPos());
                 }
             }
-        } else if (event.equals("GameRunning")) {
-            System.out.println("angekommen"); //TODO löschen
+        } else if (event.equals("GameEnded")) {
+            TextView winnerText = findViewById(R.id.showWinnerText);
+            TextView round = findViewById(R.id.showRoundText);
+            Spinner transportTickets = findViewById(R.id.showTransportTicket);
+            Button tickets = findViewById(R.id.showTicketsButton);
+            Button endMove = findViewById(R.id.endMoveButton);
+            Button center = findViewById(R.id.centerButton);
+            Button endGame = findViewById(R.id.endGameButton);
+
+            showMXOnMap(game.getMXPos());
+            centerMap(parserMap.getGeoPoint(game.getMXPos()));
+
+            round.setVisibility(View.INVISIBLE);
+            transportTickets.setVisibility(View.INVISIBLE);
+            tickets.setVisibility(View.INVISIBLE);
+            endMove.setVisibility(View.INVISIBLE);
+            center.setVisibility(View.INVISIBLE);
+
+            winnerText.setVisibility(View.VISIBLE);
+            winnerText.setText("Sieger: " + game.getWinner());
+            endGame.setVisibility(View.VISIBLE);
         }
     }
 

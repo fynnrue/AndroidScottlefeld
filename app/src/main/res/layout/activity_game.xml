@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/showRoundNum"
+        android:id="@+id/showRoundText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Runde 1"
@@ -21,16 +21,18 @@
 
     <org.osmdroid.views.MapView
         android:id="@+id/mapView"
-        android:layout_width="411dp"
-        android:layout_height="721dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@+id/centerButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/showRoundNum">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/showRoundText">
 
     </org.osmdroid.views.MapView>
 
     <Button
-        android:id="@+id/endMove"
+        android:id="@+id/endMoveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onEndMoveClick"
@@ -45,7 +47,7 @@
         android:layout_height="wrap_content"
         android:textAlignment="viewStart"
         app:layout_constraintBottom_toTopOf="@+id/mapView"
-        app:layout_constraintEnd_toStartOf="@+id/showRoundNum"
+        app:layout_constraintEnd_toStartOf="@+id/showRoundText"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -59,7 +61,7 @@
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/endMove" />
+        app:layout_constraintStart_toEndOf="@+id/endMoveButton" />
 
     <Button
         android:id="@+id/showTicketsButton"
@@ -69,7 +71,32 @@
         android:text="Tickets"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/endMove"
+        app:layout_constraintEnd_toStartOf="@+id/endMoveButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/showWinnerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.532"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/endGameButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onEndGameClick"
+        android:text="Beenden"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

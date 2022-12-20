@@ -15,10 +15,9 @@ import de.techfak.gse22.player_bot.exceptions.NoTicketAvailableException;
 
 public class Round {
     int amountPlayers;
-    int roundnumber;
     int amountTurnsComplete;
     boolean mXTurnComplete;
-    boolean endGame = false;
+    boolean gameFinished = false;
     String destination = "";
     MX mx;
     Player[] players;
@@ -26,9 +25,8 @@ public class Round {
     Turn[] turns;
     private PropertyChangeSupport support;
 
-    public Round(int amountPlayers, int roundnumber, MX mX, Player[] players) {
+    public Round(int amountPlayers, MX mX, Player[] players) {
         this.amountPlayers = amountPlayers;
-        this.roundnumber = roundnumber;
         this.mx = mX;
         this.players = players;
     }
@@ -43,7 +41,7 @@ public class Round {
 
         for (Player player : players) {
             if (player.getPos().equals(mx.getPos())) {
-                endGame = true;
+                gameFinished = true;
             }
         }
     }
@@ -84,7 +82,7 @@ public class Round {
         amountTurnsComplete++;
 
         if (player.getPos().equals(mx.getPos())) {
-            endGame = true;
+            gameFinished = true;
         }
 
         if (amountTurnsComplete >= amountPlayers) {
@@ -98,8 +96,8 @@ public class Round {
         return players;
     }
 
-    public boolean gameComplete() {
-        return endGame;
+    public boolean gameFinished() {
+        return gameFinished;
     }
 
     public String getPlayerPosition() {

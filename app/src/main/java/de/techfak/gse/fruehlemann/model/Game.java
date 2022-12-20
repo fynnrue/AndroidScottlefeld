@@ -16,8 +16,8 @@ import de.techfak.gse22.player_bot.exceptions.NoTicketAvailableException;
 public class Game {
     int amountPlayers;
     int roundnumber = 1;
-    int currentPlayer;
-    boolean gameRunning;
+    boolean gameFinished = false;
+    String winner = "M. X";
     ParserMap parserMap;
     Round round;
     PlayerFactory playerFactory;
@@ -27,24 +27,22 @@ public class Game {
     private PropertyChangeSupport support;
 
 
-    public Game(int amountPlayers, ParserMap map) {
+    public Game(int amountPlayers, ParserMap map, String jsonContent) {
         this.amountPlayers = amountPlayers;
         parserMap = map;
         turns = new Turn[amountPlayers];
 
+        initialisePlayers(amountPlayers, jsonContent);
+
         this.support = new PropertyChangeSupport(this);
     }
 
-    public void startGame(String jsonContent) {
-        initialisePlayers(amountPlayers, jsonContent);
-
+    public void startGame() {
         startRound();
-
-        setGameRunning(false);
     }
 
     public void startRound() {
-        round = new Round(amountPlayers, roundnumber, mX, players);
+        round = new Round(amountPlayers, mX, players);
 
         try {
             round.startRound();
@@ -56,11 +54,7 @@ public class Game {
 
         mX = round.getMX();
 
-        if (round.gameComplete()) {
-            setGameRunning(false);
-        }
-
-        increaseRoundNumber();
+        checkIfGameEnds();
     }
 
     /**
@@ -110,19 +104,24 @@ public class Game {
     public void endPlayerTurn(String destination, String ticket) {
         boolean roundEnded = round.endPlayerTurn(destination, ticket);
 
-        if (round.gameComplete()) {
-            setGameRunning(false);
-        }
+        checkIfGameEnds();
+
+        players = round.getPlayers();
+        checkIfGameEnds();
 
         if (roundEnded) {
-            players = round.getPlayers();
+            increaseRoundNumber();
             startRound();
         }
     }
 
-    public void setGameRunning(boolean bool) {
-        support.firePropertyChange("GameRunning", gameRunning, bool);
-        gameRunning = bool;
+    public void gameFinished(boolean bool) {
+        support.firePropertyChange("GameEnded", gameFinished, bool);
+        gameFinished = bool;
+    }
+
+    public boolean isFinished() {
+        return gameFinished;
     }
 
     public int getRoundnumber() {
@@ -152,6 +151,38 @@ public class Game {
 
     public int playerGetBikeTickets() {
         return round.playerGetBikeTickets();
+    }
+
+    public void checkIfGameEnds() {
+        for (Player player : players) {
+            if (player.getPos().equals(mX.getPos())) {
+                winner = "Detective";
+                gameFinished(true);
+            }
+            if (player.getBusTickets() == 0 && player.getTrainTickets() == 0 && playerGetBikeTickets() == 0)
+                gameFinished(true);
+            if (roundnumber >= 23) {
+                gameFinished(true);
+            }
+            for (String destinations : parserMap.getPossibleDestinations(player.getPos())) {
+                for (String transporttype : parserMap.getPossibleTransporttypes(player.getPos(), destinations)) {
+                    if (player.getTrainTickets() > 0 && transporttype.equals("Stadtbahn-Verbindung")) {
+                        return;
+                    }
+                    if (player.getBusTickets() > 0 && transporttype.equals("Bus-Verbindung")) {
+                        return;
+                    }
+                    if (player.getTrainTickets() > 0 && transporttype.equals("Siggi-Bike-Verbindung")) {
+                        return;
+                    }
+                    gameFinished(true);
+                }
+            }
+        }
+    }
+
+    public String getWinner() {
+        return winner;
     }
 
     //PropertyChangeHandler methods
