@@ -111,6 +111,9 @@ public class Game {
 
         if (roundEnded) {
             increaseRoundNumber();
+            if (roundnumber >= 23) {
+                gameFinished(true);
+            }
             startRound();
         }
     }
