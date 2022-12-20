@@ -445,13 +445,14 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         String transporttype = spinner.getSelectedItem().toString();
         if (transporttype.startsWith("Siggi-")) {
             ticket = "BIKE";
-        } else if (transporttype.startsWith("Stadtbahn-")) {
+        } else if (transporttype.startsWith("Stadtbahn -")) {
             ticket = "TRAIN";
-        } else if (transporttype.startsWith("Bus-")) {
+        } else if (transporttype.startsWith("Bus -")) {
             ticket = "BUS";
         } else {
             return;
         }
+
 
         for (Marker marker : markers) {
             if (marker.isInfoWindowShown()) {
@@ -480,6 +481,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         String event = propertyChangeEvent.getPropertyName();
 
         if (event.equals("NextRound")) {
+            TextView round = findViewById(R.id.showRoundText);
+
             final int mxRoundThree = 3;
             final int mxRoundEight = 8;
             final int mxRoundThirteen = 13;
@@ -493,6 +496,10 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                     showMXOnMap(game.getMXPos());
                 }
             }
+
+            round.setText("Runde " + roundnumber);
+
+
         } else if (event.equals("GameEnded")) {
             TextView winnerText = findViewById(R.id.showWinnerText);
             TextView round = findViewById(R.id.showRoundText);

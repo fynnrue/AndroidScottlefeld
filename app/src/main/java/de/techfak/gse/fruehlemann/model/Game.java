@@ -49,7 +49,7 @@ public class Game {
         } catch (NoTicketAvailableException e) {
             //handleException("M. X kann sich nicht Fortbewegen!");
             e.printStackTrace();
-            //Log.i("M. X Zug:", "none, " + mxPlayer.getPos());
+            Log.i("M. X Zug:", "none, " + mX.getPos());
         }
 
         mX = round.getMX();
@@ -110,10 +110,12 @@ public class Game {
         checkIfGameEnds();
 
         if (roundEnded) {
-            increaseRoundNumber();
-            if (roundnumber >= 23) {
+            final int maxRound = 22;
+
+            if (roundnumber >= maxRound) {
                 gameFinished(true);
             }
+            increaseRoundNumber();
             startRound();
         }
     }
@@ -136,8 +138,8 @@ public class Game {
     }
 
     public void increaseRoundNumber() {
-        this.support.firePropertyChange("NextRound", roundnumber, roundnumber + 1);
         roundnumber++;
+        this.support.firePropertyChange("NextRound", (roundnumber - 1), roundnumber);
     }
 
     public String getPlayerPosition() {
@@ -157,16 +159,12 @@ public class Game {
     }
 
     public void checkIfGameEnds() {
-        final int maxRound = 22;
         for (Player player : players) {
             if (player.getPos().equals(mX.getPos())) {
                 winner = "Detective";
                 gameFinished(true);
             }
             if (player.getBusTickets() == 0 && player.getTrainTickets() == 0 && playerGetBikeTickets() == 0) {
-                gameFinished(true);
-            }
-            if (roundnumber > maxRound) {
                 gameFinished(true);
             }
             for (String destinations : parserMap.getPossibleDestinations(player.getPos())) {
