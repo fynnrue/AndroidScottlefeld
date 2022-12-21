@@ -379,7 +379,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      *
      * @param textSnackbar Fitting text to Exception which gets shown to User in a Snackbar.
      */
-    public void showOnScreen(String textSnackbar) {
+    public void showSnackbarOnScreen(String textSnackbar) {
         Snackbar.make(findViewById(android.R.id.content).getRootView(), textSnackbar, Snackbar.LENGTH_SHORT).show();
     }
 
@@ -557,6 +557,14 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
 
             noValidTurnsText.setVisibility(View.VISIBLE);
             noValidTurnsText.setText("Keine validen Spielzüge mehr möglich!");
+        } else if (event.equals("Exception")) {
+            String exceptionType = game.getExceptionType();
+
+            if (exceptionType.equals("Invalid Connection")) {
+                showSnackbarOnScreen("Unzulässige Verbindung!");
+            } else if (exceptionType.equals("No Ticket")) {
+                showSnackbarOnScreen("Kein Ticket für ausgewählten Transporttyp!");
+            }
         }
     }
 

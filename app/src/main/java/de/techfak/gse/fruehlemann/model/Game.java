@@ -19,6 +19,7 @@ public class Game {
     boolean gameFinished = false;
     boolean validTurnsPossible = true;
     String winner = "M. X";
+    String exceptionType = "";
     ParserMap parserMap;
     Round round;
     PlayerFactory playerFactory;
@@ -123,6 +124,8 @@ public class Game {
                 increaseRoundNumber();
                 startRound();
             }
+        } else {
+            alarmException(round.getExceptionType());
         }
     }
 
@@ -202,6 +205,15 @@ public class Game {
     public void setValidTurnsPossible(boolean bool) {
         support.firePropertyChange("ValidTurns", validTurnsPossible, bool);
         validTurnsPossible = bool;
+    }
+
+    public void alarmException(String exception) {
+        support.firePropertyChange("Exception", exceptionType, exception);
+        exceptionType = exception;
+    }
+
+    public String getExceptionType() {
+        return exceptionType;
     }
 
     //PropertyChangeHandler methods

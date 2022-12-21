@@ -8,6 +8,8 @@ import android.util.Log;
 
 import java.beans.PropertyChangeSupport;
 
+import de.techfak.gse.fruehlemann.exceptions.InvalidConnectionException;
+import de.techfak.gse.fruehlemann.exceptions.ZeroTicketException;
 import de.techfak.gse22.player_bot.MX;
 import de.techfak.gse22.player_bot.Player;
 import de.techfak.gse22.player_bot.Turn;
@@ -19,6 +21,7 @@ public class Round {
     boolean mXTurnComplete;
     boolean gameFinished = false;
     boolean turnValid = false;
+    String exceptionType;
     MX mX;
     Player[] players;
     Turn mxTurn = null;
@@ -133,6 +136,12 @@ public class Round {
         return players[amountTurnsComplete].getBikeTickets();
     }
 
+    public String getExceptionType() {
+        String tempExceptionType = exceptionType;
+        exceptionType = "";
+        return tempExceptionType;
+    }
+
     public boolean checkTurnValidGame() {
         if (turnValid) {
             turnValid = false;
@@ -145,31 +154,45 @@ public class Round {
         if (destination.equals(getPlayerPosition())) {
             return false;
         }
-        if (transporttype.startsWith("BI")) {
-            if (!parserMap.checkLinkExists(getPlayerPosition(), destination, "Siggi-Bike-Verbindung")) {
-                return false;
-            }
-            if (getPlayer().getBikeTickets() < 1) {
-                return false;
-            }
+        try {
+            if (transporttype.startsWith("BI")) {
+                parserMap.checkLinkExists(getPlayerPosition(), destination, "Siggi-Bike-Verbindung");
 
-        } else if (transporttype.startsWith("BU")) {
-            if (!parserMap.checkLinkExists(getPlayerPosition(), destination, "Bus-Verbindung")) {
-                return false;
+                checkIfPlayerHasTicket("siggi");
+            } else if (transporttype.startsWith("BU")) {
+                parserMap.checkLinkExists(getPlayerPosition(), destination, "Bus-Verbindung");
+
+                checkIfPlayerHasTicket("bus");
+            } else if (transporttype.startsWith("TRA")) {
+                parserMap.checkLinkExists(getPlayerPosition(), destination, "Stadtbahn-Verbindung");
+
+                checkIfPlayerHasTicket("train");
             }
-            if (getPlayer().getBusTickets() < 1) {
-                return false;
-            }
-        } else if (transporttype.startsWith("TRA")) {
-            if (!parserMap.checkLinkExists(getPlayerPosition(), destination, "Stadtbahn-Verbindung")) {
-                return false;
-            }
-            if (getPlayer().getTrainTickets() < 1) {
-                return false;
-            }
+        } catch (InvalidConnectionException invalidConnection) {
+            exceptionType = "Invalid Connection";
+            invalidConnection.printStackTrace();
+        } catch (ZeroTicketException zeroTicketException) {
+            exceptionType = "No Ticket";
+            zeroTicketException.printStackTrace();
         }
 
         turnValid = true;
         return true;
+    }
+
+    public void checkIfPlayerHasTicket(String tickettype) throws ZeroTicketException {
+        if (tickettype.startsWith("sig")) {
+            if (getPlayer().getBikeTickets() < 1) {
+                throw new ZeroTicketException("No Ticket for Siggi-Bike");
+            }
+        } else if (tickettype.startsWith("bu")) {
+            if (getPlayer().getBusTickets() < 1) {
+                throw new ZeroTicketException("No Ticket for Bus");
+            }
+        } else if (tickettype.startsWith("tra")) {
+            if (getPlayer().getTrainTickets() < 1) {
+                throw new ZeroTicketException("No Ticket for Train");
+            }
+        }
     }
 }

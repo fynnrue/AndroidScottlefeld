@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import de.techfak.gse.fruehlemann.exceptions.InvalidConnectionException;
+
 public class ParserMap {
     static final String FEATURES_ATTRIBUTE = "features";
     static final String GEOMETRY_ATTRIBUTE = "geometry";
@@ -585,7 +587,8 @@ public class ParserMap {
      * @param transporttype Name of chosen transporttype.
      * @return true when connection between two POIs exist with transporttype, else false.
      */
-    public boolean checkLinkExists(String position, String destination, String transporttype) {
+    public boolean checkLinkExists(String position, String destination, String transporttype)
+            throws InvalidConnectionException {
         ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
         ArrayList<String> possibleTransporttypes = getPossibleTransporttypes(position, destination);
 
@@ -595,7 +598,8 @@ public class ParserMap {
             }
         }
 
-        return false;
+        throw new InvalidConnectionException("No connection between " + position
+                + "and " + destination + " (" + transporttype + ")");
     }
 
     //endregion
