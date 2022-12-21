@@ -18,17 +18,19 @@ public class Round {
     int amountTurnsComplete;
     boolean mXTurnComplete;
     boolean gameFinished = false;
-    String destination = "";
+    boolean turnValid = false;
     MX mX;
     Player[] players;
     Turn mxTurn = null;
     Turn[] turns;
+    ParserMap parserMap;
     private PropertyChangeSupport support;
 
-    public Round(int amountPlayers, MX mX, Player[] players) {
+    public Round(int amountPlayers, MX mX, Player[] players, ParserMap parserMap) {
         this.amountPlayers = amountPlayers;
         this.mX = mX;
         this.players = players;
+        this.parserMap = parserMap;
     }
 
     public void startRound() throws NoTicketAvailableException {
@@ -64,46 +66,51 @@ public class Round {
         final String typeTrain = "TRAIN";
         final String typeBus = "BUS";
 
-        this.destination = destination;
-        Detective player = (Detective) players[amountTurnsComplete];
+        if (checkIfTurnValid(destination, transporttype)) {
 
-        Turn turn = null;
-        if (transporttype.equals(typeBike)) {
-            turn = new Turn(BIKE, destination);
-            player.decreaseTicket(typeBike);
-            mX.giveBikeTicket();
-        } else if (transporttype.equals(typeTrain)) {
-            turn = new Turn(TRAIN, destination);
-            player.decreaseTicket(typeTrain);
-            mX.giveTrainTicket();
-        } else if (transporttype.equals(typeBus)) {
-            turn = new Turn(BUS, destination);
-            player.decreaseTicket(typeBus);
-            mX.giveTrainTicket();
+            Detective player = (Detective) players[amountTurnsComplete];
+
+            Turn turn = null;
+            if (transporttype.equals(typeBike)) {
+                turn = new Turn(BIKE, destination);
+                player.decreaseTicket(typeBike);
+                mX.giveBikeTicket();
+            } else if (transporttype.equals(typeTrain)) {
+                turn = new Turn(TRAIN, destination);
+                player.decreaseTicket(typeTrain);
+                mX.giveTrainTicket();
+            } else if (transporttype.equals(typeBus)) {
+                turn = new Turn(BUS, destination);
+                player.decreaseTicket(typeBus);
+                mX.giveTrainTicket();
+            }
+
+            player.setPos(destination);
+            players[amountTurnsComplete] = player;
+
+            turns[amountTurnsComplete] = turn;
+
+            Log.i("Turn Detective " + amountTurnsComplete, transporttype);
+
+            amountTurnsComplete++;
+
+            if (player.getPos().equals(mX.getPos())) {
+                gameFinished = true;
+            }
+
+            if (amountTurnsComplete >= amountPlayers) {
+                return true;
+            }
         }
-
-        player.setPos(destination);
-        players[amountTurnsComplete] = player;
-
-        turns[amountTurnsComplete] = turn;
-
-        Log.i("Turn Detective " + amountTurnsComplete, transporttype);
-
-        amountTurnsComplete++;
-
-        if (player.getPos().equals(mX.getPos())) {
-            gameFinished = true;
-        }
-
-        if (amountTurnsComplete >= amountPlayers) {
-            return true;
-        }
-
         return false;
     }
 
     public Player[] getPlayers() {
         return players;
+    }
+
+    public Player getPlayer() {
+        return players[amountTurnsComplete];
     }
 
     public boolean gameFinished() {
@@ -124,5 +131,45 @@ public class Round {
 
     public int playerGetBikeTickets() {
         return players[amountTurnsComplete].getBikeTickets();
+    }
+
+    public boolean checkTurnValidGame() {
+        if (turnValid) {
+            turnValid = false;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean checkIfTurnValid(String destination, String transporttype) {
+        if (destination.equals(getPlayerPosition())) {
+            return false;
+        }
+        if (transporttype.startsWith("BI")) {
+            if (!parserMap.checkLinkExists(getPlayerPosition(), destination, "Siggi-Bike-Verbindung")) {
+                return false;
+            }
+            if (getPlayer().getBikeTickets() < 1) {
+                return false;
+            }
+
+        } else if (transporttype.startsWith("BU")) {
+            if (!parserMap.checkLinkExists(getPlayerPosition(), destination, "Bus-Verbindung")) {
+                return false;
+            }
+            if (getPlayer().getBusTickets() < 1) {
+                return false;
+            }
+        } else if (transporttype.startsWith("TRA")) {
+            if (!parserMap.checkLinkExists(getPlayerPosition(), destination, "Stadtbahn-Verbindung")) {
+                return false;
+            }
+            if (getPlayer().getTrainTickets() < 1) {
+                return false;
+            }
+        }
+
+        turnValid = true;
+        return true;
     }
 }

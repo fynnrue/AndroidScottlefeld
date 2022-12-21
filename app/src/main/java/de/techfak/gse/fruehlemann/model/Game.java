@@ -42,7 +42,7 @@ public class Game {
     }
 
     public void startRound() {
-        round = new Round(amountPlayers, mX, players);
+        round = new Round(amountPlayers, mX, players, parserMap);
 
         try {
             round.startRound();
@@ -105,20 +105,23 @@ public class Game {
     public void endPlayerTurn(String destination, String ticket) {
         boolean roundEnded = round.endPlayerTurn(destination, ticket);
 
-        checkIfGameEnds();
+        if (round.checkTurnValidGame()) {
 
-        players = round.getPlayers();
-        mX = round.getMX();
-        checkIfGameEnds();
+            checkIfGameEnds();
 
-        if (roundEnded) {
-            final int maxRound = 22;
+            players = round.getPlayers();
+            mX = round.getMX();
+            checkIfGameEnds();
 
-            if (roundnumber >= maxRound) {
-                gameFinished(true);
+            if (roundEnded) {
+                final int maxRound = 22;
+
+                if (roundnumber >= maxRound) {
+                    gameFinished(true);
+                }
+                increaseRoundNumber();
+                startRound();
             }
-            increaseRoundNumber();
-            startRound();
         }
     }
 
@@ -184,8 +187,8 @@ public class Game {
                     if (player.getBikeTickets() > 0 && transporttype.equals("Siggi-Bike-Verbindung")) {
                         return;
                     }
-                    gameFinished(true);
                 }
+                gameFinished(true);
             }
         }
     }
