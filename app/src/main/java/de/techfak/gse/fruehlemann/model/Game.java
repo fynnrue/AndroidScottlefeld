@@ -49,9 +49,9 @@ public class Game {
         try {
             round.startRound();
         } catch (NoTicketAvailableException e) {
-            //handleException("M. X kann sich nicht Fortbewegen!");
+            alarmException("No Ticket M. X");
             e.printStackTrace();
-            Log.i("M. X Zug:", "none, " + mX.getPos());
+            Log.i("M. X Turn:", "none, " + mX.getPos());
         }
 
         mX = round.getMX();
@@ -213,7 +213,9 @@ public class Game {
     }
 
     public String getExceptionType() {
-        return exceptionType;
+        String tempExceptionType = exceptionType;
+        exceptionType = "";
+        return tempExceptionType;
     }
 
     //PropertyChangeHandler methods

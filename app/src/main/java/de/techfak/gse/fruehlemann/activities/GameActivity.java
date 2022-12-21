@@ -564,6 +564,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 showSnackbarOnScreen("Unzulässige Verbindung!");
             } else if (exceptionType.equals("No Ticket")) {
                 showSnackbarOnScreen("Kein Ticket für ausgewählten Transporttyp!");
+            } else if (exceptionType.equals("No Ticket M. X")) {
+                showSnackbarOnScreen("M. X besitzt aktuell kein gültiges Ticket.");
             }
         }
     }
