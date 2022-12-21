@@ -458,27 +458,6 @@ public class ParserMap {
     }
 
     /**
-     * Gives back Coordinates of given POI.
-     *
-     * @param pOIName Name of POI.
-     * @return Array of BigDecimals with Coordinates (Lat, Lon) of POI.
-     */
-    public BigDecimal[] getCoordinates(String pOIName) {
-        BigDecimal[] coords = new BigDecimal[2];
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-
-        for (PointOfInterest pOI : pOIs) {
-            if (pOI.getName().equals(pOIName)) {
-                coords[0] = pOI.getCoords().getLat();
-                coords[1] = pOI.getCoords().getLon();
-
-                break;
-            }
-        }
-        return coords;
-    }
-
-    /**
      * Gives Back all the possible transporttypes between two POIs.
      *
      * @param position    Name of current position/POI.

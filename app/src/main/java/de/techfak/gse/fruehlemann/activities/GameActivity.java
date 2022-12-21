@@ -383,20 +383,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         Snackbar.make(findViewById(android.R.id.content).getRootView(), textSnackbar, Snackbar.LENGTH_SHORT).show();
     }
 
-    /**
-     * Ends the Activity after 3 Seconds.
-     */
-    public void endActivity() {
-        try {
-            final int delay = 3000;
-            Thread.sleep(delay);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        finish();
-    }
-
     public void showTransporttypesAndTickets(String position, String destination) {
         String[] typeTicket;
 
@@ -570,42 +556,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         }
     }
 
-    //endRegion
-
-
-
-
-
-
-    /*public void showDestinations() {
-        Spinner showDest = findViewById(R.id.choosePOI);
-
-        ArrayList<String> possibleDestinations = parserMap.getPossibleDestinations(position);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter(
-                this,
-                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                possibleDestinations
-        );
-
-        showDest.setAdapter(adapter);
-    }
-
-    public void showTransporttypes() {
-        Spinner showDest = findViewById(R.id.choosePOI);
-        Spinner showTypes = findViewById(R.id.chooseTransptype);
-
-        String destination = showDest.getSelectedItem().toString();
-        ArrayList<String> transportTypes = parserMap.getPossibleTransporttypes(position, destination);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter(
-                this,
-                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                transportTypes
-        );
-
-        showTypes.setAdapter(adapter);
-    }*/
-
+    //endregion
 
 }

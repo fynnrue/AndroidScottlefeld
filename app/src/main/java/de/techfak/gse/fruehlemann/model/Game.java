@@ -22,7 +22,6 @@ public class Game {
     String exceptionType = "";
     ParserMap parserMap;
     Round round;
-    PlayerFactory playerFactory;
     MX mX;
     Player[] players;
     Turn[] turns;
@@ -134,43 +133,6 @@ public class Game {
         gameFinished = bool;
     }
 
-    public boolean isFinished() {
-        return gameFinished;
-    }
-
-    public int getRoundnumber() {
-        return roundnumber;
-    }
-
-    public String getMXPos() {
-        return mX.getPos();
-    }
-
-    public void increaseRoundNumber() {
-        roundnumber++;
-        support.firePropertyChange("NextRound", (roundnumber - 1), roundnumber);
-    }
-
-    public void mXTurnFinished() {
-        support.firePropertyChange("MXTurn", 0, 1);
-    }
-
-    public String getPlayerPosition() {
-        return round.getPlayerPosition();
-    }
-
-    public int playerGetBusTickets() {
-        return round.playerGetBusTickets();
-    }
-
-    public int playerGetTrainTickets() {
-        return round.playerGetTrainTickets();
-    }
-
-    public int playerGetBikeTickets() {
-        return round.playerGetBikeTickets();
-    }
-
     public void checkIfGameEnds() {
         for (Player player : players) {
             if (player.getPos().equals(mX.getPos())) {
@@ -198,8 +160,14 @@ public class Game {
         }
     }
 
-    public String getWinner() {
-        return winner;
+    public void increaseRoundNumber() {
+        roundnumber++;
+        support.firePropertyChange("NextRound", (roundnumber - 1), roundnumber);
+    }
+
+    public void alarmException(String exception) {
+        support.firePropertyChange("Exception", exceptionType, exception);
+        exceptionType = exception;
     }
 
     public void setValidTurnsPossible(boolean bool) {
@@ -207,9 +175,40 @@ public class Game {
         validTurnsPossible = bool;
     }
 
-    public void alarmException(String exception) {
-        support.firePropertyChange("Exception", exceptionType, exception);
-        exceptionType = exception;
+    public void mXTurnFinished() {
+        support.firePropertyChange("MXTurn", 0, 1);
+    }
+
+    public boolean isFinished() {
+        return gameFinished;
+    }
+
+    public int getRoundnumber() {
+        return roundnumber;
+    }
+
+    public String getMXPos() {
+        return mX.getPos();
+    }
+
+    public String getPlayerPosition() {
+        return round.getPlayerPosition();
+    }
+
+    public int playerGetBusTickets() {
+        return round.playerGetBusTickets();
+    }
+
+    public int playerGetTrainTickets() {
+        return round.playerGetTrainTickets();
+    }
+
+    public int playerGetBikeTickets() {
+        return round.playerGetBikeTickets();
+    }
+
+    public String getWinner() {
+        return winner;
     }
 
     public String getExceptionType() {

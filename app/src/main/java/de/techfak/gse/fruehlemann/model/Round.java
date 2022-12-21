@@ -19,7 +19,6 @@ public class Round {
     int amountPlayers;
     int amountTurnsComplete;
     boolean mXTurnComplete;
-    boolean gameFinished = false;
     boolean turnValid = false;
     String exceptionType;
     MX mX;
@@ -43,20 +42,6 @@ public class Round {
         turns = new Turn[players.length];
 
         mXTurn();
-
-        for (Player player : players) {
-            if (player.getPos().equals(mX.getPos())) {
-                gameFinished = true;
-            }
-        }
-    }
-
-    public MX getMX() {
-        return mX;
-    }
-
-    public Turn.TicketType getMXTransporttype() {
-        return mxTurn.getTicketType();
     }
 
     public void mXTurn() throws NoTicketAvailableException {
@@ -97,49 +82,11 @@ public class Round {
 
             amountTurnsComplete++;
 
-            if (player.getPos().equals(mX.getPos())) {
-                gameFinished = true;
-            }
-
             if (amountTurnsComplete >= amountPlayers) {
                 return true;
             }
         }
         return false;
-    }
-
-    public Player[] getPlayers() {
-        return players;
-    }
-
-    public Player getPlayer() {
-        return players[amountTurnsComplete];
-    }
-
-    public boolean gameFinished() {
-        return gameFinished;
-    }
-
-    public String getPlayerPosition() {
-        return players[amountTurnsComplete].getPos();
-    }
-
-    public int playerGetBusTickets() {
-        return players[amountTurnsComplete].getBusTickets();
-    }
-
-    public int playerGetTrainTickets() {
-        return players[amountTurnsComplete].getTrainTickets();
-    }
-
-    public int playerGetBikeTickets() {
-        return players[amountTurnsComplete].getBikeTickets();
-    }
-
-    public String getExceptionType() {
-        String tempExceptionType = exceptionType;
-        exceptionType = "";
-        return tempExceptionType;
     }
 
     public boolean checkTurnValidGame() {
@@ -171,9 +118,11 @@ public class Round {
         } catch (InvalidConnectionException invalidConnection) {
             exceptionType = "Invalid Connection";
             invalidConnection.printStackTrace();
+            return false;
         } catch (ZeroTicketException zeroTicketException) {
             exceptionType = "No Ticket";
             zeroTicketException.printStackTrace();
+            return false;
         }
 
         turnValid = true;
@@ -195,4 +144,43 @@ public class Round {
             }
         }
     }
+
+    public String getExceptionType() {
+        String tempExceptionType = exceptionType;
+        exceptionType = "";
+        return tempExceptionType;
+    }
+
+    public MX getMX() {
+        return mX;
+    }
+
+    public Turn.TicketType getMXTransporttype() {
+        return mxTurn.getTicketType();
+    }
+
+    public Player[] getPlayers() {
+        return players;
+    }
+
+    public Player getPlayer() {
+        return players[amountTurnsComplete];
+    }
+
+    public String getPlayerPosition() {
+        return players[amountTurnsComplete].getPos();
+    }
+
+    public int playerGetBusTickets() {
+        return players[amountTurnsComplete].getBusTickets();
+    }
+
+    public int playerGetTrainTickets() {
+        return players[amountTurnsComplete].getTrainTickets();
+    }
+
+    public int playerGetBikeTickets() {
+        return players[amountTurnsComplete].getBikeTickets();
+    }
+
 }
