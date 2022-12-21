@@ -379,7 +379,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      *
      * @param textSnackbar Fitting text to Exception which gets shown to User in a Snackbar.
      */
-    public void handleException(String textSnackbar) {
+    public void showOnScreen(String textSnackbar) {
         Snackbar.make(findViewById(android.R.id.content).getRootView(), textSnackbar, Snackbar.LENGTH_SHORT).show();
     }
 
@@ -552,6 +552,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             winnerText.setVisibility(View.VISIBLE);
             winnerText.setText("Sieger: " + game.getWinner());
             endGame.setVisibility(View.VISIBLE);
+        } else if (event.equals("ValidTurns")) {
+            TextView noValidTurnsText = findViewById(R.id.noValidTurnsText);
+
+            noValidTurnsText.setVisibility(View.VISIBLE);
+            noValidTurnsText.setText("Keine validen Spielzüge mehr möglich!");
         }
     }
 

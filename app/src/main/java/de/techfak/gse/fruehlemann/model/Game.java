@@ -17,6 +17,7 @@ public class Game {
     int amountPlayers;
     int roundnumber = 1;
     boolean gameFinished = false;
+    boolean validTurnsPossible = true;
     String winner = "M. X";
     ParserMap parserMap;
     Round round;
@@ -189,12 +190,18 @@ public class Game {
                     }
                 }
                 gameFinished(true);
+                setValidTurnsPossible(false);
             }
         }
     }
 
     public String getWinner() {
         return winner;
+    }
+
+    public void setValidTurnsPossible(boolean bool) {
+        support.firePropertyChange("ValidTurns", validTurnsPossible, bool);
+        validTurnsPossible = bool;
     }
 
     //PropertyChangeHandler methods
