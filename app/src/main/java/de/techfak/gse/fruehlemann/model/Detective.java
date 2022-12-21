@@ -40,11 +40,11 @@ public class Detective implements Player {
     }
 
     public void decreaseTicket(String type) {
-        if(type.equals("BIKE")) {
+        if (type.equals("BIKE")) {
             amountBikeTickets--;
-        } else if(type.equals("TRAIN")) {
+        } else if (type.equals("TRAIN")) {
             amountTrainTickets--;
-        } else if(type.equals("BUS")) {
+        } else if (type.equals("BUS")) {
             amountBusTickets--;
         }
     }
