@@ -48,9 +48,9 @@ public class Game {
         try {
             round.startRound();
         } catch (NoTicketAvailableException e) {
-            alarmException("No Ticket M. X");
+            Log.i("Exception: M. X Turn:", "none, " + mX.getPos());
             e.printStackTrace();
-            Log.i("M. X Turn:", "none, " + mX.getPos());
+            alarmException("No Ticket M. X");
         }
 
         mX = round.getMX();
