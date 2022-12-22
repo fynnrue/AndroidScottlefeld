@@ -574,6 +574,12 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 showSnackbarOnScreen("Kein Ticket für ausgewählten Transporttyp!");
             } else if (exceptionType.equals("No Ticket M. X")) {
                 showSnackbarOnScreen("M. X besitzt aktuell kein gültiges Ticket.");
+            } else if (exceptionType.equals("Initiation M. X Failure")) {
+                showSnackbarOnScreen("Fehler beim Erstellen von M. X");
+                endActivity();
+            } else if (exceptionType.equals("No place M. X")) {
+                showSnackbarOnScreen("Keinen freien Playtz für M. X gefunden");
+                endActivity();
             }
         }
     }

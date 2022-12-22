@@ -91,13 +91,15 @@ public class Game {
             mX = playerFactory.createMx(Integer.parseInt(amountTickets[indexTrain]),
                     Integer.parseInt(amountTickets[indexBus]), Integer.parseInt(amountTickets[indexBike]));
         } catch (JSONParseException e) {
-            //handleException("Fehler beim Verarbeiten der GeoJson!");
+            Log.i("Exception:", "Failed to initiate M. X");
             e.printStackTrace();
-            //endActivity();
+            alarmException("Initiation M. X Failure");
+            return;
         } catch (NoFreePositionException e) {
-            //handleException("Keine freie Position auf der Karte für M. X");
+            Log.i("Exception:", "No free position on map to initialise M. X");
             e.printStackTrace();
-            //endActivity();
+            alarmException("No place M. X");
+            return;
         }
 
         Log.i("M. X Position", mX.getPos());
