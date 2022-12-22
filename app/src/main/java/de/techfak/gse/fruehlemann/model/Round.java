@@ -6,8 +6,6 @@ import static de.techfak.gse22.player_bot.Turn.TicketType.BIKE;
 
 import android.util.Log;
 
-import java.beans.PropertyChangeSupport;
-
 import de.techfak.gse.fruehlemann.exceptions.InvalidConnectionException;
 import de.techfak.gse.fruehlemann.exceptions.ZeroTicketException;
 import de.techfak.gse22.player_bot.MX;
@@ -26,7 +24,10 @@ public class Round {
     Turn mxTurn = null;
     Turn[] turns;
     ParserMap parserMap;
-    private PropertyChangeSupport support;
+
+    String bike = String.format("BIKE");
+    String bus = String.format("BUS");
+    String train = String.format("TRAIN");
 
     public Round(int amountPlayers, MX mX, Player[] players, ParserMap parserMap) {
         this.amountPlayers = amountPlayers;
@@ -50,26 +51,22 @@ public class Round {
     }
 
     public boolean endPlayerTurn(String destination, String transporttype) {
-        final String typeBike = "BIKE";
-        final String typeTrain = "TRAIN";
-        final String typeBus = "BUS";
-
         if (checkIfTurnValid(destination, transporttype)) {
 
             Detective player = (Detective) players[amountTurnsComplete];
 
             Turn turn = null;
-            if (transporttype.equals(typeBike)) {
+            if (transporttype.equals(bike)) {
                 turn = new Turn(BIKE, destination);
-                player.decreaseTicket(typeBike);
+                player.decreaseTicket(bike);
                 mX.giveBikeTicket();
-            } else if (transporttype.equals(typeTrain)) {
+            } else if (transporttype.equals(train)) {
                 turn = new Turn(TRAIN, destination);
-                player.decreaseTicket(typeTrain);
+                player.decreaseTicket(train);
                 mX.giveTrainTicket();
-            } else if (transporttype.equals(typeBus)) {
+            } else if (transporttype.equals(bus)) {
                 turn = new Turn(BUS, destination);
-                player.decreaseTicket(typeBus);
+                player.decreaseTicket(bus);
                 mX.giveTrainTicket();
             }
 
@@ -98,30 +95,31 @@ public class Round {
     }
 
     public boolean checkIfTurnValid(String destination, String transporttype) {
+        String exceptionLog = "Exception:";
         if (destination.equals(getPlayerPosition())) {
             return false;
         }
         try {
-            if (transporttype.startsWith("BI")) {
+            if (transporttype.equals(bike)) {
                 parserMap.checkLinkExists(getPlayerPosition(), destination, "Siggi-Bike-Verbindung");
 
-                checkIfPlayerHasTicket("siggi");
-            } else if (transporttype.startsWith("BU")) {
+                checkIfPlayerHasTicket(bike);
+            } else if (transporttype.equals(bus)) {
                 parserMap.checkLinkExists(getPlayerPosition(), destination, "Bus-Verbindung");
 
-                checkIfPlayerHasTicket("bus");
-            } else if (transporttype.startsWith("TRA")) {
+                checkIfPlayerHasTicket(bus);
+            } else if (transporttype.equals(train)) {
                 parserMap.checkLinkExists(getPlayerPosition(), destination, "Stadtbahn-Verbindung");
 
-                checkIfPlayerHasTicket("train");
+                checkIfPlayerHasTicket(train);
             }
         } catch (InvalidConnectionException invalidConnection) {
-            Log.i("Exception:", "Chosen Connection does not exist.");
+            Log.i(exceptionLog, "Chosen Connection does not exist.");
             exceptionType = "Invalid Connection";
             invalidConnection.printStackTrace();
             return false;
         } catch (ZeroTicketException zeroTicketException) {
-            Log.i("Exception:", "No Ticket available for chosen transporttype.");
+            Log.i(exceptionLog, "No Ticket available for chosen transporttype.");
             exceptionType = "No Ticket";
             zeroTicketException.printStackTrace();
             return false;
@@ -132,15 +130,15 @@ public class Round {
     }
 
     public void checkIfPlayerHasTicket(String tickettype) throws ZeroTicketException {
-        if (tickettype.startsWith("sig")) {
+        if (tickettype.equals(bike)) {
             if (getPlayer().getBikeTickets() < 1) {
                 throw new ZeroTicketException("No Ticket for Siggi-Bike");
             }
-        } else if (tickettype.startsWith("bu")) {
+        } else if (tickettype.equals(bus)) {
             if (getPlayer().getBusTickets() < 1) {
                 throw new ZeroTicketException("No Ticket for Bus");
             }
-        } else if (tickettype.startsWith("tra")) {
+        } else if (tickettype.equals(train)) {
             if (getPlayer().getTrainTickets() < 1) {
                 throw new ZeroTicketException("No Ticket for Train");
             }

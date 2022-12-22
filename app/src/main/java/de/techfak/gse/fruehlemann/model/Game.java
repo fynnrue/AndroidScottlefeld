@@ -66,6 +66,7 @@ public class Game {
      * @param jsonContent   Information about map that the game is played on.
      */
     public void initialisePlayers(int amountPlayers, String jsonContent) {
+        String exceptionLog = "Exceptiom:";
         PlayerFactory playerFactory = null;
         String[] amountTickets = parserMap.getAmountTickets();
         players = new Player[amountPlayers];
@@ -91,12 +92,12 @@ public class Game {
             mX = playerFactory.createMx(Integer.parseInt(amountTickets[indexTrain]),
                     Integer.parseInt(amountTickets[indexBus]), Integer.parseInt(amountTickets[indexBike]));
         } catch (JSONParseException e) {
-            Log.i("Exception:", "Failed to initiate M. X");
+            Log.i(exceptionLog, "Failed to initiate M. X");
             e.printStackTrace();
             alarmException("Initiation M. X Failure");
             return;
         } catch (NoFreePositionException e) {
-            Log.i("Exception:", "No free position on map to initialise M. X");
+            Log.i(exceptionLog, "No free position on map to initialise M. X");
             e.printStackTrace();
             alarmException("No place M. X");
             return;

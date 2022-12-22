@@ -61,18 +61,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isMapSelected() {
-            try {
-                checkSelected();
-                return true;
-            } catch (NoMapSelectedException exception) {
-                Log.i("Exception", "No map selected when tried to start game!");
-                exception.printStackTrace();
-            }
+        try {
+            checkSelected();
+            return true;
+        } catch (NoMapSelectedException exception) {
+            Log.i("Exception", "No map selected when tried to start game!");
+            exception.printStackTrace();
+        }
         return false;
     }
 
     private void checkSelected() throws NoMapSelectedException {
-        if(dropdown.getSelectedItem().equals(noSelection)) {
+        if (dropdown.getSelectedItem().equals(noSelection)) {
             throw new NoMapSelectedException("No map Selected");
         }
     }

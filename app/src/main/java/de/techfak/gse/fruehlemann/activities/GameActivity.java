@@ -52,6 +52,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     Game game;
     ArrayList<Marker> markers = new ArrayList<>();
     String markerName = "";
+    String exceptionLog = "Exception:";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +71,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             jsonContent = br.lines().collect(Collectors.joining());
             br.close();
         } catch (IOException e) {
-            Log.i("Exception", "Failed to read File.");
+            Log.i(exceptionLog, "Failed to read File.");
             showSnackbarOnScreen("Karte konnte nicht gelesen werden.");
             e.printStackTrace();
             endActivity();
@@ -91,7 +92,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             parserMap.parseMap(root);
 
         } catch (JsonProcessingException e) {
-            Log.i("Exception", "Failed to parse Map from Json.");
+            Log.i(exceptionLog, "Failed to parse Map from Json.");
             showSnackbarOnScreen("Fehler beim Parsen der Karte.");
             e.printStackTrace();
             endActivity();
@@ -161,7 +162,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             final int delay = 3000;
             Thread.sleep(delay);
         } catch (InterruptedException e) {
-            Log.i("Exception", "Failed to end Activity.");
+            Log.i(exceptionLog, "Failed to end Activity.");
             showSnackbarOnScreen("Fehler beim Beenden der Ansicht.");
             e.printStackTrace();
         }

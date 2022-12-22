@@ -17,25 +17,28 @@ import java.util.Set;
 import de.techfak.gse.fruehlemann.exceptions.InvalidConnectionException;
 
 public class ParserMap {
-    static final String FEATURES_ATTRIBUTE = "features";
-    static final String GEOMETRY_ATTRIBUTE = "geometry";
-    static final String TYPE_ATTRIBUTE = "type";
-    static final String COORDINATES_ATTRIBUTE = "coordinates";
-    static final String PROPERTIES_ATTRIBUTE = "properties";
-    static final String NAME_ATTRIBUTE = "name";
-    static final String FACILMAP_ATTRIBUTE = "facilmap";
-    static final String TYPES_ATTRIBUTE = "types";
-    static final String DEFAULT_ATTRIBUTE = "default";
-    static final String FIELDS_ATTRIBUTE = "fields";
-    static final String LINE_ATTRIBUTE = "line";
     final int amountTicketTypes = 7;
-
     String[] amountTickets = new String[amountTicketTypes];
-
     HashMap<PointOfInterest, ArrayList<Link>> map = new HashMap<>();
     ArrayList<Transport> transports;
     ArrayList<Object[]> geoPoints = new ArrayList<>();
     ArrayList<Object[]> polylines = new ArrayList<>();
+
+    //region String format
+
+    String featuresPath = String.format("features");
+    String geometryPath = String.format("geometry");
+    String typePath = String.format("type");
+    String coordinatesPath = String.format("coordinates");
+    String propertiesPath = String.format("properties");
+    String namePath = String.format("name");
+    String facilmapPath = String.format("facilmap");
+    String typesPath = String.format("types");
+    String defaultPath = String.format("default");
+    String fieldsPath = String.format("fields");
+    String linePath = String.format("line");
+
+    //endregion
 
     //region Parse map
 
@@ -80,16 +83,16 @@ public class ParserMap {
         ArrayList<PointOfInterest> pOIs;
         Set<PointOfInterest> pOIsUnduped = new HashSet<>();
 
-        for (JsonNode jn : root.get(FEATURES_ATTRIBUTE)) {
+        for (JsonNode jn : root.get(featuresPath)) {
 
-            String featureType = jn.get(GEOMETRY_ATTRIBUTE).get(TYPE_ATTRIBUTE).asText();
+            String featureType = jn.get(geometryPath).get(typePath).asText();
 
             if (featureType.equals("Point")) {
-                BigDecimal lonP = jn.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(0).decimalValue();
-                BigDecimal latP = jn.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(1).decimalValue();
+                BigDecimal lonP = jn.get(geometryPath).get(coordinatesPath).get(0).decimalValue();
+                BigDecimal latP = jn.get(geometryPath).get(coordinatesPath).get(1).decimalValue();
 
                 pOIsUnduped.add(new PointOfInterest(
-                        jn.get(PROPERTIES_ATTRIBUTE).get(NAME_ATTRIBUTE).asText(),
+                        jn.get(propertiesPath).get(namePath).asText(),
                         (new Coordinate(latP, lonP))
                 ));
             }
@@ -109,7 +112,7 @@ public class ParserMap {
         ArrayList<Transport> transports = new ArrayList<>();
         ArrayList<String[]> types = new ArrayList<>();
 
-        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get(FACILMAP_ATTRIBUTE).get(TYPES_ATTRIBUTE).fields();
+        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get(facilmapPath).get(typesPath).fields();
         ArrayList<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
         while (typesEntry.hasNext()) {
             Map.Entry<String, JsonNode> entry = typesEntry.next();
@@ -117,11 +120,11 @@ public class ParserMap {
         }
 
         for (Map.Entry<String, JsonNode> entry : entries) {
-            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals(LINE_ATTRIBUTE)) {
+            if (entry.getValue().get(typePath).asText().equals(linePath)) {
                 String[] type = new String[2];
 
 
-                type[0] = entry.getValue().get(NAME_ATTRIBUTE).asText();
+                type[0] = entry.getValue().get(namePath).asText();
                 type[1] = entry.getKey();
 
                 types.add(type);
@@ -146,12 +149,12 @@ public class ParserMap {
     public ArrayList<Link> parseLinks(JsonNode root, ArrayList<PointOfInterest> pOIs, ArrayList<Transport> transports) {
         ArrayList<Link> links = new ArrayList<>();
 
-        for (JsonNode link : root.get(FEATURES_ATTRIBUTE)) {
-            String featType = link.get(GEOMETRY_ATTRIBUTE).get(TYPE_ATTRIBUTE).asText();
+        for (JsonNode link : root.get(featuresPath)) {
+            String featType = link.get(geometryPath).get(typePath).asText();
 
             if (featType.equals("LineString")) {
-                BigDecimal lonS = link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(0).get(0).decimalValue();
-                BigDecimal latS = link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(0).get(1).decimalValue();
+                BigDecimal lonS = link.get(geometryPath).get(coordinatesPath).get(0).get(0).decimalValue();
+                BigDecimal latS = link.get(geometryPath).get(coordinatesPath).get(0).get(1).decimalValue();
 
 
                 for (PointOfInterest start : pOIs) {
@@ -159,9 +162,9 @@ public class ParserMap {
 
                     if (start.getCoords().getLon().equals(lonS) && start.getCoords().getLat().equals(latS)) {
                         BigDecimal lonE =
-                                link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(1).get(0).decimalValue();
+                                link.get(geometryPath).get(coordinatesPath).get(1).get(0).decimalValue();
                         BigDecimal latE =
-                                link.get(GEOMETRY_ATTRIBUTE).get(COORDINATES_ATTRIBUTE).get(1).get(1).decimalValue();
+                                link.get(geometryPath).get(coordinatesPath).get(1).get(1).decimalValue();
 
                         for (PointOfInterest end : pOIs) {
                             if (end.getCoords().getLon().equals(lonE) && end.getCoords().getLat().equals(latE)) {
@@ -170,7 +173,7 @@ public class ParserMap {
                                 final int indexSiggi = 2;
                                 final int indexBlack = 3;
 
-                                if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
+                                if (link.get(propertiesPath).get(typeID).asText().equals(
                                         transports.get(indexStadtbahn).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -189,7 +192,7 @@ public class ParserMap {
                                         type.add(transports.get(indexStadtbahn));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
+                                } else if (link.get(propertiesPath).get(typeID).asText().equals(
                                         transports.get(indexBus).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -208,7 +211,7 @@ public class ParserMap {
                                         type.add(transports.get(indexBus));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
+                                } else if (link.get(propertiesPath).get(typeID).asText().equals(
                                         transports.get(indexSiggi).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -227,7 +230,7 @@ public class ParserMap {
                                         type.add(transports.get(indexSiggi));
                                         links.add(new Link(start, end, type));
                                     }
-                                } else if (link.get(PROPERTIES_ATTRIBUTE).get(typeID).asText().equals(
+                                } else if (link.get(propertiesPath).get(typeID).asText().equals(
                                         transports.get(indexBlack).getId())) {
                                     if (links.stream().anyMatch(x -> x.getPointOne().equals(start)
                                             && x.getPointTwo().equals(end))
@@ -268,7 +271,7 @@ public class ParserMap {
     public String[] parseTickets(JsonNode root) {
         String[] amountTickets = new String[amountTicketTypes];
 
-        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get(FACILMAP_ATTRIBUTE).get(TYPES_ATTRIBUTE).fields();
+        Iterator<Map.Entry<String, JsonNode>> typesEntry = root.get(facilmapPath).get(typesPath).fields();
         ArrayList<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
         while (typesEntry.hasNext()) {
             Map.Entry<String, JsonNode> entry = typesEntry.next();
@@ -278,11 +281,11 @@ public class ParserMap {
         int ticketIndex = 1;
         final int amntTickets = 5;
         for (Map.Entry<String, JsonNode> entry : entries) {
-            if (entry.getValue().get(TYPE_ATTRIBUTE).asText().equals(LINE_ATTRIBUTE)) {
-                String amountOne = entry.getValue().get(FIELDS_ATTRIBUTE).get(0).get(DEFAULT_ATTRIBUTE).textValue();
+            if (entry.getValue().get(typePath).asText().equals(linePath)) {
+                String amountOne = entry.getValue().get(fieldsPath).get(0).get(defaultPath).textValue();
                 amountTickets[ticketIndex - 1] = amountOne;
                 if (ticketIndex <= amntTickets) {
-                    String amountTwo = entry.getValue().get(FIELDS_ATTRIBUTE).get(1).get(DEFAULT_ATTRIBUTE).textValue();
+                    String amountTwo = entry.getValue().get(fieldsPath).get(1).get(defaultPath).textValue();
                     amountTickets[ticketIndex] = amountTwo;
                 }
                 ticketIndex += 2;
