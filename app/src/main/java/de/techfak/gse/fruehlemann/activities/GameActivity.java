@@ -68,8 +68,12 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 new InputStreamReader(getResources().openRawResource(getResources().getIdentifier(
                         map, "raw", getPackageName()))))) {
             jsonContent = br.lines().collect(Collectors.joining());
+            br.close();
         } catch (IOException e) {
+            Log.i("Exception", "Failed to read File.");
+            showSnackbarOnScreen("Karte konnte nicht gelesen werden.");
             e.printStackTrace();
+            endActivity();
         }
 
         /**
@@ -87,7 +91,10 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             parserMap.parseMap(root);
 
         } catch (JsonProcessingException e) {
+            Log.i("Exception", "Failed to parse Map from Json.");
+            showSnackbarOnScreen("Fehler beim Parsen der Karte.");
             e.printStackTrace();
+            endActivity();
         }
 
         //Log all POIs and Connections
@@ -144,6 +151,21 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
                 });
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    /**
+     * Ends the Activity after 3 Seconds.
+     */
+    public void endActivity() {
+        try {
+            final int delay = 3000;
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            Log.i("Exception", "Failed to end Activity.");
+            showSnackbarOnScreen("Fehler beim Beenden der Ansicht.");
+            e.printStackTrace();
+        }
+        finish();
     }
 
     //endregion
