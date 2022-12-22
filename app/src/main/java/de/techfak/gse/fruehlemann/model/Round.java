@@ -116,10 +116,12 @@ public class Round {
                 checkIfPlayerHasTicket("train");
             }
         } catch (InvalidConnectionException invalidConnection) {
+            Log.i("Exception:", "Chosen Connection does not exist.");
             exceptionType = "Invalid Connection";
             invalidConnection.printStackTrace();
             return false;
         } catch (ZeroTicketException zeroTicketException) {
+            Log.i("Exception:", "No Ticket available for chosen transporttype.");
             exceptionType = "No Ticket";
             zeroTicketException.printStackTrace();
             return false;
