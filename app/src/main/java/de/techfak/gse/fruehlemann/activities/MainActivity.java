@@ -17,6 +17,7 @@ import android.widget.Spinner;
 import java.lang.reflect.Field;
 
 import de.techfak.gse.fruehlemann.R;
+import de.techfak.gse.fruehlemann.exceptions.NoMapSelectedException;
 
 public class MainActivity extends AppCompatActivity {
     Spinner dropdown;
@@ -44,9 +45,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onStartClick(View view) {
-        try {
-            checkSelected();
-
+        if (isMapSelected()) {
             String selectedMap = dropdown.getSelectedItem().toString();
 
             Snackbar.make(view, "Spiel startet", Snackbar.LENGTH_SHORT).show();
@@ -56,20 +55,26 @@ public class MainActivity extends AppCompatActivity {
             startActivity(gameI);
 
             Log.i("Ausgewählte Karte", selectedMap);
-        } catch (NoMapSelectedException noMap) {
+        } else {
             Snackbar.make(view, "Keine Karte ausgewählt!", Snackbar.LENGTH_SHORT).show();
         }
     }
 
+    private boolean isMapSelected() {
+            try {
+                checkSelected();
+                return true;
+            } catch (NoMapSelectedException exception) {
+                Log.i("Exception", "No map selected when tried to start game!");
+                exception.printStackTrace();
+            }
+        return false;
+    }
+
     private void checkSelected() throws NoMapSelectedException {
-        if (dropdown.getSelectedItem().equals(noSelection)) {
-            throw new NoMapSelectedException("No map selected!");
+        if(dropdown.getSelectedItem().equals(noSelection)) {
+            throw new NoMapSelectedException("No map Selected");
         }
     }
 
-    private class NoMapSelectedException extends Exception {
-        public NoMapSelectedException(String errorMessage) {
-            super(errorMessage);
-        }
-    }
 }
