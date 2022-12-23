@@ -106,6 +106,14 @@ public class Game {
         Log.i("M. X Position", mX.getPos());
     }
 
+    /**
+     * Gets information about player turn, if turn is valid a new Turn object is initilised
+     * and information about player and mx will be updated. Also checks if round ended to
+     * initialise a new round and to check if game ended.
+     *
+     * @param destination destination of player turn.
+     * @param ticket type of ticket used in player turn.
+     */
     public void endPlayerTurn(String destination, String ticket) {
         boolean roundEnded = round.endPlayerTurn(destination, ticket);
 
@@ -131,11 +139,19 @@ public class Game {
         }
     }
 
+    /**
+     * Signals GameActivity that game has ended.
+     *
+     * @param bool Boolean if game has ended.
+     */
     public void gameFinished(boolean bool) {
         support.firePropertyChange("GameEnded", gameFinished, bool);
         gameFinished = bool;
     }
 
+    /**
+     * Checks if any of the game ending conditions are met.
+     */
     public void checkIfGameEnds() {
         for (Player player : players) {
             if (player.getPos().equals(mX.getPos())) {
@@ -168,11 +184,21 @@ public class Game {
         support.firePropertyChange("NextRound", (roundnumber - 1), roundnumber);
     }
 
+    /**
+     * An Exception occured in Game or Round.
+     *
+     * @param exception
+     */
     public void alarmException(String exception) {
         support.firePropertyChange("Exception", exceptionType, exception);
         exceptionType = exception;
     }
 
+    /**
+     * No valid turn is possible for player.
+     *
+     * @param bool Boolean if valid turn is possible.
+     */
     public void setValidTurnsPossible(boolean bool) {
         support.firePropertyChange("ValidTurns", validTurnsPossible, bool);
         validTurnsPossible = bool;
@@ -214,6 +240,11 @@ public class Game {
         return winner;
     }
 
+    /**
+     * (GameActivity) Returns type of Exception from Game or Round, reset after that.
+     *
+     * @return String of Exceptiontype.
+     */
     public String getExceptionType() {
         String tempExceptionType = exceptionType;
         exceptionType = "";

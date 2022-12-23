@@ -50,6 +50,13 @@ public class Round {
         Log.i("M. X Turn:", mxTurn.getTicketType().toString() + ", " + mxTurn.getTargetName());
     }
 
+    /**
+     * Performs a player turn if turn is valid and returns true if valid, else false
+     *
+     * @param destination Name of destination.
+     * @param transporttype Name of transport/tickettype.
+     * @return turn performed or not.
+     */
     public boolean endPlayerTurn(String destination, String transporttype) {
         if (checkIfTurnValid(destination, transporttype)) {
 
@@ -94,6 +101,13 @@ public class Round {
         return false;
     }
 
+    /**
+     * Checks if turn is valid, returns true if yes.
+     *
+     * @param destination Name of destiantion.
+     * @param transporttype Ticket/Transporttype.
+     * @return Valid turn returns true else false.
+     */
     public boolean checkIfTurnValid(String destination, String transporttype) {
         String exceptionLog = "Exception:";
         if (destination.equals(getPlayerPosition())) {
@@ -129,6 +143,12 @@ public class Round {
         return true;
     }
 
+    /**
+     * Checks if player has more than 0 tickets for transporttype.
+     *
+     * @param tickettype Ticket/Transporttype.
+     * @throws ZeroTicketException If player has no such ticket left a Exceptiuon will be thrown.
+     */
     public void checkIfPlayerHasTicket(String tickettype) throws ZeroTicketException {
         if (tickettype.equals(bike)) {
             if (getPlayer().getBikeTickets() < 1) {
@@ -145,6 +165,10 @@ public class Round {
         }
     }
 
+    /**
+     * Returns Exceptiontype that got thrown in a round/turn.
+     * @return
+     */
     public String getExceptionType() {
         String tempExceptionType = exceptionType;
         exceptionType = "";

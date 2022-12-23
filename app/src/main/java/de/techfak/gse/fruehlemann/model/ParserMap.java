@@ -402,7 +402,7 @@ public class ParserMap {
     }
 
     /**
-     * Gives back all GeoPoints parsed from map.
+     * Returns all GeoPoints parsed from map.
      *
      * @return ArrayList of Objects (GeoPoint POI, Name of POI) representing GeoPoints.
      */
@@ -411,7 +411,7 @@ public class ParserMap {
     }
 
     /**
-     * Gives back all Polylines parsed from map.
+     * Returns all Polylines parsed from map.
      *
      * @return ArrayList of Objects (Polyline, GeoPoint1, GeoPoint2, transporttypes) representing Polylines.
      */
@@ -420,7 +420,7 @@ public class ParserMap {
     }
 
     /**
-     * Gives back GeoPoint of POI.
+     * Returns GeoPoint of POI.
      *
      * @param name Name of POI.
      * @return GeoPoint from corresponding POI.
@@ -435,7 +435,7 @@ public class ParserMap {
     }
 
     /**
-     * Gives back all the POIs that are possible to visit from given POI.
+     * Returns all the POIs that are possible to visit from given POI.
      *
      * @param position Name of current position/POI.
      * @return ArrayList of Strings of all names of visitable POIs.
@@ -461,7 +461,7 @@ public class ParserMap {
     }
 
     /**
-     * Gives Back all the possible transporttypes between two POIs.
+     * Returns all the possible transporttypes between two POIs.
      *
      * @param position    Name of current position/POI.
      * @param destination Name of destination POI.

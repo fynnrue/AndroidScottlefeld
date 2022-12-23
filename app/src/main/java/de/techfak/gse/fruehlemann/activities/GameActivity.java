@@ -108,7 +108,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         initialiseOsmdroid();
 
         //Show POIs and Connections on map
-        //After Player initialisations to avoid null-pointer-exception
+        //After player initialisations to avoid null-pointer-exception
         showAllLinks();
         showAllPOIs();
 
@@ -196,7 +196,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     }
 
     /**
-     * Starts the game and administrates Rounds.
+     * Starts the game.
      */
     public void createGame(int amountPlayers, String jsonContent) {
         game = new Game(amountPlayers, parserMap, jsonContent);
@@ -358,7 +358,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     }
 
     /**
-     * Shows given Marker on MapView with a different look to show M.X. position
+     * Shows given Marker on MapView with a different look to show M.X. position.
      *
      * @param position Name of POI that M. X is at.
      */
@@ -372,6 +372,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         }
     }
 
+    /**
+     * Shows given MArker on MapView with a different look to show player on map.
+     *
+     * @param position Name of POI that player is at.
+     */
     public void showPlayerOnMap(String position) {
         if (!game.isFinished()) {
             for (Marker marker : markers) {
@@ -384,6 +389,9 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         }
     }
 
+    /**
+     * Searches for old M. X marker and shows it as a normal marker again.
+     */
     public void showMXNormal() {
         for (Marker marker : markers) {
             if (marker.getTitle().equals(markerName)) {
@@ -444,6 +452,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         setTransportSpinner(transportTicketList);
     }
 
+    /**
+     * Shows all Transporttypes and corresponding amount of tickets for chosen connection.
+     *
+     * @param transportTicket Transporttypes and amount tickets available for connection.
+     */
     public void setTransportSpinner(ArrayList<String> transportTicket) {
         Spinner spinner = findViewById(R.id.showTransportTicket);
 
@@ -498,6 +511,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         setTransportSpinner(emptySpinner);
     }
 
+    /**
+     * When Button "Tickets" clicked open new Activity which shows amount of tickets of player.
+     *
+     * @param view
+     */
     public void onShowTicketsClick(View view) {
         Intent ticketsIntent = new Intent(GameActivity.this, ShowTicktesActivity.class);
         ticketsIntent.putExtra("Siggi", String.valueOf(game.playerGetBikeTickets()));
@@ -506,6 +524,11 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         startActivity(ticketsIntent);
     }
 
+    /**
+     * Ends current view.
+     *
+     * @param view current View.
+     */
     public void onEndGameClick(View view) {
         finish();
     }
@@ -513,6 +536,12 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     //endregion
 
     //region Observer
+
+    /**
+     * Reaction to different changes in Game object.
+     *
+     * @param propertyChangeEvent
+     */
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
         String event = propertyChangeEvent.getPropertyName();
