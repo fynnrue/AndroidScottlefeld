@@ -53,6 +53,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     ArrayList<Marker> markers = new ArrayList<>();
     String markerName = "";
     String exceptionLog = "Exception:";
+    ArrayList<Object[]> polylines = new ArrayList<>();
+    ArrayList<Object[]> geoPoints = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +107,8 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         createGame(1, jsonContent);
 
         //Initialising Osmdroid MapView
+        parseGeoPoints();
+        parsePolylines();
         initialiseOsmdroid();
 
         //Show POIs and Connections on map
@@ -226,11 +230,72 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
     //region Map Interaction
 
     /**
+     * Parses all Points of Interest to GeoPoints.
+     */
+    public void parseGeoPoints() {
+        ArrayList<String> pOIs = parserMap.getPointsOfInterest();
+
+        for (String pOI : pOIs) {
+            Object[] geoName = new Object[2];
+            Double[] pOIInfo = parserMap.getPOICoordinates(pOI);
+
+            geoName[0] = new GeoPoint(pOIInfo[0], pOIInfo[1]);
+            geoName[1] = pOI;
+
+            geoPoints.add(geoName);
+        }
+    }
+
+    /**
+     * Returns the GeoPoint to a corresponding name.
+     *
+     * @param name Name of POI.
+     * @return
+     */
+    public GeoPoint getGeoPoint(String name) {
+        for (Object[] geoPoint : geoPoints) {
+            if (geoPoint[1].equals(name)) {
+                return (GeoPoint) geoPoint[0];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parsing all connections between POIs in form of Object Arrays (Polyline, GeoPoint1, GeoPoint2, transporttypes)
+     * and storing them in global ArrayList Variable polylines.
+     */
+    public void parsePolylines() {
+        ArrayList<String[]> links = parserMap.getLinksNoDuplicates();
+
+        for (String[] link : links) {
+            final int polylineAttributes = 4;
+            final int transporttypesIndex = 3;
+            GeoPoint geoPointOne = getGeoPoint(link[0]);
+            GeoPoint geoPointTwo = getGeoPoint(link[1]);
+            ArrayList<String> transporttypes = parserMap.getPossibleTransporttypes(link[0], link[1]);
+
+            ArrayList<GeoPoint> points = new ArrayList<>();
+            points.add(geoPointOne);
+            points.add(geoPointTwo);
+
+            Polyline line = new Polyline();
+            line.setPoints(points);
+
+            Object[] newPolyline = new Object[polylineAttributes];
+            newPolyline[0] = line;
+            newPolyline[1] = geoPointOne;
+            newPolyline[2] = geoPointTwo;
+            newPolyline[transporttypesIndex] = transporttypes;
+
+            polylines.add(newPolyline);
+        }
+    }
+
+    /**
      * Goes through every POI and starts method to show on MapView.
      */
     public void showAllPOIs() {
-        ArrayList<Object[]> geoPoints = parserMap.getGeoPoints();
-
         for (Object[] geoPoint : geoPoints) {
             showPositionOnMap(geoPoint);
         }
@@ -275,8 +340,6 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      * Every Polyline gets added to the MapView and Method polylineChangeColor will be calles with the colors.
      */
     public void showAllLinks() {
-        ArrayList<Object[]> polylines = parserMap.getPolylines();
-
         for (Object[] polyline : polylines) {
             final int indexTransporttypes = 3;
 
@@ -381,7 +444,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
         if (!game.isFinished()) {
             for (Marker marker : markers) {
                 if (marker.getTitle().equals(position)) {
-                    centerMap(parserMap.getGeoPoint(marker.getTitle()));
+                    centerMap(getGeoPoint(marker.getTitle()));
                     marker.setIcon(ResourcesCompat.getDrawable(getResources(),
                             org.osmdroid.library.R.drawable.person, null));
                 }
@@ -472,7 +535,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
      * @param view Current View.
      */
     public void onCenterMapClick(View view) {
-        centerMap(parserMap.getGeoPoint(game.getPlayerPosition()));
+        centerMap(getGeoPoint(game.getPlayerPosition()));
     }
 
     /**
@@ -579,7 +642,7 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
             Button endGame = findViewById(R.id.endGameButton);
 
             showMXOnMap(game.getMXPos());
-            centerMap(parserMap.getGeoPoint(game.getMXPos()));
+            centerMap(getGeoPoint(game.getMXPos()));
 
             round.setVisibility(View.INVISIBLE);
             transportTickets.setVisibility(View.INVISIBLE);

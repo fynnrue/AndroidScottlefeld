@@ -2,9 +2,6 @@ package de.techfak.gse.fruehlemann.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.Polyline;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,8 +18,6 @@ public class ParserMap {
     String[] amountTickets = new String[amountTicketTypes];
     HashMap<PointOfInterest, ArrayList<Link>> map = new HashMap<>();
     ArrayList<Transport> transports;
-    ArrayList<Object[]> geoPoints = new ArrayList<>();
-    ArrayList<Object[]> polylines = new ArrayList<>();
 
     //region String format
 
@@ -43,7 +38,7 @@ public class ParserMap {
     //region Parse map
 
     /**
-     * Parses all information to Hashmap and GeoPoints and Polylines to work with in Controller.
+     * Parses all information to Hashmap to work with in Controller.
      *
      * @param root JsonNode to access information from given map.
      */
@@ -68,9 +63,6 @@ public class ParserMap {
             }
             map.put(pOI, connectedPoIs);
         }
-
-        parseGeoPoints();
-        parsePolylines();
     }
 
     /**
@@ -294,28 +286,8 @@ public class ParserMap {
         return amountTickets;
     }
 
-    /**
-     * Parsing all POIs into GeoPoints in form of Object Arrays (GeoPoint, Name of POI)
-     * and storing them in global ArrayList Variable geoPoints.
-     */
-    public void parseGeoPoints() {
-        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
-
-        for (PointOfInterest pOI : pOIs) {
-            Object[] geoName = new Object[2];
-
-            geoName[0] = new GeoPoint(pOI.getCoords().getLat().doubleValue(), pOI.getCoords().getLon().doubleValue());
-            geoName[1] = pOI.getName();
-
-            geoPoints.add(geoName);
-        }
-    }
-
-    /**
-     * Parsing all connections between POIs in form of Object Arrays (Polyline, GeoPoint1, GeoPoint2, transporttypes)
-     * and storing them in global ArrayList Variable polylines.
-     */
-    public void parsePolylines() {
+    public ArrayList<String[]> getLinksNoDuplicates() {
+        ArrayList<String[]> linksNoDups = new ArrayList<>();
         ArrayList<Link> links = getLinks();
         ArrayList<Link> linksDuplicate = getLinks();
 
@@ -331,35 +303,15 @@ public class ParserMap {
         }
 
         for (Link link : links) {
-            final int polylineAttributes = 4;
-            PointOfInterest pOIFirst = link.getPointOne();
-            PointOfInterest pOISecond = link.getPointTwo();
-            ArrayList<String> transporttypes = new ArrayList<>();
+            String[] linkString = new String[2];
 
-            ArrayList<GeoPoint> points = new ArrayList<>();
-            for (Object[] geoPoint : geoPoints) {
-                if (pOIFirst.getName().equals(geoPoint[1])) {
-                    points.add((GeoPoint) geoPoint[0]);
-                } else if (pOISecond.getName().equals(geoPoint[1])) {
-                    points.add((GeoPoint) geoPoint[0]);
-                }
-            }
-            for (Transport type : link.getType()) {
-                transporttypes.add(type.getType());
-            }
-            Polyline line = new Polyline();
-            line.setPoints(points);
+            linkString[0] = link.getPointOne().getName();
+            linkString[1] = link.getPointTwo().getName();
 
-            final int indexTransporttypes = 3;
-
-            Object[] newPolyline = new Object[polylineAttributes];
-            newPolyline[0] = line;
-            newPolyline[1] = points.get(0);
-            newPolyline[2] = points.get(1);
-            newPolyline[indexTransporttypes] = transporttypes;
-
-            polylines.add(newPolyline);
+            linksNoDups.add(linkString);
         }
+
+        return linksNoDups;
     }
 
     //endregion
@@ -399,39 +351,6 @@ public class ParserMap {
      */
     public String[] getAmountTickets() {
         return amountTickets;
-    }
-
-    /**
-     * Returns all GeoPoints parsed from map.
-     *
-     * @return ArrayList of Objects (GeoPoint POI, Name of POI) representing GeoPoints.
-     */
-    public ArrayList<Object[]> getGeoPoints() {
-        return geoPoints;
-    }
-
-    /**
-     * Returns all Polylines parsed from map.
-     *
-     * @return ArrayList of Objects (Polyline, GeoPoint1, GeoPoint2, transporttypes) representing Polylines.
-     */
-    public ArrayList<Object[]> getPolylines() {
-        return polylines;
-    }
-
-    /**
-     * Returns GeoPoint of POI.
-     *
-     * @param name Name of POI.
-     * @return GeoPoint from corresponding POI.
-     */
-    public GeoPoint getGeoPoint(String name) {
-        for (Object[] point : geoPoints) {
-            if (name.equals(point[1])) {
-                return (GeoPoint) point[0];
-            }
-        }
-        return null;
     }
 
     /**
@@ -492,6 +411,31 @@ public class ParserMap {
             }
         }
         return possibleTransporttypes;
+    }
+
+    public ArrayList<String> getPointsOfInterest() {
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+        ArrayList<String> pOIsString = new ArrayList<>();
+
+        for (PointOfInterest pOI : pOIs) {
+            pOIsString.add(pOI.getName());
+        }
+
+        return pOIsString;
+    }
+
+    public Double[] getPOICoordinates(String name) {
+        Double[] pOIInfo = new Double[2];
+        ArrayList<PointOfInterest> pOIs = new ArrayList<>(map.keySet());
+
+        for (PointOfInterest pOI : pOIs) {
+            if (pOI.getName().equals(name)) {
+                pOIInfo[0] = pOI.getCoords().getLat().doubleValue();
+                pOIInfo[1] = pOI.getCoords().getLon().doubleValue();
+            }
+        }
+
+        return pOIInfo;
     }
 
     //endregion
