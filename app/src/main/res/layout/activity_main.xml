@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:onClick="onStartClick"
         android:text="Start"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,15 +33,120 @@
         app:layout_constraintVertical_bias="0.9" />
 
     <Spinner
-        android:id="@+id/dropdown"
+        android:id="@+id/mapSpinner"
         android:layout_width="409dp"
         android:layout_height="wrap_content"
         android:contextClickable="true"
         android:spinnerMode="dropdown"
         android:textAlignment="center"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/header" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="409dp"
+        android:layout_height="104dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header">
+
+        <Button
+            android:id="@+id/singleplayerGameButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:onClick="onSingleplayerClick"
+            android:text="Einzelspieler"
+            tools:visibility="invisible" />
+
+        <Button
+            android:id="@+id/multiplayerGameButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:onClick="onMultiplayerClick"
+            android:text="Mehrspieler"
+            tools:visibility="invisible" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="412dp"
+        android:layout_height="198dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header">
+
+        <TextView
+            android:id="@+id/textUrlHeader"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:editable="false"
+            android:text="URL:"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/textHostnameHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:text="Hostname:"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/textHostname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="http://10.0.2.2"
+            android:textAlignment="center"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/textPortHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:text="Port:"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/textPort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="true"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="8080"
+            android:textAlignment="center"
+            android:visibility="invisible" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/connectServerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="124dp"
+        android:onClick="onConnectClick"
+        android:text="verbinden"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
