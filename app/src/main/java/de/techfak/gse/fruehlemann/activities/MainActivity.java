@@ -121,17 +121,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public StringRequest buildRequest(String url) {
-        url += "/";
-        // url somit "http://127.0.0.1:8080/"
+        String checkConnectionUrl = url + "/";
         Response.Listener<String> onResponse = response -> {
-            Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
         };
-        final Response.ErrorListener onError = error -> {
-            Toast.makeText(this, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show();
+        Response.ErrorListener onError = error -> {
+            Toast.makeText(this, "Keine Verbindung zu " + url + " möglich", Toast.LENGTH_SHORT).show();
         };
 
-        StringRequest request = new StringRequest(Request.Method.GET, url, onResponse, onError);
-        // request.getBody() liefert = null
+        StringRequest request = new StringRequest(Request.Method.GET, checkConnectionUrl, onResponse, onError);
 
         return request;
     }
