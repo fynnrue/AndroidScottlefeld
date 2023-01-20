@@ -43,6 +43,14 @@
                 <action android:name="android.intent.action.GameView" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activities.LobbyActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.GameView" />
+            </intent-filter>
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

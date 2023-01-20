@@ -32,6 +32,8 @@ import de.techfak.gse.fruehlemann.exceptions.NoMapSelectedException;
 public class MainActivity extends AppCompatActivity {
     Spinner dropdown;
     String noSelection;
+    String[] singleplayerMapNames;
+    String connection = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +44,14 @@ public class MainActivity extends AppCompatActivity {
         noSelection = "Karte auswählen";
 
         Field[] maps = R.raw.class.getFields();
-        String[] mapNames = new String[maps.length + 1];
-        mapNames[0] = noSelection;
+        singleplayerMapNames = new String[maps.length + 1];
+        singleplayerMapNames[0] = noSelection;
         for (int i = 0; i < maps.length; i++) {
-            mapNames[i + 1] = maps[i].getName();
+            singleplayerMapNames[i + 1] = maps[i].getName();
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, mapNames);
+                android.R.layout.simple_spinner_item, singleplayerMapNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         dropdown.setAdapter(adapter);
     }
@@ -74,12 +76,16 @@ public class MainActivity extends AppCompatActivity {
         Button singleButton = findViewById(R.id.singleplayerGameButton);
         Button multiButton = findViewById(R.id.multiplayerGameButton);
         Button startButton = findViewById(R.id.start);
-        Spinner mapSpinner = findViewById(R.id.mapSpinner);
 
         singleButton.setVisibility(View.INVISIBLE);
         multiButton.setVisibility(View.INVISIBLE);
         startButton.setVisibility(View.VISIBLE);
-        mapSpinner.setVisibility(View.VISIBLE);
+        dropdown.setVisibility(View.VISIBLE);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, singleplayerMapNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        dropdown.setAdapter(adapter);
     }
 
     public void onMultiplayerClick(View view) {
@@ -103,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
         portHeader.setVisibility(View.VISIBLE);
         portContent.setVisibility(View.VISIBLE);
         connectButton.setVisibility(View.VISIBLE);
-
     }
 
     public void onConnectClick(View view) {
@@ -114,19 +119,24 @@ public class MainActivity extends AppCompatActivity {
         String port = Objects.requireNonNull(portInput.getText()).toString();
 
         String url = hostname + ":" + port;
-        StringRequest request = buildRequest(url);
+        StringRequest request = buildConnectionRequest(url);
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
     }
 
-    public StringRequest buildRequest(String url) {
+    public StringRequest buildConnectionRequest(String url) {
         String checkConnectionUrl = url + "/";
         Response.Listener<String> onResponse = response -> {
             Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
+
+            Intent lobbyI = new Intent(MainActivity.this, LobbyActivity.class);
+            lobbyI.putExtra("url", url);
+            startActivity(lobbyI);
         };
         Response.ErrorListener onError = error -> {
             Toast.makeText(this, "Keine Verbindung zu " + url + " möglich", Toast.LENGTH_SHORT).show();
+            connection = "";
         };
 
         StringRequest request = new StringRequest(Request.Method.GET, checkConnectionUrl, onResponse, onError);
