@@ -29,6 +29,8 @@ public class LobbyActivity extends AppCompatActivity {
     ArrayList<String> maps = new ArrayList<>();
     String mapName;
     String playerName;
+    int gameId;
+    String playerToken;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,18 +83,23 @@ public class LobbyActivity extends AppCompatActivity {
 
     public void onPlayMXClick(View view) {
         TextView textName = findViewById(R.id.textName);
+        TextView textSelectMap = findViewById(R.id.textSelectMap);
         EditText textPlayerName = findViewById(R.id.textPlayerName);
         Button playMXButton = findViewById(R.id.playMXButton);
         Button createGameButton = findViewById(R.id.createGameButton);
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
 
-        playerName = Objects.requireNonNull(textPlayerName.getText().toString());
+        if (!textPlayerName.getText().toString().equals("")) {
 
-        textName.setVisibility(View.INVISIBLE);
-        textPlayerName.setVisibility(View.INVISIBLE);
-        playMXButton.setVisibility(View.INVISIBLE);
-        mapSelectSpinnerMultiplayer.setVisibility(View.VISIBLE);
-        createGameButton.setVisibility(View.VISIBLE);
+            playerName = Objects.requireNonNull(textPlayerName.getText().toString());
+
+            textName.setVisibility(View.INVISIBLE);
+            textPlayerName.setVisibility(View.INVISIBLE);
+            playMXButton.setVisibility(View.INVISIBLE);
+            mapSelectSpinnerMultiplayer.setVisibility(View.VISIBLE);
+            createGameButton.setVisibility(View.VISIBLE);
+            textSelectMap.setVisibility(View.VISIBLE);
+        }
     }
 
     public void onCreateGameClick(View view) {
@@ -104,13 +111,34 @@ public class LobbyActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
+
+
     }
 
     public StringRequest buildCreateGameRequest(String mapName, String playerName) {
         String createGameUrl = url + "/games";
 
         Response.Listener<String> onResponse = response -> {
-            Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+            TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
+            TextView textGameId = findViewById(R.id.textGameId);
+            TextView textMapId = findViewById(R.id.textMapId);
+            TextView textShowPlayers = findViewById(R.id.textShowPlayers);
+            TextView textSelectMap = findViewById(R.id.textSelectMap);
+            Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
+
+            String[] responseSplit = response.split(",");
+            String[] gameIdSplit = responseSplit[0].split(":");
+            String[] playerTokenSplit = responseSplit[11].split(":");
+
+            gameId = Integer.parseInt(gameIdSplit[1]);
+            playerToken = playerTokenSplit[1];
+
+            textWaitingHeader.setVisibility(View.VISIBLE);
+            textGameId.setVisibility(View.VISIBLE);
+            textMapId.setVisibility(View.VISIBLE);
+            textShowPlayers.setVisibility(View.VISIBLE);
+            textSelectMap.setVisibility(View.INVISIBLE);
+            mapSelectSpinnerMultiplayer.setVisibility(View.INVISIBLE);
         };
         Response.ErrorListener onError = error -> {
             Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
@@ -122,19 +150,16 @@ public class LobbyActivity extends AppCompatActivity {
                 try {
                     final String encodedMapName = URLEncoder.encode(mapName, getParamsEncoding());
                     final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
-                    final String body = "{\n" +
-                            "  \"mapName\": \"small\",\n" +
-                            "  \"playerName\": \"Professor Moriarty\"\n" +
-                            "}";
-                    /*"{\n"
-                            + "  \"mapName\": \"" + encodedMapName + "\",\n"
-                            + "  \"playerName\": \"" + encodedPlayerName + "\"\n"
-                            + "}";*/
+                    final String body = "{\"mapName\":\"" + encodedMapName + "\",\"playerName\":\"" + encodedPlayerName + "\"}";
                     return body.getBytes(getParamsEncoding());
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                     return null;
                 }
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
             }
         };
 
