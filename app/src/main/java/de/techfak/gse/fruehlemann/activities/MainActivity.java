@@ -128,11 +128,15 @@ public class MainActivity extends AppCompatActivity {
     public StringRequest buildConnectionRequest(String url) {
         String checkConnectionUrl = url + "/";
         Response.Listener<String> onResponse = response -> {
-            Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
+            if (response.equals("Scottlefeld")) {
+                Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
 
-            Intent lobbyI = new Intent(MainActivity.this, LobbyActivity.class);
-            lobbyI.putExtra("url", url);
-            startActivity(lobbyI);
+                Intent lobbyI = new Intent(MainActivity.this, LobbyActivity.class);
+                lobbyI.putExtra("url", url);
+                startActivity(lobbyI);
+            } else {
+                Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
+            }
         };
         Response.ErrorListener onError = error -> {
             Toast.makeText(this, "Keine Verbindung zu " + url + " möglich", Toast.LENGTH_SHORT).show();
