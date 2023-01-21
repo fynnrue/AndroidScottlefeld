@@ -17,13 +17,18 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import de.techfak.gse.fruehlemann.R;
 
 public class LobbyActivity extends AppCompatActivity {
     String url;
     ArrayList<String> maps = new ArrayList<>();
+    String mapName;
+    String playerName;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,10 +86,58 @@ public class LobbyActivity extends AppCompatActivity {
         Button createGameButton = findViewById(R.id.createGameButton);
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
 
+        playerName = Objects.requireNonNull(textPlayerName.getText().toString());
+
         textName.setVisibility(View.INVISIBLE);
         textPlayerName.setVisibility(View.INVISIBLE);
         playMXButton.setVisibility(View.INVISIBLE);
         mapSelectSpinnerMultiplayer.setVisibility(View.VISIBLE);
         createGameButton.setVisibility(View.VISIBLE);
+    }
+
+    public void onCreateGameClick(View view) {
+        Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
+
+        mapName = Objects.requireNonNull(mapSelectSpinnerMultiplayer.getSelectedItem().toString());
+
+        StringRequest request = buildCreateGameRequest(mapName, playerName);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(request);
+    }
+
+    public StringRequest buildCreateGameRequest(String mapName, String playerName) {
+        String createGameUrl = url + "/games";
+
+        Response.Listener<String> onResponse = response -> {
+            Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+        };
+        Response.ErrorListener onError = error -> {
+            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
+        };
+
+        StringRequest request = new StringRequest(Request.Method.POST, createGameUrl, onResponse, onError) {
+            @Override
+            public byte[] getBody() {
+                try {
+                    final String encodedMapName = URLEncoder.encode(mapName, getParamsEncoding());
+                    final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
+                    final String body = "{\n" +
+                            "  \"mapName\": \"small\",\n" +
+                            "  \"playerName\": \"Professor Moriarty\"\n" +
+                            "}";
+                    /*"{\n"
+                            + "  \"mapName\": \"" + encodedMapName + "\",\n"
+                            + "  \"playerName\": \"" + encodedPlayerName + "\"\n"
+                            + "}";*/
+                    return body.getBytes(getParamsEncoding());
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
+
+        return request;
     }
 }
