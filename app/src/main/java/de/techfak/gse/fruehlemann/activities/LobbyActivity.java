@@ -1,5 +1,6 @@
 package de.techfak.gse.fruehlemann.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -37,6 +38,7 @@ public class LobbyActivity extends AppCompatActivity {
     int gameId;
     String playerToken;
     RequestQueue queue;
+    ScheduledExecutorService executorService;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -110,12 +112,15 @@ public class LobbyActivity extends AppCompatActivity {
 
     public void onCreateGameClick(View view) {
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
+        Button createGameButton = findViewById(R.id.createGameButton);
 
         mapName = Objects.requireNonNull(mapSelectSpinnerMultiplayer.getSelectedItem().toString());
 
         StringRequest request = buildCreateGameRequest(mapName, playerName);
 
         queue.add(request);
+
+        createGameButton.setVisibility(View.INVISIBLE);
     }
 
     public StringRequest buildCreateGameRequest(String mapName, String playerName) {
@@ -173,7 +178,7 @@ public class LobbyActivity extends AppCompatActivity {
     }
 
     public void refreshWaitingLobby() {
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+        executorService = Executors.newScheduledThreadPool(1);
 
         StringRequest request = buildGetWaitinglobbyInfo();
 
@@ -184,7 +189,7 @@ public class LobbyActivity extends AppCompatActivity {
         TextView textGameId = findViewById(R.id.textGameId);
         TextView textMapId = findViewById(R.id.textMapId);
         TextView textShowPlayers = findViewById(R.id.textShowPlayers);
-        String getMapUrl = url + "/games/" + gameId;
+        String getGameInfosUrl = url + "/games/" + gameId;
 
         Response.Listener<String> onResponse = response -> {
             response = response.substring(1, response.length()-1);
@@ -192,6 +197,7 @@ public class LobbyActivity extends AppCompatActivity {
 
             String[] gameIdSplit = responseSplit[0].split(":");
             String[] mapIdSplit = responseSplit[1].split(":");
+            String[] gameStatus = responseSplit[2].split(":");
             ArrayList<String[]> allPlayers = new ArrayList<>();
             for (int i = 0; i < responseSplit.length; i++) {
                 if (responseSplit[i].startsWith("\"name\":")) {
@@ -209,16 +215,22 @@ public class LobbyActivity extends AppCompatActivity {
 
             textGameId.setText("Spiel ID:\n" + gameIdSplit[1]);
             textMapId.setText("Karten ID:\n" + mapIdSplit[1].replace("\"", ""));
+            mapName = mapIdSplit[1].replace("\"", "");
+
             textShowPlayers.setText("Mitspieler");
             for (String[] playerInfo : allPlayers) {
                 textShowPlayers.setText(textShowPlayers.getText().toString() + "\n" + playerInfo[0] + " (" + playerInfo[1] + ")");
+            }
+
+            if (gameStatus[1].equals("\"RUNNING\"")) {
+                startGame();
             }
         };
         Response.ErrorListener onError = error -> {
             Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
         };
 
-        StringRequest request = new StringRequest(Request.Method.GET, getMapUrl, onResponse, onError) {
+        StringRequest request = new StringRequest(Request.Method.GET, getGameInfosUrl, onResponse, onError) {
             @Override
             public Map<String, String> getHeaders() {
                 HashMap<String, String> headers = new HashMap<>();
@@ -226,6 +238,44 @@ public class LobbyActivity extends AppCompatActivity {
                 return headers;
             }
         };
+
+        return request;
+    }
+
+    public void startGame() {
+        TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
+        TextView textGameId = findViewById(R.id.textGameId);
+        TextView textMapId = findViewById(R.id.textMapId);
+        TextView textShowPlayers = findViewById(R.id.textShowPlayers);
+
+        textWaitingHeader.setVisibility(View.INVISIBLE);
+        textGameId.setVisibility(View.INVISIBLE);
+        textMapId.setVisibility(View.INVISIBLE);
+        textShowPlayers.setVisibility(View.INVISIBLE);
+
+        executorService.shutdown();
+
+        StringRequest request = buildGetMapInfo();
+
+        queue.add(request);
+    }
+
+    public StringRequest buildGetMapInfo() {
+        String getMapInfosUrl = url + "/maps/" + mapName;
+
+        Response.Listener<String> onResponse = response -> {
+            String mapContent = response;
+
+            Intent gameI = new Intent(LobbyActivity.this, GameActivity.class);
+            gameI.putExtra("map", mapName);
+            gameI.putExtra("mapContent", mapContent);
+            startActivity(gameI);
+        };
+        Response.ErrorListener onError = error -> {
+            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
+        };
+
+        StringRequest request = new StringRequest(Request.Method.GET, getMapInfosUrl, onResponse, onError);
 
         return request;
     }
