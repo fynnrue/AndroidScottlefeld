@@ -94,6 +94,7 @@ public class LobbyActivity extends AppCompatActivity {
         TextView textSelectMap = findViewById(R.id.textSelectMap);
         EditText textPlayerName = findViewById(R.id.textPlayerName);
         Button playMXButton = findViewById(R.id.playMXButton);
+        Button playDetectiveButton = findViewById(R.id.playDetectiveButton);
         Button createGameButton = findViewById(R.id.createGameButton);
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
 
@@ -104,6 +105,7 @@ public class LobbyActivity extends AppCompatActivity {
             textName.setVisibility(View.INVISIBLE);
             textPlayerName.setVisibility(View.INVISIBLE);
             playMXButton.setVisibility(View.INVISIBLE);
+            playDetectiveButton.setVisibility(View.INVISIBLE);
             mapSelectSpinnerMultiplayer.setVisibility(View.VISIBLE);
             createGameButton.setVisibility(View.VISIBLE);
             textSelectMap.setVisibility(View.VISIBLE);
@@ -276,6 +278,95 @@ public class LobbyActivity extends AppCompatActivity {
         };
 
         StringRequest request = new StringRequest(Request.Method.GET, getMapInfosUrl, onResponse, onError);
+
+        return request;
+    }
+
+    public void onPlayDetectiveClick(View view) {
+        TextView textName = findViewById(R.id.textName);
+        TextView textInputGameIdHeader = findViewById(R.id.textInputGameIdHeader);
+        EditText textInputGameId = findViewById(R.id.textInputGameId);
+        EditText textPlayerName = findViewById(R.id.textPlayerName);
+        Button playMXButton = findViewById(R.id.playMXButton);
+        Button playDetectiveButton = findViewById(R.id.playDetectiveButton);
+        Button connectButton = findViewById(R.id.connectButton);
+
+        if (!textPlayerName.getText().toString().equals("")) {
+
+            playerName = Objects.requireNonNull(textPlayerName.getText().toString());
+
+            textName.setVisibility(View.INVISIBLE);
+            textPlayerName.setVisibility(View.INVISIBLE);
+            playMXButton.setVisibility(View.INVISIBLE);
+            playDetectiveButton.setVisibility(View.INVISIBLE);
+            textInputGameIdHeader.setVisibility(View.VISIBLE);
+            textInputGameId.setVisibility(View.VISIBLE);
+            connectButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void onConnectClick(View view) {
+        EditText textInputGameId = findViewById(R.id.textInputGameId);
+
+        if (!textInputGameId.getText().toString().equals("")) {
+
+            gameId = Integer.valueOf(textInputGameId.getText().toString());
+
+            StringRequest request = buildConnectRequest();
+
+            queue.add(request);
+        }
+    }
+
+    public StringRequest buildConnectRequest() {
+        String connectUrl = url + "/games/" + gameId + "/players";
+
+        Response.Listener<String> onResponse = response -> {
+            TextView textGameId = findViewById(R.id.textGameId);
+            TextView textMapId = findViewById(R.id.textMapId);
+            TextView textShowPlayers = findViewById(R.id.textShowPlayers);
+            TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
+            TextView textInputGameIdHeader = findViewById(R.id.textInputGameIdHeader);
+            EditText textInputGameId = findViewById(R.id.textInputGameId);
+            Button connectButton = findViewById(R.id.connectButton);
+
+            String[] responseSplit = response.split(",");
+            String[] gameIdSplit = responseSplit[1].split(":");
+            String[] playerTokenSplit = responseSplit[3].split(":");
+
+            playerToken = playerTokenSplit[1].replace("\"", "");
+
+            textWaitingHeader.setVisibility(View.VISIBLE);
+            textGameId.setVisibility(View.VISIBLE);
+            textMapId.setVisibility(View.VISIBLE);
+            textShowPlayers.setVisibility(View.VISIBLE);
+            textInputGameIdHeader.setVisibility(View.INVISIBLE);
+            textInputGameId.setVisibility(View.INVISIBLE);
+            connectButton.setVisibility(View.INVISIBLE);
+
+            refreshWaitingLobby();
+        };
+        Response.ErrorListener onError = error -> {
+            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
+        };
+
+        StringRequest request = new StringRequest(Request.Method.POST, connectUrl, onResponse, onError) {
+            @Override
+            public byte[] getBody() {
+                try {
+                    final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
+                    final String body = "{\"playerName\":\"" + encodedPlayerName + "\"}";
+                    return body.getBytes(getParamsEncoding());
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+        };
 
         return request;
     }
