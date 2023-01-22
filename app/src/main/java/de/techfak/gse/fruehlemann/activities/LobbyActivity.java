@@ -20,7 +20,12 @@ import com.android.volley.toolbox.Volley;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import de.techfak.gse.fruehlemann.R;
 
@@ -31,6 +36,7 @@ public class LobbyActivity extends AppCompatActivity {
     String playerName;
     int gameId;
     String playerToken;
+    RequestQueue queue;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,6 +44,7 @@ public class LobbyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_lobby);
 
         url = getIntent().getStringExtra("url");
+        queue = Volley.newRequestQueue(this);
 
         getMapsFromServer();
     }
@@ -48,7 +55,6 @@ public class LobbyActivity extends AppCompatActivity {
     public void getMapsFromServer() {
         StringRequest request = buildGetMapRequest();
 
-        RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
     }
 
@@ -109,10 +115,7 @@ public class LobbyActivity extends AppCompatActivity {
 
         StringRequest request = buildCreateGameRequest(mapName, playerName);
 
-        RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
-
-
     }
 
     public StringRequest buildCreateGameRequest(String mapName, String playerName) {
@@ -128,10 +131,10 @@ public class LobbyActivity extends AppCompatActivity {
 
             String[] responseSplit = response.split(",");
             String[] gameIdSplit = responseSplit[0].split(":");
-            String[] playerTokenSplit = responseSplit[11].split(":");
+            String[] playerTokenSplit = responseSplit[12].split(":");
 
             gameId = Integer.parseInt(gameIdSplit[1]);
-            playerToken = playerTokenSplit[1];
+            playerToken = playerTokenSplit[1].replace("\"", "");
 
             textWaitingHeader.setVisibility(View.VISIBLE);
             textGameId.setVisibility(View.VISIBLE);
@@ -139,6 +142,9 @@ public class LobbyActivity extends AppCompatActivity {
             textShowPlayers.setVisibility(View.VISIBLE);
             textSelectMap.setVisibility(View.INVISIBLE);
             mapSelectSpinnerMultiplayer.setVisibility(View.INVISIBLE);
+
+
+            refreshWaitingLobby();
         };
         Response.ErrorListener onError = error -> {
             Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
@@ -160,6 +166,64 @@ public class LobbyActivity extends AppCompatActivity {
             @Override
             public String getBodyContentType() {
                 return "application/json";
+            }
+        };
+
+        return request;
+    }
+
+    public void refreshWaitingLobby() {
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+
+        StringRequest request = buildGetWaitinglobbyInfo();
+
+        executorService.scheduleWithFixedDelay(() -> queue.add(request), 0, 1, TimeUnit.SECONDS);
+    }
+
+    public StringRequest buildGetWaitinglobbyInfo() {
+        TextView textGameId = findViewById(R.id.textGameId);
+        TextView textMapId = findViewById(R.id.textMapId);
+        TextView textShowPlayers = findViewById(R.id.textShowPlayers);
+        String getMapUrl = url + "/games/" + gameId;
+
+        Response.Listener<String> onResponse = response -> {
+            response = response.substring(1, response.length()-1);
+            String[] responseSplit = response.split(",");
+
+            String[] gameIdSplit = responseSplit[0].split(":");
+            String[] mapIdSplit = responseSplit[1].split(":");
+            ArrayList<String[]> allPlayers = new ArrayList<>();
+            for (int i = 0; i < responseSplit.length; i++) {
+                if (responseSplit[i].startsWith("\"name\":")) {
+                    int j = 0;
+                    while (!responseSplit[j].startsWith("\"type\":")) {
+                        j++;
+                    }
+                    String[] playerNameSplit = responseSplit[i].split(":");
+                    String[] playerRoleSplit = responseSplit[j].split(":");
+
+                    String[] playerInfo = {playerNameSplit[1].replace("\"", ""), playerRoleSplit[1].replace("\"", "")};
+                    allPlayers.add(playerInfo);
+                }
+            }
+
+            textGameId.setText("Spiel ID:\n" + gameIdSplit[1]);
+            textMapId.setText("Karten ID:\n" + mapIdSplit[1].replace("\"", ""));
+            textShowPlayers.setText("Mitspieler");
+            for (String[] playerInfo : allPlayers) {
+                textShowPlayers.setText(textShowPlayers.getText().toString() + "\n" + playerInfo[0] + " (" + playerInfo[1] + ")");
+            }
+        };
+        Response.ErrorListener onError = error -> {
+            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
+        };
+
+        StringRequest request = new StringRequest(Request.Method.GET, getMapUrl, onResponse, onError) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("X-PLAYER-TOKEN", playerToken);
+                return headers;
             }
         };
 
