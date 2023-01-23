@@ -210,8 +210,9 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
 
             if (!mapInfo.startsWith("Fehler: ")) {
                 Intent gameI = new Intent(LobbyActivity.this, GameActivity.class);
-                gameI.putExtra("map", gameApplication.getServerConnection().getMapName());
+                gameI.putExtra("mapName", gameApplication.getServerConnection().getMapName());
                 gameI.putExtra("mapContent", mapInfo);
+                gameI.putExtra("mode", "multiplayer");
                 startActivity(gameI);
             } else {
                 Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + mapInfo, Toast.LENGTH_SHORT).show();

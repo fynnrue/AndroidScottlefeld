@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements PropertyChangeLis
 
             Intent gameI = new Intent(MainActivity.this, GameActivity.class);
             gameI.putExtra("map", selectedMap);
+            gameI.putExtra("mode", "singleplayer");
             startActivity(gameI);
 
             Log.i("Ausgewählte Karte", selectedMap);

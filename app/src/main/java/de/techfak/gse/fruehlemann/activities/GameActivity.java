@@ -65,18 +65,24 @@ public class GameActivity extends AppCompatActivity implements PropertyChangeLis
          * Read map.
          */
         String map = getIntent().getStringExtra("map");
+        String gamemode = getIntent().getStringExtra("mode");
 
         String jsonContent = null;
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(getResources().openRawResource(getResources().getIdentifier(
-                        map, "raw", getPackageName()))))) {
-            jsonContent = br.lines().collect(Collectors.joining());
-            br.close();
-        } catch (IOException e) {
-            Log.i(exceptionLog, "Failed to read File.");
-            showSnackbarOnScreen("Karte konnte nicht gelesen werden.");
-            e.printStackTrace();
-            endActivity();
+
+        if (gamemode.equals("singleplayer")) {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(getResources().openRawResource(getResources().getIdentifier(
+                            map, "raw", getPackageName()))))) {
+                jsonContent = br.lines().collect(Collectors.joining());
+                br.close();
+            } catch (IOException e) {
+                Log.i(exceptionLog, "Failed to read File.");
+                showSnackbarOnScreen("Karte konnte nicht gelesen werden.");
+                e.printStackTrace();
+                endActivity();
+            }
+        } else {
+            jsonContent = getIntent().getStringExtra("mapContent");
         }
 
         /**
