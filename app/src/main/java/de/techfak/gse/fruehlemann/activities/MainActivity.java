@@ -28,6 +28,9 @@ import java.util.Objects;
 
 import de.techfak.gse.fruehlemann.R;
 import de.techfak.gse.fruehlemann.exceptions.NoMapSelectedException;
+import de.techfak.gse.fruehlemann.model.Game;
+import de.techfak.gse.fruehlemann.model.GameApplication;
+import de.techfak.gse.fruehlemann.model.ServerConnection;
 
 public class MainActivity extends AppCompatActivity {
     Spinner dropdown;
@@ -35,10 +38,14 @@ public class MainActivity extends AppCompatActivity {
     String[] singleplayerMapNames;
     String connection = "";
 
+    GameApplication gameApplication;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        gameApplication = (GameApplication) getApplication();
 
         dropdown = findViewById(R.id.mapSpinner);
         noSelection = "Karte auswählen";
@@ -119,6 +126,10 @@ public class MainActivity extends AppCompatActivity {
         String port = Objects.requireNonNull(portInput.getText()).toString();
 
         String url = hostname + ":" + port;
+
+        ServerConnection serverConnection = new ServerConnection(url);
+        gameApplication.setServerConnection(serverConnection);
+
         StringRequest request = buildConnectionRequest(url);
 
         RequestQueue queue = Volley.newRequestQueue(this);
