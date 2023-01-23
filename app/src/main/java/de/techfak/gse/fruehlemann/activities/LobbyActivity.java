@@ -18,32 +18,32 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import de.techfak.gse.fruehlemann.R;
+import de.techfak.gse.fruehlemann.model.GameApplication;
 
-public class LobbyActivity extends AppCompatActivity {
+public class LobbyActivity extends AppCompatActivity implements PropertyChangeListener {
     String url;
-    ArrayList<String> maps = new ArrayList<>();
     String mapName;
     String playerName;
     int gameId;
     String playerToken;
     RequestQueue queue;
-    ScheduledExecutorService executorService;
+    GameApplication gameApplication;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
+
+        gameApplication = (GameApplication) getApplication();
+        gameApplication.getServerConnection().addListener(this);
 
         url = getIntent().getStringExtra("url");
         queue = Volley.newRequestQueue(this);
@@ -51,42 +51,17 @@ public class LobbyActivity extends AppCompatActivity {
         getMapsFromServer();
     }
 
+    @Override
+    public void onDestroy() {
+        gameApplication.getServerConnection().removeListener(this);
+        super.onDestroy();
+    }
+
     /**
      * Call to get the names of all available maps from the server.
      */
     public void getMapsFromServer() {
-        StringRequest request = buildGetMapRequest();
-
-        queue.add(request);
-    }
-
-    /**
-     * Gets all the names of available maps from the server and saves them in global variable maps.
-     * @return StringRequest object of Request to the server.
-     */
-    public StringRequest buildGetMapRequest() {
-        Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
-        String getMapUrl = url + "/maps";
-
-        Response.Listener<String> onResponse = response -> {
-            response = response.substring(1, response.length()-1);
-            String[] responseSplit = response.split(",");
-            for (String map : responseSplit) {
-                maps.add(map.replace("\"", ""));
-            }
-
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_spinner_item, maps);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mapSelectSpinnerMultiplayer.setAdapter(adapter);
-        };
-        Response.ErrorListener onError = error -> {
-            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
-        };
-
-        StringRequest request = new StringRequest(Request.Method.GET, getMapUrl, onResponse, onError);
-
-        return request;
+        gameApplication.getServerConnection().getMapsFromServer();
     }
 
     public void onPlayMXClick(View view) {
@@ -114,134 +89,17 @@ public class LobbyActivity extends AppCompatActivity {
 
     public void onCreateGameClick(View view) {
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
-        Button createGameButton = findViewById(R.id.createGameButton);
 
-        mapName = Objects.requireNonNull(mapSelectSpinnerMultiplayer.getSelectedItem().toString());
+        if (!mapSelectSpinnerMultiplayer.getSelectedItem().toString().equals("")) {
 
-        StringRequest request = buildCreateGameRequest(mapName, playerName);
+            mapName = Objects.requireNonNull(mapSelectSpinnerMultiplayer.getSelectedItem().toString());
 
-        queue.add(request);
-
-        createGameButton.setVisibility(View.INVISIBLE);
-    }
-
-    public StringRequest buildCreateGameRequest(String mapName, String playerName) {
-        String createGameUrl = url + "/games";
-
-        Response.Listener<String> onResponse = response -> {
-            TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
-            TextView textGameId = findViewById(R.id.textGameId);
-            TextView textMapId = findViewById(R.id.textMapId);
-            TextView textShowPlayers = findViewById(R.id.textShowPlayers);
-            TextView textSelectMap = findViewById(R.id.textSelectMap);
-            Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
-
-            String[] responseSplit = response.split(",");
-            String[] gameIdSplit = responseSplit[0].split(":");
-            String[] playerTokenSplit = responseSplit[12].split(":");
-
-            gameId = Integer.parseInt(gameIdSplit[1]);
-            playerToken = playerTokenSplit[1].replace("\"", "");
-
-            textWaitingHeader.setVisibility(View.VISIBLE);
-            textGameId.setVisibility(View.VISIBLE);
-            textMapId.setVisibility(View.VISIBLE);
-            textShowPlayers.setVisibility(View.VISIBLE);
-            textSelectMap.setVisibility(View.INVISIBLE);
-            mapSelectSpinnerMultiplayer.setVisibility(View.INVISIBLE);
-
-
-            refreshWaitingLobby();
-        };
-        Response.ErrorListener onError = error -> {
-            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
-        };
-
-        StringRequest request = new StringRequest(Request.Method.POST, createGameUrl, onResponse, onError) {
-            @Override
-            public byte[] getBody() {
-                try {
-                    final String encodedMapName = URLEncoder.encode(mapName, getParamsEncoding());
-                    final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
-                    final String body = "{\"mapName\":\"" + encodedMapName + "\",\"playerName\":\"" + encodedPlayerName + "\"}";
-                    return body.getBytes(getParamsEncoding());
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
-            }
-        };
-
-        return request;
+            gameApplication.getServerConnection().createGameOnServer(mapName, playerName);
+        }
     }
 
     public void refreshWaitingLobby() {
-        executorService = Executors.newScheduledThreadPool(1);
-
-        StringRequest request = buildGetWaitinglobbyInfo();
-
-        executorService.scheduleWithFixedDelay(() -> queue.add(request), 0, 1, TimeUnit.SECONDS);
-    }
-
-    public StringRequest buildGetWaitinglobbyInfo() {
-        TextView textGameId = findViewById(R.id.textGameId);
-        TextView textMapId = findViewById(R.id.textMapId);
-        TextView textShowPlayers = findViewById(R.id.textShowPlayers);
-        String getGameInfosUrl = url + "/games/" + gameId;
-
-        Response.Listener<String> onResponse = response -> {
-            response = response.substring(1, response.length()-1);
-            String[] responseSplit = response.split(",");
-
-            String[] gameIdSplit = responseSplit[0].split(":");
-            String[] mapIdSplit = responseSplit[1].split(":");
-            String[] gameStatus = responseSplit[2].split(":");
-            ArrayList<String[]> allPlayers = new ArrayList<>();
-            for (int i = 0; i < responseSplit.length; i++) {
-                if (responseSplit[i].startsWith("\"name\":")) {
-                    int j = 0;
-                    while (!responseSplit[j].startsWith("\"type\":")) {
-                        j++;
-                    }
-                    String[] playerNameSplit = responseSplit[i].split(":");
-                    String[] playerRoleSplit = responseSplit[j].split(":");
-
-                    String[] playerInfo = {playerNameSplit[1].replace("\"", ""), playerRoleSplit[1].replace("\"", "")};
-                    allPlayers.add(playerInfo);
-                }
-            }
-
-            textGameId.setText("Spiel ID:\n" + gameIdSplit[1]);
-            textMapId.setText("Karten ID:\n" + mapIdSplit[1].replace("\"", ""));
-            mapName = mapIdSplit[1].replace("\"", "");
-
-            textShowPlayers.setText("Mitspieler");
-            for (String[] playerInfo : allPlayers) {
-                textShowPlayers.setText(textShowPlayers.getText().toString() + "\n" + playerInfo[0] + " (" + playerInfo[1] + ")");
-            }
-
-            if (gameStatus[1].equals("\"RUNNING\"")) {
-                startGame();
-            }
-        };
-        Response.ErrorListener onError = error -> {
-            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
-        };
-
-        StringRequest request = new StringRequest(Request.Method.GET, getGameInfosUrl, onResponse, onError) {
-            @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> headers = new HashMap<>();
-                headers.put("X-PLAYER-TOKEN", playerToken);
-                return headers;
-            }
-        };
-
-        return request;
+        gameApplication.getServerConnection().getWaitingRoomInfo();
     }
 
     public void startGame() {
@@ -255,31 +113,7 @@ public class LobbyActivity extends AppCompatActivity {
         textMapId.setVisibility(View.INVISIBLE);
         textShowPlayers.setVisibility(View.INVISIBLE);
 
-        executorService.shutdown();
-
-        StringRequest request = buildGetMapInfo();
-
-        queue.add(request);
-    }
-
-    public StringRequest buildGetMapInfo() {
-        String getMapInfosUrl = url + "/maps/" + mapName;
-
-        Response.Listener<String> onResponse = response -> {
-            String mapContent = response;
-
-            Intent gameI = new Intent(LobbyActivity.this, GameActivity.class);
-            gameI.putExtra("map", mapName);
-            gameI.putExtra("mapContent", mapContent);
-            startActivity(gameI);
-        };
-        Response.ErrorListener onError = error -> {
-            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
-        };
-
-        StringRequest request = new StringRequest(Request.Method.GET, getMapInfosUrl, onResponse, onError);
-
-        return request;
+        gameApplication.getServerConnection().getMapInfo();
     }
 
     public void onPlayDetectiveClick(View view) {
@@ -347,7 +181,7 @@ public class LobbyActivity extends AppCompatActivity {
             refreshWaitingLobby();
         };
         Response.ErrorListener onError = error -> {
-            Toast.makeText(this, "Ein Fehler ist aufgetreten", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ein Fehler ist aufgetreten.", Toast.LENGTH_SHORT).show();
         };
 
         StringRequest request = new StringRequest(Request.Method.POST, connectUrl, onResponse, onError) {
@@ -370,4 +204,90 @@ public class LobbyActivity extends AppCompatActivity {
 
         return request;
     }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+        String propertyChangeName = propertyChangeEvent.getPropertyName();
+
+        if (propertyChangeName.equals("maps")) {
+            String mapsStatus = propertyChangeEvent.getNewValue().toString();
+
+            if (!mapsStatus.startsWith("Fehler: ")) {
+                Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
+
+                String[] maps = mapsStatus.split(",");
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                        android.R.layout.simple_spinner_item, maps);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                mapSelectSpinnerMultiplayer.setAdapter(adapter);
+            } else {
+                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + mapsStatus, Toast.LENGTH_SHORT).show();
+            }
+        } else if (propertyChangeName.equals("gameCreate")) {
+                String createGameStatus = propertyChangeEvent.getNewValue().toString();
+
+                if (createGameStatus.equals("200")) {
+                    TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
+                    TextView textGameId = findViewById(R.id.textGameId);
+                    TextView textMapId = findViewById(R.id.textMapId);
+                    TextView textShowPlayers = findViewById(R.id.textShowPlayers);
+                    TextView textSelectMap = findViewById(R.id.textSelectMap);
+                    Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
+                    Button createGameButton = findViewById(R.id.createGameButton);
+
+                    textWaitingHeader.setVisibility(View.VISIBLE);
+                    textGameId.setVisibility(View.VISIBLE);
+                    textMapId.setVisibility(View.VISIBLE);
+                    textShowPlayers.setVisibility(View.VISIBLE);
+                    textSelectMap.setVisibility(View.INVISIBLE);
+                    mapSelectSpinnerMultiplayer.setVisibility(View.INVISIBLE);
+                    createGameButton.setVisibility(View.INVISIBLE);
+
+                    refreshWaitingLobby();
+                } else {
+                    Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + createGameStatus, Toast.LENGTH_SHORT).show();
+                }
+        } else if (propertyChangeName.equals("waitingLobbyGameId")) {
+            String gameId = propertyChangeEvent.getNewValue().toString();
+
+            TextView textGameId = findViewById(R.id.textGameId);
+
+            textGameId.setText("Spiel ID:\n" + gameId);
+        } else if (propertyChangeName.equals("waitingLobbyMap")) {
+            String mapName = propertyChangeEvent.getNewValue().toString();
+
+            TextView textMapId = findViewById(R.id.textMapId);
+
+            textMapId.setText("Karten ID:\n" + mapName);
+        } else if (propertyChangeName.equals("waitingLobbyPlayers")) {
+                String allPlayers = propertyChangeEvent.getNewValue().toString();
+
+                TextView textShowPlayers = findViewById(R.id.textShowPlayers);
+
+                textShowPlayers.setText("Mitspieler:\n" + allPlayers);
+        } else if (propertyChangeName.equals("waitingLobbyGameStatus")) {
+            String gameStatus = propertyChangeEvent.getNewValue().toString();
+
+            if (gameStatus.equals("RUNNING")) {
+                startGame();
+            }
+        } else if (propertyChangeName.equals("waitingLobbyError")) {
+                String waitingLobbyError = propertyChangeEvent.getNewValue().toString();
+
+                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + waitingLobbyError, Toast.LENGTH_SHORT).show();
+        } else if (propertyChangeName.equals("mapInfo")) {
+            String mapInfo = propertyChangeEvent.getNewValue().toString();
+
+            if (!mapInfo.startsWith("Fehler: ")) {
+                Intent gameI = new Intent(LobbyActivity.this, GameActivity.class);
+                gameI.putExtra("map", mapName);
+                gameI.putExtra("mapContent", mapInfo);
+                startActivity(gameI);
+            } else {
+                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }

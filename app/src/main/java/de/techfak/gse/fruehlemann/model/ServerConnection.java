@@ -1,6 +1,8 @@
 package de.techfak.gse.fruehlemann.model;
 
 import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -10,8 +12,17 @@ import com.android.volley.toolbox.Volley;;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import de.techfak.gse.fruehlemann.activities.GameActivity;
+import de.techfak.gse.fruehlemann.activities.LobbyActivity;
 
 public class ServerConnection {
     String url;
@@ -21,6 +32,7 @@ public class ServerConnection {
     int gameId;
     String playerToken;
     String connectionStatus;
+    String gameStatus;
     RequestQueue queue;
     ScheduledExecutorService executorService;
     Context context;
@@ -78,6 +90,10 @@ public class ServerConnection {
         return connectionStatus;
     }
 
+    public String getGameStatus() {
+        return gameStatus;
+    }
+
     public RequestQueue getQueue() {
         return queue;
     }
@@ -111,6 +127,194 @@ public class ServerConnection {
 
         return request;
     }
+
+    //Requests player plays M. X
+    public void getMapsFromServer() {
+        StringRequest request = buildGetMapsRequest();
+
+        queue.add(request);
+    }
+
+    public StringRequest buildGetMapsRequest() {
+        String getMapUrl = url + "/maps";
+
+        Response.Listener<String> onResponse = response -> {
+            maps = new ArrayList<>();
+
+            response = response.substring(1, response.length()-1);
+            String[] responseSplit = response.split(",");
+            for (String map : responseSplit) {
+                maps.add(map.replace("\"", ""));
+            }
+
+            String mapsString = "";
+            for (int i = 0; i < maps.size(); i++) {
+                if (i != 0) {
+                    mapsString += "," + maps.get(i);
+                } else {
+                    mapsString = maps.get(i);
+                }
+            }
+            this.support.firePropertyChange("maps", "", mapsString);
+        };
+        Response.ErrorListener onError = error -> {
+            String mapsStatus = error.getCause().getMessage();
+            this.support.firePropertyChange("connection", "", "Fehler: " + mapsStatus);
+        };
+
+        StringRequest request = new StringRequest(Request.Method.GET, getMapUrl, onResponse, onError);
+
+        return request;
+    }
+
+
+    public void createGameOnServer(String mapName, String playerName) {
+        this.mapName = mapName;
+        this.playerName = playerName;
+
+        StringRequest request = buildCreateGameRequest();
+
+        queue.add(request);
+    }
+
+    public StringRequest buildCreateGameRequest() {
+        String createGameUrl = url + "/games";
+
+        Response.Listener<String> onResponse = response -> {
+            String[] responseSplit = response.split(",");
+            String[] gameIdSplit = responseSplit[0].split(":");
+            String[] playerTokenSplit = responseSplit[7].split(":");
+
+            gameId = Integer.parseInt(gameIdSplit[1]);
+            playerToken = playerTokenSplit[1].replace("\"", "");
+
+            this.support.firePropertyChange("gameCreate", "", "200");
+        };
+        Response.ErrorListener onError = error -> {
+            String createGameStatus = error.getCause().getMessage();
+            this.support.firePropertyChange("gameCreate", "", createGameStatus);
+        };
+
+        StringRequest request = new StringRequest(Request.Method.POST, createGameUrl, onResponse, onError) {
+            @Override
+            public byte[] getBody() {
+                try {
+                    final String encodedMapName = URLEncoder.encode(mapName, getParamsEncoding());
+                    final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
+                    final String body = "{\"mapName\":\"" + encodedMapName + "\",\"playerName\":\"" + encodedPlayerName + "\"}";
+                    return body.getBytes(getParamsEncoding());
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+        };
+
+        return request;
+    }
+
+
+    public void getWaitingRoomInfo() {
+        executorService = Executors.newScheduledThreadPool(1);
+
+        StringRequest request = buildGetWaitinglobbyInfoRequest();
+
+        executorService.scheduleWithFixedDelay(() -> queue.add(request), 0, 1, TimeUnit.SECONDS);
+    }
+
+    public StringRequest buildGetWaitinglobbyInfoRequest() {
+        String getGameInfosUrl = url + "/games/" + gameId;
+
+        Response.Listener<String> onResponse = response -> {
+            response = response.substring(1, response.length()-1);
+            String[] responseSplit = response.split(",");
+
+            String[] gameIdSplit = responseSplit[0].split(":");
+            String[] mapIdSplit = responseSplit[1].split(":");
+            String[] gameStatusSplit = responseSplit[2].split(":");
+            ArrayList<String> allPlayers = new ArrayList<>();
+
+            for (int i = 0; i < responseSplit.length; i++) {
+                if (responseSplit[i].startsWith("\"name\":")) {
+                    int j = i;
+                    while (!responseSplit[j].startsWith("\"type\":")) {
+                        j++;
+                    }
+                    String[] playerNameSplit = responseSplit[i].split(":");
+                    String[] playerRoleSplit = responseSplit[j].split(":");
+
+                    String playerInfo = playerNameSplit[1].replace("\"", "") + " (" + playerRoleSplit[1].replace("\"", "") + ")";
+                    allPlayers.add(playerInfo);
+                }
+            }
+
+            String playersString = "";
+            for (int i = 0; i < allPlayers.size(); i++) {
+                if (i != 0) {
+                    playersString += "\n" + allPlayers.get(i);
+                } else {
+                    playersString = allPlayers.get(i);
+                }
+            }
+
+            mapName = mapIdSplit[1].replace("\"", "");
+            gameId = Integer.valueOf(gameIdSplit[1].replace("\"", ""));
+            gameStatus = gameStatusSplit[1].replace("\"", "");
+
+            if (gameStatus.equals("RUNNING")) {
+                executorService.shutdown();
+            }
+
+            this.support.firePropertyChange("waitingLobbyGameId", "", gameId);
+            this.support.firePropertyChange("waitingLobbyMap", "", mapName);
+            this.support.firePropertyChange("waitingLobbyPlayers", "", playersString);
+            this.support.firePropertyChange("waitingLobbyGameStatus", "", gameStatus);
+        };
+        Response.ErrorListener onError = error -> {
+            String waitingStatus = error.getCause().getMessage();
+            this.support.firePropertyChange("waitingLobbyError", "", "Fehler: " + waitingStatus);
+        };
+
+        StringRequest request = new StringRequest(Request.Method.GET, getGameInfosUrl, onResponse, onError) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("X-PLAYER-TOKEN", playerToken);
+                return headers;
+            }
+        };
+
+        return request;
+    }
+
+    public void getMapInfo() {
+        StringRequest request = buildGetMapInfoRequest();
+
+        queue.add(request);
+    }
+
+    public StringRequest buildGetMapInfoRequest() {
+        String getMapInfosUrl = url + "/maps/" + mapName;
+
+        Response.Listener<String> onResponse = response -> {
+            String mapContent = response;
+
+            this.support.firePropertyChange("mapInfo", "", mapContent);
+        };
+        Response.ErrorListener onError = error -> {
+            String mapInfoStatus = error.getCause().getMessage();
+            this.support.firePropertyChange("mapInfo", "", "Fehler: " + mapInfoStatus);
+        };
+
+        StringRequest request = new StringRequest(Request.Method.GET, getMapInfosUrl, onResponse, onError);
+
+        return request;
+    }
+
 
     //PropertyChange
     public void addListener(PropertyChangeListener listener) {
