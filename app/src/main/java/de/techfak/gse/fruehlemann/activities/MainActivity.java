@@ -9,11 +9,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.widget.ArrayAdapter;
@@ -23,16 +18,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
 import de.techfak.gse.fruehlemann.R;
 import de.techfak.gse.fruehlemann.exceptions.NoMapSelectedException;
-import de.techfak.gse.fruehlemann.model.Game;
 import de.techfak.gse.fruehlemann.model.GameApplication;
 import de.techfak.gse.fruehlemann.model.ServerConnection;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PropertyChangeListener {
     Spinner dropdown;
     String noSelection;
     String[] singleplayerMapNames;
@@ -46,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         gameApplication = (GameApplication) getApplication();
+        gameApplication.setServerConnection(new ServerConnection("", this));
+        gameApplication.getServerConnection().addListener(this);
 
         dropdown = findViewById(R.id.mapSpinner);
         noSelection = "Karte auswählen";
@@ -61,6 +59,12 @@ public class MainActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, singleplayerMapNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         dropdown.setAdapter(adapter);
+    }
+
+    @Override
+    public void onDestroy() {
+        gameApplication.getServerConnection().removeListener(this);
+        super.onDestroy();
     }
 
     public void onStartClick(View view) {
@@ -127,39 +131,9 @@ public class MainActivity extends AppCompatActivity {
 
         String url = hostname + ":" + port;
 
-        ServerConnection serverConnection = new ServerConnection(url);
-        gameApplication.setServerConnection(serverConnection);
-
-        StringRequest request = buildConnectionRequest(url);
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(request);
+        gameApplication.getServerConnection().setUrl(url);
+        gameApplication.getServerConnection().connectToServer();
     }
-
-    public StringRequest buildConnectionRequest(String url) {
-        String checkConnectionUrl = url + "/";
-        Response.Listener<String> onResponse = response -> {
-            if (response.equals("Scottlefeld")) {
-                Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
-
-                Intent lobbyI = new Intent(MainActivity.this, LobbyActivity.class);
-                lobbyI.putExtra("url", url);
-                startActivity(lobbyI);
-            } else {
-                Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
-            }
-        };
-        Response.ErrorListener onError = error -> {
-            Toast.makeText(this, "Keine Verbindung zu " + url + " möglich", Toast.LENGTH_SHORT).show();
-            connection = "";
-        };
-
-        StringRequest request = new StringRequest(Request.Method.GET, checkConnectionUrl, onResponse, onError);
-
-        return request;
-    }
-
-
 
     private boolean isMapSelected() {
         try {
@@ -177,5 +151,28 @@ public class MainActivity extends AppCompatActivity {
             throw new NoMapSelectedException("No map Selected");
         }
     }
+
+    //PropertyChange
+    @Override
+    public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+        String url = gameApplication.getServerConnection().getUrl();
+
+        if (propertyChangeEvent.getPropertyName().equals("connection")) {
+            String statusCode = propertyChangeEvent.getNewValue().toString();
+
+            if (statusCode.equals("200")) {
+                Toast.makeText(this, "Verbunden mit " + url, Toast.LENGTH_SHORT).show();
+
+                Intent lobbyI = new Intent(MainActivity.this, LobbyActivity.class);
+                lobbyI.putExtra("url", url);
+                startActivity(lobbyI);
+            } else if (statusCode.equals("201")) {
+                Toast.makeText(this, "Verbunden aber " + url + "ist kein Spielserver.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Keine Verbindung zu " + url + " möglich. \nFehler: " + statusCode, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
 }
