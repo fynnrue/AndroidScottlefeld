@@ -1,8 +1,6 @@
 package de.techfak.gse.fruehlemann.model;
 
 import android.content.Context;
-import android.content.Intent;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -20,9 +18,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import de.techfak.gse.fruehlemann.activities.GameActivity;
-import de.techfak.gse.fruehlemann.activities.LobbyActivity;
 
 public class ServerConnection {
     String url;
@@ -185,7 +180,7 @@ public class ServerConnection {
             String[] gameIdSplit = responseSplit[0].split(":");
             String[] playerTokenSplit = responseSplit[7].split(":");
 
-            gameId = Integer.parseInt(gameIdSplit[1]);
+            gameId = Integer.parseInt(gameIdSplit[1].replace("\"", ""));
             playerToken = playerTokenSplit[1].replace("\"", "");
 
             this.support.firePropertyChange("gameCreate", "", "200");
@@ -291,6 +286,57 @@ public class ServerConnection {
         return request;
     }
 
+
+    //Requests player plays Detective
+    public void connectToGame(int gameId, String playerName) {
+        this.gameId = gameId;
+        this.playerName = playerName;
+
+        StringRequest request = buildConnectGameRequest();
+
+        queue.add(request);
+    }
+
+    public StringRequest buildConnectGameRequest() {
+        String connectUrl = url + "/games/" + gameId + "/players";
+
+        Response.Listener<String> onResponse = response -> {
+            String[] responseSplit = response.split(",");
+            String[] playerTokenSplit = responseSplit[3].split(":");
+
+            playerToken = playerTokenSplit[1].replace("\"", "");
+
+            this.support.firePropertyChange("connectGame", "", "200");
+        };
+        Response.ErrorListener onError = error -> {
+            String createGameStatus = error.getCause().getMessage();
+            this.support.firePropertyChange("connectGame", "", createGameStatus);
+        };
+
+        StringRequest request = new StringRequest(Request.Method.POST, connectUrl, onResponse, onError) {
+            @Override
+            public byte[] getBody() {
+                try {
+                    final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
+                    final String body = "{\"playerName\":\"" + encodedPlayerName + "\"}";
+                    return body.getBytes(getParamsEncoding());
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+        };
+
+        return request;
+    }
+
+
+
+    //Requests from all players
     public void getMapInfo() {
         StringRequest request = buildGetMapInfoRequest();
 
@@ -314,6 +360,7 @@ public class ServerConnection {
 
         return request;
     }
+
 
 
     //PropertyChange

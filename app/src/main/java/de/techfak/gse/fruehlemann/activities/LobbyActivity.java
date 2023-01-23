@@ -12,29 +12,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Objects;
-import java.util.concurrent.ScheduledExecutorService;
 
 import de.techfak.gse.fruehlemann.R;
 import de.techfak.gse.fruehlemann.model.GameApplication;
 
 public class LobbyActivity extends AppCompatActivity implements PropertyChangeListener {
     String url;
-    String mapName;
-    String playerName;
-    int gameId;
-    String playerToken;
-    RequestQueue queue;
     GameApplication gameApplication;
 
     @Override
@@ -46,7 +32,6 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         gameApplication.getServerConnection().addListener(this);
 
         url = getIntent().getStringExtra("url");
-        queue = Volley.newRequestQueue(this);
 
         getMapsFromServer();
     }
@@ -74,9 +59,6 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
 
         if (!textPlayerName.getText().toString().equals("")) {
-
-            playerName = Objects.requireNonNull(textPlayerName.getText().toString());
-
             textName.setVisibility(View.INVISIBLE);
             textPlayerName.setVisibility(View.INVISIBLE);
             playMXButton.setVisibility(View.INVISIBLE);
@@ -89,10 +71,12 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
 
     public void onCreateGameClick(View view) {
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
+        EditText textPlayerName = findViewById(R.id.textPlayerName);
 
         if (!mapSelectSpinnerMultiplayer.getSelectedItem().toString().equals("")) {
 
-            mapName = Objects.requireNonNull(mapSelectSpinnerMultiplayer.getSelectedItem().toString());
+            String mapName = Objects.requireNonNull(mapSelectSpinnerMultiplayer.getSelectedItem().toString());
+            String playerName = Objects.requireNonNull(textPlayerName.getText().toString());
 
             gameApplication.getServerConnection().createGameOnServer(mapName, playerName);
         }
@@ -126,9 +110,6 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         Button connectButton = findViewById(R.id.connectButton);
 
         if (!textPlayerName.getText().toString().equals("")) {
-
-            playerName = Objects.requireNonNull(textPlayerName.getText().toString());
-
             textName.setVisibility(View.INVISIBLE);
             textPlayerName.setVisibility(View.INVISIBLE);
             playMXButton.setVisibility(View.INVISIBLE);
@@ -141,69 +122,17 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
 
     public void onConnectClick(View view) {
         EditText textInputGameId = findViewById(R.id.textInputGameId);
+        EditText textPlayerName = findViewById(R.id.textPlayerName);
 
         if (!textInputGameId.getText().toString().equals("")) {
 
-            gameId = Integer.valueOf(textInputGameId.getText().toString());
+            int gameId = Integer.valueOf(textInputGameId.getText().toString());
+            String playerName = textPlayerName.getText().toString();
 
-            StringRequest request = buildConnectRequest();
-
-            queue.add(request);
+            gameApplication.getServerConnection().connectToGame(gameId, playerName);
         }
     }
 
-    public StringRequest buildConnectRequest() {
-        String connectUrl = url + "/games/" + gameId + "/players";
-
-        Response.Listener<String> onResponse = response -> {
-            TextView textGameId = findViewById(R.id.textGameId);
-            TextView textMapId = findViewById(R.id.textMapId);
-            TextView textShowPlayers = findViewById(R.id.textShowPlayers);
-            TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
-            TextView textInputGameIdHeader = findViewById(R.id.textInputGameIdHeader);
-            EditText textInputGameId = findViewById(R.id.textInputGameId);
-            Button connectButton = findViewById(R.id.connectButton);
-
-            String[] responseSplit = response.split(",");
-            String[] gameIdSplit = responseSplit[1].split(":");
-            String[] playerTokenSplit = responseSplit[3].split(":");
-
-            playerToken = playerTokenSplit[1].replace("\"", "");
-
-            textWaitingHeader.setVisibility(View.VISIBLE);
-            textGameId.setVisibility(View.VISIBLE);
-            textMapId.setVisibility(View.VISIBLE);
-            textShowPlayers.setVisibility(View.VISIBLE);
-            textInputGameIdHeader.setVisibility(View.INVISIBLE);
-            textInputGameId.setVisibility(View.INVISIBLE);
-            connectButton.setVisibility(View.INVISIBLE);
-
-            refreshWaitingLobby();
-        };
-        Response.ErrorListener onError = error -> {
-            Toast.makeText(this, "Ein Fehler ist aufgetreten.", Toast.LENGTH_SHORT).show();
-        };
-
-        StringRequest request = new StringRequest(Request.Method.POST, connectUrl, onResponse, onError) {
-            @Override
-            public byte[] getBody() {
-                try {
-                    final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
-                    final String body = "{\"playerName\":\"" + encodedPlayerName + "\"}";
-                    return body.getBytes(getParamsEncoding());
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
-            }
-        };
-
-        return request;
-    }
 
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
@@ -281,11 +210,35 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
 
             if (!mapInfo.startsWith("Fehler: ")) {
                 Intent gameI = new Intent(LobbyActivity.this, GameActivity.class);
-                gameI.putExtra("map", mapName);
+                gameI.putExtra("map", gameApplication.getServerConnection().getMapName());
                 gameI.putExtra("mapContent", mapInfo);
                 startActivity(gameI);
             } else {
-                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + mapInfo, Toast.LENGTH_SHORT).show();
+            }
+        } else if (propertyChangeName.equals("connectGame")) {
+            String connectGameStatus = propertyChangeEvent.getNewValue().toString();
+
+            if (connectGameStatus.equals("200")) {
+                TextView textGameId = findViewById(R.id.textGameId);
+                TextView textMapId = findViewById(R.id.textMapId);
+                TextView textShowPlayers = findViewById(R.id.textShowPlayers);
+                TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
+                TextView textInputGameIdHeader = findViewById(R.id.textInputGameIdHeader);
+                EditText textInputGameId = findViewById(R.id.textInputGameId);
+                Button connectButton = findViewById(R.id.connectButton);
+
+                textWaitingHeader.setVisibility(View.VISIBLE);
+                textGameId.setVisibility(View.VISIBLE);
+                textMapId.setVisibility(View.VISIBLE);
+                textShowPlayers.setVisibility(View.VISIBLE);
+                textInputGameIdHeader.setVisibility(View.INVISIBLE);
+                textInputGameId.setVisibility(View.INVISIBLE);
+                connectButton.setVisibility(View.INVISIBLE);
+
+                refreshWaitingLobby();
+            } else {
+                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + connectGameStatus, Toast.LENGTH_SHORT).show();
             }
         }
     }
