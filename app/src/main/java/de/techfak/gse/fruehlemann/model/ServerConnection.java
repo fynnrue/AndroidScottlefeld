@@ -2,9 +2,11 @@ package de.techfak.gse.fruehlemann.model;
 
 import android.content.Context;
 
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;;
 
@@ -113,9 +115,13 @@ public class ServerConnection {
             this.support.firePropertyChange("connection", "", connectionStatus);
         };
         Response.ErrorListener onError = error -> {
-            connectionStatus = error.getCause().getMessage();
-            setUrl(url);
-            this.support.firePropertyChange("connection", "", connectionStatus);
+            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                this.support.firePropertyChange("connection", "", "Server antwortet nicht.");
+            } else {
+                connectionStatus = error.getCause().getMessage();
+                setUrl(url);
+                this.support.firePropertyChange("connection", "", connectionStatus);
+            }
         };
 
         StringRequest request = new StringRequest(Request.Method.GET, checkConnectionUrl, onResponse, onError);
@@ -153,8 +159,12 @@ public class ServerConnection {
             this.support.firePropertyChange("maps", "", mapsString);
         };
         Response.ErrorListener onError = error -> {
-            String mapsStatus = error.getCause().getMessage();
-            this.support.firePropertyChange("connection", "", "Fehler: " + mapsStatus);
+            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                this.support.firePropertyChange("maps", "", "Fehler: Server antwortet nicht.");
+            } else {
+                String mapsStatus = error.getCause().getMessage();
+                this.support.firePropertyChange("maps", "", "Fehler: " + mapsStatus);
+            }
         };
 
         StringRequest request = new StringRequest(Request.Method.GET, getMapUrl, onResponse, onError);
@@ -186,8 +196,12 @@ public class ServerConnection {
             this.support.firePropertyChange("gameCreate", "", "200");
         };
         Response.ErrorListener onError = error -> {
-            String createGameStatus = error.getCause().getMessage();
-            this.support.firePropertyChange("gameCreate", "", createGameStatus);
+            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                this.support.firePropertyChange("gameCreate", "", "Server antwortet nicht.");
+            } else {
+                String createGameStatus = error.getCause().getMessage();
+                this.support.firePropertyChange("gameCreate", "", createGameStatus);
+            }
         };
 
         StringRequest request = new StringRequest(Request.Method.POST, createGameUrl, onResponse, onError) {
@@ -270,8 +284,12 @@ public class ServerConnection {
             this.support.firePropertyChange("waitingLobbyGameStatus", "", gameStatus);
         };
         Response.ErrorListener onError = error -> {
-            String waitingStatus = error.getCause().getMessage();
-            this.support.firePropertyChange("waitingLobbyError", "", "Fehler: " + waitingStatus);
+            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                this.support.firePropertyChange("waitingLobbyError", "", "Fehler: Server antwortet nicht.");
+            } else {
+                String waitingStatus = error.getCause().getMessage();
+                this.support.firePropertyChange("waitingLobbyError", "", "Fehler: " + waitingStatus);
+            }
         };
 
         StringRequest request = new StringRequest(Request.Method.GET, getGameInfosUrl, onResponse, onError) {
