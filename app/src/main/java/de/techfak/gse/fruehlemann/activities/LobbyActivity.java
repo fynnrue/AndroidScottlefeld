@@ -241,6 +241,15 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
             } else {
                 Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + connectGameStatus, Toast.LENGTH_SHORT).show();
             }
+        } else if (propertyChangeName.equals("exception")) {
+            String exceptionType = propertyChangeEvent.getNewValue().toString();
+
+            if (exceptionType.equals("createGameRequest")) {
+                Toast.makeText(this, "Fehler beim erstellen des Spiels. (parsen fehlgeschlagen)", Toast.LENGTH_SHORT).show();
+            } else if (exceptionType.equals("connectRequest")) {
+                Toast.makeText(this, "Fehler beim erstellen betreten Spiels. (parsen fehlgeschlagen)", Toast.LENGTH_SHORT).show();
+            }
+
         }
     }
 

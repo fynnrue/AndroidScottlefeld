@@ -1,6 +1,7 @@
 package de.techfak.gse.fruehlemann.model;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
@@ -213,6 +214,8 @@ public class ServerConnection {
                     final String body = "{\"mapName\":\"" + encodedMapName + "\",\"playerName\":\"" + encodedPlayerName + "\"}";
                     return body.getBytes(getParamsEncoding());
                 } catch (UnsupportedEncodingException e) {
+                    Log.i("Exception connect", "Error when encoding player or map name to create a game.");
+                    support.firePropertyChange("exception", "", "createGameRequest");
                     e.printStackTrace();
                     return null;
                 }
@@ -343,6 +346,8 @@ public class ServerConnection {
                     final String body = "{\"playerName\":\"" + encodedPlayerName + "\"}";
                     return body.getBytes(getParamsEncoding());
                 } catch (UnsupportedEncodingException e) {
+                    Log.i("Exception connect", "Error when encoding player name to connect to game.");
+                    support.firePropertyChange("exception", "", "connectRequest");
                     e.printStackTrace();
                     return null;
                 }
