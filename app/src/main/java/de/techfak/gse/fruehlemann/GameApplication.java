@@ -1,6 +1,8 @@
-package de.techfak.gse.fruehlemann.model;
+package de.techfak.gse.fruehlemann;
 
 import android.app.Application;
+
+import de.techfak.gse.fruehlemann.model.ServerConnection;
 
 public class GameApplication  extends Application {
     ServerConnection server;

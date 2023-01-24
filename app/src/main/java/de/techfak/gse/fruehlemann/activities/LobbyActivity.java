@@ -17,7 +17,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Objects;
 
 import de.techfak.gse.fruehlemann.R;
-import de.techfak.gse.fruehlemann.model.GameApplication;
+import de.techfak.gse.fruehlemann.GameApplication;
 
 public class LobbyActivity extends AppCompatActivity implements PropertyChangeListener {
     String url;

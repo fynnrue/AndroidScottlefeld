@@ -4,7 +4,7 @@
     package="de.techfak.gse.fruehlemann">
 
     <application
-        android:name=".model.GameApplication"
+        android:name=".GameApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

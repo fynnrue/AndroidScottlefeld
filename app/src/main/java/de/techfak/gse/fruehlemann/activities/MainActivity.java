@@ -25,7 +25,7 @@ import java.util.Objects;
 
 import de.techfak.gse.fruehlemann.R;
 import de.techfak.gse.fruehlemann.exceptions.NoMapSelectedException;
-import de.techfak.gse.fruehlemann.model.GameApplication;
+import de.techfak.gse.fruehlemann.GameApplication;
 import de.techfak.gse.fruehlemann.model.ServerConnection;
 
 public class MainActivity extends AppCompatActivity implements PropertyChangeListener {
