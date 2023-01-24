@@ -327,8 +327,12 @@ public class ServerConnection {
             this.support.firePropertyChange("connectGame", "", "200");
         };
         Response.ErrorListener onError = error -> {
-            String createGameStatus = error.getCause().getMessage();
-            this.support.firePropertyChange("connectGame", "", createGameStatus);
+            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                this.support.firePropertyChange("connectGame", "", "Server antwortet nicht.");
+            } else {
+                String createGameStatus = error.getCause().getMessage();
+                this.support.firePropertyChange("connectGame", "", createGameStatus);
+            }
         };
 
         StringRequest request = new StringRequest(Request.Method.POST, connectUrl, onResponse, onError) {
@@ -370,8 +374,12 @@ public class ServerConnection {
             this.support.firePropertyChange("mapInfo", "", mapContent);
         };
         Response.ErrorListener onError = error -> {
-            String mapInfoStatus = error.getCause().getMessage();
-            this.support.firePropertyChange("mapInfo", "", "Fehler: " + mapInfoStatus);
+            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                this.support.firePropertyChange("mapInfo", "", "Fehler: Server antwortet nicht.");
+            } else {
+                String mapInfoStatus = error.getCause().getMessage();
+                this.support.firePropertyChange("mapInfo", "", "Fehler: " + mapInfoStatus);
+            }
         };
 
         StringRequest request = new StringRequest(Request.Method.GET, getMapInfosUrl, onResponse, onError);
