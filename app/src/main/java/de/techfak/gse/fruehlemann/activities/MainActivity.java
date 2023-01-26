@@ -170,7 +170,8 @@ public class MainActivity extends AppCompatActivity implements PropertyChangeLis
             } else if (statusCode.equals("201")) {
                 Toast.makeText(this, "Verbunden aber " + url + "ist kein Spielserver.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Keine Verbindung zu " + url + " möglich. \nFehler: " + statusCode, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Keine Verbindung zu " + url + " möglich. \nFehler: " + statusCode,
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }

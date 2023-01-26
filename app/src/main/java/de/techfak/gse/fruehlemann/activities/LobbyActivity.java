@@ -23,6 +23,10 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
     String url;
     GameApplication gameApplication;
 
+
+    final String statusSuccessfull = "200";
+    final String statusErrorOccured = "Fehler: ";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,7 +145,7 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         if (propertyChangeName.equals("maps")) {
             String mapsStatus = propertyChangeEvent.getNewValue().toString();
 
-            if (!mapsStatus.startsWith("Fehler: ")) {
+            if (!mapsStatus.startsWith(statusErrorOccured)) {
                 Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
 
                 String[] maps = mapsStatus.split(",");
@@ -151,12 +155,13 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 mapSelectSpinnerMultiplayer.setAdapter(adapter);
             } else {
-                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + mapsStatus, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Ein Fehler beim Auslesen der Karten ist aufgetreten.\n" + mapsStatus,
+                        Toast.LENGTH_SHORT).show();
             }
         } else if (propertyChangeName.equals("gameCreate")) {
                 String createGameStatus = propertyChangeEvent.getNewValue().toString();
 
-                if (createGameStatus.equals("200")) {
+                if (createGameStatus.equals(statusSuccessfull)) {
                     TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
                     TextView textGameId = findViewById(R.id.textGameId);
                     TextView textMapId = findViewById(R.id.textMapId);
@@ -175,7 +180,8 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
 
                     refreshWaitingLobby();
                 } else {
-                    Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + createGameStatus, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ein Fehler beim Erstellen des Spiels ist aufgetreten.\n" + createGameStatus,
+                            Toast.LENGTH_SHORT).show();
                 }
         } else if (propertyChangeName.equals("waitingLobbyGameId")) {
             String gameId = propertyChangeEvent.getNewValue().toString();
@@ -204,23 +210,25 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         } else if (propertyChangeName.equals("waitingLobbyError")) {
                 String waitingLobbyError = propertyChangeEvent.getNewValue().toString();
 
-                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + waitingLobbyError, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Ein Fehler beim Laden der Lobby Informationen ist aufgetreten.\n"
+                        + waitingLobbyError, Toast.LENGTH_SHORT).show();
         } else if (propertyChangeName.equals("mapInfo")) {
             String mapInfo = propertyChangeEvent.getNewValue().toString();
 
-            if (!mapInfo.startsWith("Fehler: ")) {
+            if (!mapInfo.startsWith(statusErrorOccured)) {
                 Intent gameI = new Intent(LobbyActivity.this, GameActivity.class);
                 gameI.putExtra("mapName", gameApplication.getServerConnection().getMapName());
                 gameI.putExtra("mapContent", mapInfo);
                 gameI.putExtra("mode", "multiplayer");
                 startActivity(gameI);
             } else {
-                Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + mapInfo, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Ein Fehler ist beim Parsen der Karte ausgewählten aufgetreten.\n" + mapInfo,
+                        Toast.LENGTH_SHORT).show();
             }
         } else if (propertyChangeName.equals("connectGame")) {
             String connectGameStatus = propertyChangeEvent.getNewValue().toString();
 
-            if (connectGameStatus.equals("200")) {
+            if (connectGameStatus.equals(statusSuccessfull)) {
                 TextView textGameId = findViewById(R.id.textGameId);
                 TextView textMapId = findViewById(R.id.textMapId);
                 TextView textShowPlayers = findViewById(R.id.textShowPlayers);
@@ -241,15 +249,12 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
             } else {
                 Toast.makeText(this, "Ein Fehler ist aufgetreten.\n" + connectGameStatus, Toast.LENGTH_SHORT).show();
             }
-        } else if (propertyChangeName.equals("exception")) {
-            String exceptionType = propertyChangeEvent.getNewValue().toString();
-
-            if (exceptionType.equals("createGameRequest")) {
-                Toast.makeText(this, "Fehler beim erstellen des Spiels. (parsen fehlgeschlagen)", Toast.LENGTH_SHORT).show();
-            } else if (exceptionType.equals("connectRequest")) {
-                Toast.makeText(this, "Fehler beim erstellen betreten Spiels. (parsen fehlgeschlagen)", Toast.LENGTH_SHORT).show();
-            }
-
+        } else if (propertyChangeName.equals("exceptionCreate")) {
+            Toast.makeText(this, "Fehler beim erstellen des Spiels. (parsen fehlgeschlagen)",
+                        Toast.LENGTH_SHORT).show();
+        } else if (propertyChangeName.equals("exceptionJoin")) {
+            Toast.makeText(this, "Fehler beim erstellen betreten Spiels. (parsen fehlgeschlagen)",
+                        Toast.LENGTH_SHORT).show();
         }
     }
 

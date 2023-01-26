@@ -9,7 +9,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;;
+import com.android.volley.toolbox.Volley;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -23,6 +23,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class ServerConnection {
+    final String statusSuccessfull = "200";
+    final String splitComma = ",";
+    final String splitColon = ":";
+    final String endRequestbody = "\"}";
+    final String replaceQuote = "\"";
+    final String urlGames = "/games/";
+    final String requestBodyType = "application/json";
+
     String url;
     ArrayList<String> maps;
     String mapName;
@@ -106,22 +114,24 @@ public class ServerConnection {
 
     public StringRequest buildConnectionRequest(String url) {
         String checkConnectionUrl = url + "/";
+        String propertyChange = "connection";
+
         Response.Listener<String> onResponse = response -> {
             setUrl(url);
             if (response.equals("Scottlefeld")) {
-                connectionStatus = "200";
+                connectionStatus = statusSuccessfull;
             } else {
                 connectionStatus = "201";
             }
-            this.support.firePropertyChange("connection", "", connectionStatus);
+            this.support.firePropertyChange(propertyChange, "", connectionStatus);
         };
         Response.ErrorListener onError = error -> {
             if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                this.support.firePropertyChange("connection", "", "Server antwortet nicht.");
+                this.support.firePropertyChange(propertyChange, "", "Server antwortet nicht beim Verbindung abrufen.");
             } else {
                 connectionStatus = error.getCause().getMessage();
                 setUrl(url);
-                this.support.firePropertyChange("connection", "", connectionStatus);
+                this.support.firePropertyChange(propertyChange, "", connectionStatus);
             }
         };
 
@@ -139,32 +149,34 @@ public class ServerConnection {
 
     public StringRequest buildGetMapsRequest() {
         String getMapUrl = url + "/maps";
+        String propertyChange = "maos";
 
         Response.Listener<String> onResponse = response -> {
             maps = new ArrayList<>();
 
-            response = response.substring(1, response.length()-1);
-            String[] responseSplit = response.split(",");
+            response = response.substring(1, response.length() - 1);
+            String[] responseSplit = response.split(splitComma);
             for (String map : responseSplit) {
-                maps.add(map.replace("\"", ""));
+                maps.add(map.replace(replaceQuote, ""));
             }
 
             String mapsString = "";
             for (int i = 0; i < maps.size(); i++) {
                 if (i != 0) {
-                    mapsString += "," + maps.get(i);
+                    mapsString += splitComma + maps.get(i);
                 } else {
                     mapsString = maps.get(i);
                 }
             }
-            this.support.firePropertyChange("maps", "", mapsString);
+            this.support.firePropertyChange(propertyChange, "", mapsString);
         };
         Response.ErrorListener onError = error -> {
             if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                this.support.firePropertyChange("maps", "", "Fehler: Server antwortet nicht.");
+                this.support.firePropertyChange(propertyChange, "",
+                        "Fehler: Server antwortet nicht beim Abfragen der Karten.");
             } else {
                 String mapsStatus = error.getCause().getMessage();
-                this.support.firePropertyChange("maps", "", "Fehler: " + mapsStatus);
+                this.support.firePropertyChange(propertyChange, "", "Fehler: MapAbfrage: " + mapsStatus);
             }
         };
 
@@ -185,23 +197,26 @@ public class ServerConnection {
 
     public StringRequest buildCreateGameRequest() {
         String createGameUrl = url + "/games";
+        String propertyChange = "gameCreate";
 
         Response.Listener<String> onResponse = response -> {
-            String[] responseSplit = response.split(",");
-            String[] gameIdSplit = responseSplit[0].split(":");
-            String[] playerTokenSplit = responseSplit[7].split(":");
+            final int indexPlayerToken = 7;
 
-            gameId = Integer.parseInt(gameIdSplit[1].replace("\"", ""));
-            playerToken = playerTokenSplit[1].replace("\"", "");
+            String[] responseSplit = response.split(splitComma);
+            String[] gameIdSplit = responseSplit[0].split(splitColon);
+            String[] playerTokenSplit = responseSplit[indexPlayerToken].split(splitColon);
 
-            this.support.firePropertyChange("gameCreate", "", "200");
+            gameId = Integer.parseInt(gameIdSplit[1].replace(replaceQuote, ""));
+            playerToken = playerTokenSplit[1].replace(replaceQuote, "");
+
+            this.support.firePropertyChange(propertyChange, "", statusSuccessfull);
         };
         Response.ErrorListener onError = error -> {
             if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                this.support.firePropertyChange("gameCreate", "", "Server antwortet nicht.");
+                this.support.firePropertyChange(propertyChange, "", "Server antwortet nicht beim Spiel erstellen.");
             } else {
                 String createGameStatus = error.getCause().getMessage();
-                this.support.firePropertyChange("gameCreate", "", createGameStatus);
+                this.support.firePropertyChange(propertyChange, "", createGameStatus);
             }
         };
 
@@ -211,18 +226,19 @@ public class ServerConnection {
                 try {
                     final String encodedMapName = URLEncoder.encode(mapName, getParamsEncoding());
                     final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
-                    final String body = "{\"mapName\":\"" + encodedMapName + "\",\"playerName\":\"" + encodedPlayerName + "\"}";
+                    final String body = "{\"mapName\":\"" + encodedMapName + "\",\"playerName\":\""
+                            + encodedPlayerName + endRequestbody;
                     return body.getBytes(getParamsEncoding());
                 } catch (UnsupportedEncodingException e) {
-                    Log.i("Exception connect", "Error when encoding player or map name to create a game.");
-                    support.firePropertyChange("exception", "", "createGameRequest");
+                    Log.i("Exception create", "Error when encoding player or map name to create a game.");
+                    support.firePropertyChange("exceptionCreate", "", "createGameRequest");
                     e.printStackTrace();
                     return null;
                 }
             }
             @Override
             public String getBodyContentType() {
-                return "application/json";
+                return requestBodyType;
             }
         };
 
@@ -239,27 +255,28 @@ public class ServerConnection {
     }
 
     public StringRequest buildGetWaitinglobbyInfoRequest() {
-        String getGameInfosUrl = url + "/games/" + gameId;
+        String getGameInfosUrl = url + urlGames + gameId;
 
         Response.Listener<String> onResponse = response -> {
-            response = response.substring(1, response.length()-1);
-            String[] responseSplit = response.split(",");
+            response = response.substring(1, response.length() - 1);
+            String[] responseSplit = response.split(splitComma);
 
-            String[] gameIdSplit = responseSplit[0].split(":");
-            String[] mapIdSplit = responseSplit[1].split(":");
-            String[] gameStatusSplit = responseSplit[2].split(":");
+            String[] gameIdSplit = responseSplit[0].split(splitColon);
+            String[] mapIdSplit = responseSplit[1].split(splitColon);
+            String[] gameStatusSplit = responseSplit[2].split(splitColon);
             ArrayList<String> allPlayers = new ArrayList<>();
 
             for (int i = 0; i < responseSplit.length; i++) {
                 if (responseSplit[i].startsWith("\"name\":")) {
-                    int j = i;
-                    while (!responseSplit[j].startsWith("\"type\":")) {
-                        j++;
+                    int findPlayerRole = i;
+                    while (!responseSplit[findPlayerRole].startsWith("\"type\":")) {
+                        findPlayerRole++;
                     }
-                    String[] playerNameSplit = responseSplit[i].split(":");
-                    String[] playerRoleSplit = responseSplit[j].split(":");
+                    String[] playerNameSplit = responseSplit[i].split(splitColon);
+                    String[] playerRoleSplit = responseSplit[findPlayerRole].split(splitColon);
 
-                    String playerInfo = playerNameSplit[1].replace("\"", "") + " (" + playerRoleSplit[1].replace("\"", "") + ")";
+                    String playerInfo = playerNameSplit[1].replace(replaceQuote, "") + " ("
+                            + playerRoleSplit[1].replace(replaceQuote, "") + ")";
                     allPlayers.add(playerInfo);
                 }
             }
@@ -273,9 +290,9 @@ public class ServerConnection {
                 }
             }
 
-            mapName = mapIdSplit[1].replace("\"", "");
-            gameId = Integer.valueOf(gameIdSplit[1].replace("\"", ""));
-            gameStatus = gameStatusSplit[1].replace("\"", "");
+            mapName = mapIdSplit[1].replace(replaceQuote, "");
+            gameId = Integer.valueOf(gameIdSplit[1].replace(replaceQuote, ""));
+            gameStatus = gameStatusSplit[1].replace(replaceQuote, "");
 
             if (gameStatus.equals("RUNNING")) {
                 executorService.shutdown();
@@ -287,11 +304,14 @@ public class ServerConnection {
             this.support.firePropertyChange("waitingLobbyGameStatus", "", gameStatus);
         };
         Response.ErrorListener onError = error -> {
+            String propertyChange = "waitingLobbyError";
+
             if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                this.support.firePropertyChange("waitingLobbyError", "", "Fehler: Server antwortet nicht.");
+                this.support.firePropertyChange(propertyChange, "",
+                        "Fehler: Server antwortet nicht beim Abfragen der Wartelobby Informationen.");
             } else {
                 String waitingStatus = error.getCause().getMessage();
-                this.support.firePropertyChange("waitingLobbyError", "", "Fehler: " + waitingStatus);
+                this.support.firePropertyChange(propertyChange, "", "Fehler: Wartelobby: " + waitingStatus);
             }
         };
 
@@ -319,22 +339,26 @@ public class ServerConnection {
     }
 
     public StringRequest buildConnectGameRequest() {
-        String connectUrl = url + "/games/" + gameId + "/players";
+        String connectUrl = url + urlGames + gameId + "/players";
+        String propertyChange = "connectGame";
 
         Response.Listener<String> onResponse = response -> {
-            String[] responseSplit = response.split(",");
-            String[] playerTokenSplit = responseSplit[3].split(":");
+            final int indexPlayerToken = 3;
 
-            playerToken = playerTokenSplit[1].replace("\"", "");
+            String[] responseSplit = response.split(splitComma);
+            String[] playerTokenSplit = responseSplit[indexPlayerToken].split(splitColon);
 
-            this.support.firePropertyChange("connectGame", "", "200");
+            playerToken = playerTokenSplit[1].replace(replaceQuote, "");
+
+            this.support.firePropertyChange(propertyChange, "", statusSuccessfull);
         };
         Response.ErrorListener onError = error -> {
             if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                this.support.firePropertyChange("connectGame", "", "Server antwortet nicht.");
+                this.support.firePropertyChange(propertyChange, "",
+                        "Server antwortet nicht beim Verbinden als Detective.");
             } else {
                 String createGameStatus = error.getCause().getMessage();
-                this.support.firePropertyChange("connectGame", "", createGameStatus);
+                this.support.firePropertyChange(propertyChange, "", createGameStatus);
             }
         };
 
@@ -343,18 +367,18 @@ public class ServerConnection {
             public byte[] getBody() {
                 try {
                     final String encodedPlayerName = URLEncoder.encode(playerName, getParamsEncoding());
-                    final String body = "{\"playerName\":\"" + encodedPlayerName + "\"}";
+                    final String body = "{\"playerName\":\"" + encodedPlayerName + endRequestbody;
                     return body.getBytes(getParamsEncoding());
                 } catch (UnsupportedEncodingException e) {
                     Log.i("Exception connect", "Error when encoding player name to connect to game.");
-                    support.firePropertyChange("exception", "", "connectRequest");
+                    support.firePropertyChange("exceptionJoin", "", "connectRequest");
                     e.printStackTrace();
                     return null;
                 }
             }
             @Override
             public String getBodyContentType() {
-                return "application/json";
+                return requestBodyType;
             }
         };
 
@@ -372,18 +396,20 @@ public class ServerConnection {
 
     public StringRequest buildGetMapInfoRequest() {
         String getMapInfosUrl = url + "/maps/" + mapName;
+        String propertyChange = "mapInfo";
 
         Response.Listener<String> onResponse = response -> {
             String mapContent = response;
 
-            this.support.firePropertyChange("mapInfo", "", mapContent);
+            this.support.firePropertyChange(propertyChange, "", mapContent);
         };
         Response.ErrorListener onError = error -> {
             if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                this.support.firePropertyChange("mapInfo", "", "Fehler: Server antwortet nicht.");
+                this.support.firePropertyChange(propertyChange, "",
+                        "Fehler: Server antwortet nicht beim Abfragen der Map Infos.");
             } else {
                 String mapInfoStatus = error.getCause().getMessage();
-                this.support.firePropertyChange("mapInfo", "", "Fehler: " + mapInfoStatus);
+                this.support.firePropertyChange(propertyChange, "", "Fehler: Map Info parse: " + mapInfoStatus);
             }
         };
 
