@@ -23,7 +23,6 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
     String url;
     GameApplication gameApplication;
 
-
     final String statusSuccessfull = "200";
     final String statusErrorOccured = "Fehler: ";
 
@@ -53,6 +52,11 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         gameApplication.getServerConnection().getMapsFromServer();
     }
 
+    /**
+     * When play M. X button is pressed and chosen name is not empty, view changes to select map and create game.
+     *
+     * @param view current view
+     */
     public void onPlayMXClick(View view) {
         TextView textName = findViewById(R.id.textName);
         TextView textSelectMap = findViewById(R.id.textSelectMap);
@@ -73,6 +77,12 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         }
     }
 
+    /**
+     * When create game button is pressed and a map is selected,
+     * server gets asked to create game through ServerConnection.
+     *
+     * @param view current view
+     */
     public void onCreateGameClick(View view) {
         Spinner mapSelectSpinnerMultiplayer = findViewById(R.id.mapSelectSpinnerMultiplayer);
         EditText textPlayerName = findViewById(R.id.textPlayerName);
@@ -86,10 +96,16 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         }
     }
 
+    /**
+     * Server gets asked to send information about lobby through ServerConnection.
+     */
     public void refreshWaitingLobby() {
         gameApplication.getServerConnection().getWaitingRoomInfo();
     }
 
+    /**
+     * View changes when game starts to hide unnecessary information.
+     */
     public void startGame() {
         TextView textWaitingHeader = findViewById(R.id.textWaitingHeader);
         TextView textGameId = findViewById(R.id.textGameId);
@@ -104,6 +120,12 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         gameApplication.getServerConnection().getMapInfo();
     }
 
+    /**
+     * When play detective button is pressed and a player name is entered,
+     * view changes to input gameId and connect to game.
+     *
+     * @param view current view
+     */
     public void onPlayDetectiveClick(View view) {
         TextView textName = findViewById(R.id.textName);
         TextView textInputGameIdHeader = findViewById(R.id.textInputGameIdHeader);
@@ -124,6 +146,12 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         }
     }
 
+    /**
+     * When connect button is pressed and a gameId is entered,
+     * server gets asked to create new detective player and puts him into the game through ServerConnection.
+     *
+     * @param view current view
+     */
     public void onConnectClick(View view) {
         EditText textInputGameId = findViewById(R.id.textInputGameId);
         EditText textPlayerName = findViewById(R.id.textPlayerName);
@@ -137,7 +165,9 @@ public class LobbyActivity extends AppCompatActivity implements PropertyChangeLi
         }
     }
 
-
+    /**
+     * Depending on the propertyChangeEvent the view changes and/or methods are called.
+     */
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
         String propertyChangeName = propertyChangeEvent.getPropertyName();

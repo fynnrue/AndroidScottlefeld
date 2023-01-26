@@ -106,12 +106,27 @@ public class ServerConnection {
 
 
     // Requests to server
+
+    /**
+     * Called by LobbyActivity to connect with server.
+     */
     public void connectToServer() {
         StringRequest request = buildConnectionRequest(url);
 
         queue.add(request);
     }
 
+    /**
+     * Builds request to connect with server. Depending on the server answer a different PropertyChange gets fired:
+     *
+     * Statuscode 200 and Text "Scottlefeld": 200
+     * Statuscode 200 and Text not "Scottlefeld": 201
+     * Statuscode not 200 and TimeoutError/NoConnectionError: Errormessage
+     * Statuscode not 200: Errormessage from Server
+     *
+     * @param url url from server
+     * @return answer from server to request as string
+     */
     public StringRequest buildConnectionRequest(String url) {
         String checkConnectionUrl = url + "/";
         String propertyChange = "connection";
@@ -141,12 +156,23 @@ public class ServerConnection {
     }
 
     //Requests player plays M. X
+    /**
+     * Called by LobbyActivity get available maps from server.
+     */
     public void getMapsFromServer() {
         StringRequest request = buildGetMapsRequest();
 
         queue.add(request);
     }
 
+    /**
+     * Builds request to get available maps server.
+     * Depending on the server answer a different PropertyChange gets fired:
+     *
+     * Statuscode 200: String that contains all maps on server
+     * Statuscode not 200 and TimeoutError/NoConnectionError: Errormessage
+     * Statuscode not 200: Errormessage from Server
+     */
     public StringRequest buildGetMapsRequest() {
         String getMapUrl = url + "/maps";
         String propertyChange = "maos";
@@ -186,6 +212,12 @@ public class ServerConnection {
     }
 
 
+    /**
+     * Called by LobbyActivity create game on server.
+     *
+     * @param mapName map chosen in LobbyActivity
+     * @param playerName name chosen in LobbyActivity
+     */
     public void createGameOnServer(String mapName, String playerName) {
         this.mapName = mapName;
         this.playerName = playerName;
@@ -195,6 +227,13 @@ public class ServerConnection {
         queue.add(request);
     }
 
+    /**
+     * Builds request to create game on server. Depending on the server answer a different PropertyChange gets fired:
+     *
+     * Statuscode 200: 200
+     * Statuscode not 200 and TimeoutError/NoConnectionError: Errormessage
+     * Statuscode not 200: Errormessage from Server
+     */
     public StringRequest buildCreateGameRequest() {
         String createGameUrl = url + "/games";
         String propertyChange = "gameCreate";
@@ -246,6 +285,9 @@ public class ServerConnection {
     }
 
 
+    /**
+     * Called by LobbyActivity to get waiting room information from server with delay of 1 sec.
+     */
     public void getWaitingRoomInfo() {
         executorService = Executors.newScheduledThreadPool(1);
 
@@ -254,6 +296,14 @@ public class ServerConnection {
         executorService.scheduleWithFixedDelay(() -> queue.add(request), 0, 1, TimeUnit.SECONDS);
     }
 
+    /**
+     * Builds request to get waitinglobby info from server.
+     * Depending on the server answer a different PropertyChange gets fired:
+     *
+     * Statuscode 200: Multiple propertyChanges containing gameId, mapName, players and game status
+     * Statuscode not 200 and TimeoutError/NoConnectionError: Errormessage
+     * Statuscode not 200: Errormessage from Server
+     */
     public StringRequest buildGetWaitinglobbyInfoRequest() {
         String getGameInfosUrl = url + urlGames + gameId;
 
@@ -329,6 +379,9 @@ public class ServerConnection {
 
 
     //Requests player plays Detective
+    /**
+     * Called by LobbyActivity to connect to game on server.
+     */
     public void connectToGame(int gameId, String playerName) {
         this.gameId = gameId;
         this.playerName = playerName;
@@ -338,6 +391,14 @@ public class ServerConnection {
         queue.add(request);
     }
 
+    /**
+     * Builds request to connect to game on server.
+     * Depending on the server answer a different PropertyChange gets fired:
+     *
+     * Statuscode 200: 200
+     * Statuscode not 200 and TimeoutError/NoConnectionError: Errormessage
+     * Statuscode not 200: Errormessage from Server
+     */
     public StringRequest buildConnectGameRequest() {
         String connectUrl = url + urlGames + gameId + "/players";
         String propertyChange = "connectGame";
@@ -388,12 +449,22 @@ public class ServerConnection {
 
 
     //Requests from all players
+    /**
+     * Called by LobbyActivity to get map content from server.
+     */
     public void getMapInfo() {
         StringRequest request = buildGetMapInfoRequest();
 
         queue.add(request);
     }
 
+    /**
+     * Builds request to get map content server. Depending on the server answer a different PropertyChange gets fired:
+     *
+     * Statuscode 200: Content of chosen map
+     * Statuscode not 200 and TimeoutError/NoConnectionError: Errormessage
+     * Statuscode not 200: Errormessage from Server
+     */
     public StringRequest buildGetMapInfoRequest() {
         String getMapInfosUrl = url + "/maps/" + mapName;
         String propertyChange = "mapInfo";
