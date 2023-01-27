@@ -404,7 +404,7 @@ public class ServerConnection {
         String propertyChange = "connectGame";
 
         Response.Listener<String> onResponse = response -> {
-            final int indexPlayerToken = 3;
+            final int indexPlayerToken = 6;
 
             String[] responseSplit = response.split(splitComma);
             String[] playerTokenSplit = responseSplit[indexPlayerToken].split(splitColon);
