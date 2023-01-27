@@ -175,7 +175,7 @@ public class ServerConnection {
      */
     public StringRequest buildGetMapsRequest() {
         String getMapUrl = url + "/maps";
-        String propertyChange = "maos";
+        String propertyChange = "maps";
 
         Response.Listener<String> onResponse = response -> {
             maps = new ArrayList<>();
@@ -239,7 +239,7 @@ public class ServerConnection {
         String propertyChange = "gameCreate";
 
         Response.Listener<String> onResponse = response -> {
-            final int indexPlayerToken = 7;
+            final int indexPlayerToken = 16;
 
             String[] responseSplit = response.split(splitComma);
             String[] gameIdSplit = responseSplit[0].split(splitColon);
